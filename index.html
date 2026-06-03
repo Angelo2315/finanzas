@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Finanzas">
-<!-- App icon: finance/stats SVG -->
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23F7F5F0'/%3E%3Crect x='24' y='100' width='24' height='56' rx='6' fill='%235A7D5F'/%3E%3Crect x='60' y='72' width='24' height='84' rx='6' fill='%23D4AC5B'/%3E%3Crect x='96' y='50' width='24' height='106' rx='6' fill='%235C7B89'/%3E%3Crect x='132' y='30' width='24' height='126' rx='6' fill='%23D18F77'/%3E%3Cpath d='M36 90 L72 62 L108 40 L144 20' stroke='%232C2825' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='36' cy='90' r='5' fill='%232C2825'/%3E%3Ccircle cx='72' cy='62' r='5' fill='%232C2825'/%3E%3Ccircle cx='108' cy='40' r='5' fill='%232C2825'/%3E%3Ccircle cx='144' cy='20' r='5' fill='%232C2825'/%3E%3C/svg%3E">
+<!-- App icon: trading/candlestick chart -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='38' fill='%232C2825'/%3E%3C!-- candles --%3E%3Crect x='26' y='95' width='18' height='45' rx='3' fill='%23D18F77'/%3E%3Crect x='34' y='78' width='2' height='17' fill='%23D18F77'/%3E%3Crect x='34' y='140' width='2' height='10' fill='%23D18F77'/%3E%3Crect x='58' y='70' width='18' height='35' rx='3' fill='%235A7D5F'/%3E%3Crect x='66' y='55' width='2' height='15' fill='%235A7D5F'/%3E%3Crect x='66' y='105' width='2' height='12' fill='%235A7D5F'/%3E%3Crect x='90' y='85' width='18' height='50' rx='3' fill='%23D18F77'/%3E%3Crect x='98' y='68' width='2' height='17' fill='%23D18F77'/%3E%3Crect x='98' y='135' width='2' height='8' fill='%23D18F77'/%3E%3Crect x='122' y='45' width='18' height='40' rx='3' fill='%235A7D5F'/%3E%3Crect x='130' y='30' width='2' height='15' fill='%235A7D5F'/%3E%3Crect x='130' y='85' width='2' height='12' fill='%235A7D5F'/%3E%3C!-- trend line --%3E%3Cpath d='M35 105 Q67 72 99 90 Q115 98 131 52' stroke='%23D4AC5B' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <title>Finanzas Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -173,29 +173,33 @@ body{
 /* NAV */
 .nav{
   position:fixed;bottom:0;width:100%;max-width:430px;left:50%;transform:translateX(-50%);
-  background:rgba(247,245,240,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  background:rgba(247,245,240,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid var(--bdr);
   display:flex;justify-content:space-around;align-items:center;
   padding-bottom:var(--sab);
-  height:calc(58px + var(--sab));
+  height:calc(64px + var(--sab));
   z-index:100;
 }
-.nb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 12px;border:none;background:transparent;cursor:pointer;color:var(--t2);transition:color .18s;}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 14px;border:none;background:transparent;cursor:pointer;color:var(--t2);transition:color .18s;}
 .nb span{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
 .nb i{font-size:20px;}
 .nb.on{color:var(--t1);}
+/* center FAB slot (spacing only) */
+.nav-spacer{width:64px;flex-shrink:0;}
 
-/* FAB */
+/* FAB CENTER — fixed, not draggable */
 #fab{
-  position:fixed;bottom:calc(68px + var(--sab));right:18px;
-  width:52px;height:52px;border-radius:50%;
+  position:fixed;
+  bottom:calc(32px + var(--sab));
+  left:50%;transform:translateX(-50%);
+  width:60px;height:60px;border-radius:50%;
   background:var(--green);border:none;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  font-size:22px;color:#fff;
-  box-shadow:0 4px 16px rgba(90,125,95,.45);
-  z-index:999;touch-action:none;transition:transform .15s;
+  font-size:24px;color:#fff;font-weight:900;
+  box-shadow:0 0 0 4px var(--bg), 0 4px 20px rgba(90,125,95,.5);
+  z-index:101;transition:transform .15s;
 }
-#fab:active{transform:scale(.91);}
+#fab:active{transform:translateX(-50%) scale(.91);}
 
 /* MODAL */
 .mbg{display:none;position:fixed;inset:0;background:rgba(44,40,37,.4);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:200;opacity:0;transition:opacity .3s;}
@@ -299,13 +303,13 @@ select.fc option{background:var(--card);color:var(--t1);}
       </div>
     </div>
 
-    <!-- AHORRO DEL MES -->
+    <!-- AHORRO DEL MES (lo que se guardó en categoría Savings) -->
     <div class="sav-card mb12">
       <div class="sav-row">
         <div>
-          <div style="font-size:10px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Ahorrado este mes</div>
+          <div style="font-size:10px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Guardado en Savings</div>
           <div class="sav-big" id="sc-sav">$0</div>
-          <div class="sav-sub" id="sc-rate">0% de ingresos</div>
+          <div class="sav-sub" id="sc-rate">Meta: $2,000</div>
         </div>
         <div>
           <div class="donut-wrap" id="donut" style="background:conic-gradient(var(--green) 0%, #E8E6DF 0%)">
@@ -327,7 +331,7 @@ select.fc option{background:var(--card);color:var(--t1);}
 
     <!-- AHORRO POR CATEGORÍA DE INGRESO -->
     <div class="card cp mb12" id="sav-by-cat-card">
-      <div class="ct">Ahorro por Fuente de Ingreso</div>
+      <div class="ct">Ahorros Guardados (Categoría Savings)</div>
       <div id="sav-by-cat"></div>
     </div>
 
@@ -335,10 +339,6 @@ select.fc option{background:var(--card);color:var(--t1);}
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 2px">
       <span style="font-size:18px;font-weight:900">Movimientos</span>
       <span id="h-count" style="font-size:11px;font-weight:700;color:var(--t2);background:rgba(44,40,37,.08);padding:3px 10px;border-radius:50px">0</span>
-    </div>
-    <div style="font-size:10px;color:var(--t2);font-weight:600;margin-bottom:8px;padding:0 2px">
-      <i class="fa-solid fa-hand-pointer" style="color:var(--terra);margin-right:4px"></i>
-      Desliza <b style="color:var(--blue)">→</b> editar · <b style="color:var(--terra)">←</b> borrar
     </div>
     <div id="h-list"></div>
   </div>
@@ -494,7 +494,7 @@ select.fc option{background:var(--card);color:var(--t1);}
         <div class="srow-info"><h4 style="color:var(--terra)">Borrar datos locales</h4></div>
       </div>
     </div>
-    <p style="text-align:center;font-size:10px;color:var(--t2);margin-top:4px;font-weight:600">Finanzas Pro · iPhone 15 Pro Max</p>
+  
   </div>
 </div>
 
@@ -502,6 +502,7 @@ select.fc option{background:var(--card);color:var(--t1);}
 <nav class="nav">
   <button class="nb on" id="nav-home" onclick="switchView('home')"><i class="fa-solid fa-house"></i><span>Inicio</span></button>
   <button class="nb" id="nav-reports" onclick="switchView('reports')"><i class="fa-solid fa-chart-bar"></i><span>Reportes</span></button>
+  <div class="nav-spacer"></div>
   <button class="nb" id="nav-taxes" onclick="switchView('taxes')"><i class="fa-solid fa-receipt"></i><span>Taxes</span></button>
   <button class="nb" id="nav-settings" onclick="switchView('settings')"><i class="fa-solid fa-gear"></i><span>Ajustes</span></button>
 </nav>
@@ -663,34 +664,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('inp-taxpct').value = taxPct;
   updateSheetBadge();
   updateMonthDisplay();
-  initFABDrag();
   if(sheetUrl) loadFromSheets(false);
 });
-
-// ── FAB DRAGGABLE ──
-function initFABDrag() {
-  const fab = document.getElementById('fab');
-  let isDrag=false, sx=0, sy=0, il=0, it=0;
-  fab.addEventListener('touchstart', e=>{
-    isDrag=false;
-    sx=e.touches[0].clientX; sy=e.touches[0].clientY;
-    il=fab.getBoundingClientRect().left; it=fab.getBoundingClientRect().top;
-    fab.style.transition='none';
-  },{passive:true});
-  fab.addEventListener('touchmove', e=>{
-    const dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
-    if(Math.abs(dx)>6||Math.abs(dy)>6){ isDrag=true; }
-    if(!isDrag) return;
-    const nl=Math.max(8,Math.min(il+dx,window.innerWidth-60));
-    const nt=Math.max(8,Math.min(it+dy,window.innerHeight-90));
-    fab.style.right='auto'; fab.style.bottom='auto';
-    fab.style.left=nl+'px'; fab.style.top=nt+'px';
-  },{passive:true});
-  fab.addEventListener('touchend', ()=>{
-    fab.style.transition='transform .15s';
-    if(!isDrag) openModal();
-  },{passive:true});
-}
 
 // ── NAV ──
 function switchView(v) {
@@ -728,12 +703,20 @@ function getMonthTxs(yr,mo) {
 // ══════════════════════════════════
 function renderHome() {
   const mt  = getMonthTxs();
-  let inc=0, exp=0, catSums={}, incByCat={};
+  let inc=0, exp=0, catSums={}, savByCat={}, totalSaved=0;
 
   mt.forEach(tx=>{
     const amt=Number(tx.amount)||0;
-    if(tx.type==='Ingreso'){ inc+=amt; incByCat[tx.subcategory]=(incByCat[tx.subcategory]||0)+amt; }
-    else{ exp+=amt; catSums[tx.category]=(catSums[tx.category]||0)+amt; }
+    if(tx.type==='Ingreso'){ inc+=amt; }
+    else {
+      exp+=amt;
+      catSums[tx.category]=(catSums[tx.category]||0)+amt;
+      // If category is Savings, track what was deposited/saved
+      if(tx.category==='Savings'){
+        totalSaved+=amt;
+        savByCat[tx.subcategory]=(savByCat[tx.subcategory]||0)+amt;
+      }
+    }
   });
 
   // prev month for diff
@@ -741,12 +724,13 @@ function renderHome() {
   const pm=getMonthTxs(prev.getFullYear(),prev.getMonth());
   let pInc=0,pExp=0; pm.forEach(t=>t.type==='Ingreso'?pInc+=Number(t.amount||0):pExp+=Number(t.amount||0));
   const incDiff=inc-pInc, expDiff=exp-pExp;
-  const sav=inc-exp, rate=inc>0?((sav/inc)*100):0;
+  const netSav=inc-exp, rate=inc>0?((netSav/inc)*100):0;
 
   document.getElementById('sc-inc').textContent=fmt(inc);
   document.getElementById('sc-exp').textContent=fmt(exp);
-  document.getElementById('sc-sav').textContent=fmt(sav);
-  document.getElementById('sc-rate').textContent=rate.toFixed(0)+'% de ingresos';
+  // savings card = what was deposited into Savings category
+  document.getElementById('sc-sav').textContent=fmt(totalSaved);
+  document.getElementById('sc-rate').textContent='Meta: '+fmt(savGoal);
   document.getElementById('h-count').textContent=mt.length;
 
   // diffs
@@ -760,13 +744,13 @@ function renderHome() {
   setDiff('sd-inc',incDiff,true);
   setDiff('sd-exp',expDiff,false);
 
-  // donut
-  const pct=Math.max(0,Math.min(100,(sav/savGoal)*100));
-  document.getElementById('donut').style.background=`conic-gradient(${sav>=0?'var(--green)':'var(--terra)'} ${pct}%, #E8E6DF 0%)`;
+  // donut — progress toward savings goal based on Savings category deposits
+  const pct=Math.max(0,Math.min(100,(totalSaved/savGoal)*100));
+  document.getElementById('donut').style.background=`conic-gradient(var(--green) ${pct}%, #E8E6DF 0%)`;
   document.getElementById('donut-pct').textContent=pct.toFixed(0)+'%';
-  document.getElementById('donut-goal-txt').textContent=`${fmt(sav)} / ${fmt(savGoal)}`;
+  document.getElementById('donut-goal-txt').textContent=`${fmt(totalSaved)} / ${fmt(savGoal)}`;
 
-  // gastos por categoría
+  // gastos por categoría (all expense categories)
   const hc=document.getElementById('home-cats');
   const entries=Object.entries(catSums).sort((a,b)=>b[1]-a[1]);
   if(!entries.length){ hc.innerHTML='<p style="font-size:12px;color:var(--t2);padding:6px 0;font-weight:500">Sin gastos este mes</p>'; }
@@ -783,18 +767,20 @@ function renderHome() {
     }).join('');
   }
 
-  // ahorro por fuente de ingreso
+  // ahorro por subcategoría de Savings (lo que depositaste)
   const sbc=document.getElementById('sav-by-cat');
-  const incEntries=Object.entries(incByCat).sort((a,b)=>b[1]-a[1]);
-  if(!incEntries.length){ sbc.innerHTML='<p style="font-size:12px;color:var(--t2);padding:6px 0;font-weight:500">Sin ingresos este mes</p>'; }
-  else{
-    const maxI=incEntries[0][1]||1;
-    sbc.innerHTML=incEntries.map(([sub,amt])=>{
-      const savAmt=Math.max(0,amt-(exp*(amt/inc)));
+  const savEntries=Object.entries(savByCat).sort((a,b)=>b[1]-a[1]);
+  const savCard=document.getElementById('sav-by-cat-card');
+  if(!savEntries.length){
+    savCard.style.display='none';
+  } else {
+    savCard.style.display='';
+    const maxS=savEntries[0][1]||1;
+    sbc.innerHTML=savEntries.map(([sub,amt])=>{
       return `<div class="catbar">
         <div class="catbar-dot" style="background:var(--green)"></div>
         <div class="catbar-name">${sub}</div>
-        <div class="catbar-bg"><div class="catbar-fill" style="width:${(amt/maxI*100).toFixed(0)}%;background:var(--green)"></div></div>
+        <div class="catbar-bg"><div class="catbar-fill" style="width:${(amt/maxS*100).toFixed(0)}%;background:var(--green)"></div></div>
         <div class="catbar-amt" style="color:var(--green)">${fmt(amt)}</div>
       </div>`;
     }).join('');
@@ -825,7 +811,7 @@ function renderDayList(monthly) {
       const sub=tx.subcategory||tx.category||'—';
       const note=tx.notes?' · '+tx.notes:'';
       return `<div class="tx-wrap" id="txw-${tx.id}">
-        <div class="tx-hint edit"><div class="tx-hint-lbl"><i class="fa-solid fa-pen-to-square"></i><span>Editar</span></div></div>
+        <div class="tx-hint edit"><div class="tx-hint-lbl"><i class="fa-solid fa-pen" style="font-size:22px"></i></div></div>
         <div class="tx-hint del"><div class="tx-hint-lbl"><i class="fa-solid fa-trash"></i><span>Borrar</span></div></div>
         <div class="tx-surface" id="txs-${tx.id}">
           <div class="tx-body">
@@ -903,11 +889,21 @@ function renderReports() {
   const ctx=document.getElementById('rChart').getContext('2d');
   rChart=new Chart(ctx,{ type:'bar', data:{ labels, datasets:[ { label:'Ingresos', data:incD, backgroundColor:'rgba(90,125,95,.75)', borderRadius:5, borderSkipped:false }, { label:'Gastos', data:expD, backgroundColor:'rgba(209,143,119,.75)', borderRadius:5, borderSkipped:false } ] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'top', labels:{ boxWidth:10, font:{size:10,family:'Inter'}, color:'#8C867F' } } }, scales:{ x:{ ticks:{color:'#8C867F',font:{size:9}}, grid:{display:false} }, y:{ ticks:{color:'#8C867F',font:{size:9},callback:v=>'$'+v}, grid:{color:'rgba(0,0,0,.04)'} } } } });
 
-  // monthly savings table for current year
+  // monthly savings table for current year (Savings category deposits)
   const mst=document.getElementById('monthly-savings-table');
   let rows=''; let maxSav=0;
   const savsByMonth=[];
-  for(let m=0;m<12;m++){ const mt2=getMonthTxs(Y,m); let i=0,e=0; mt2.forEach(t=>{ const a=Number(t.amount)||0; t.type==='Ingreso'?i+=a:e+=a; }); savsByMonth.push({month:m,inc:i,exp:e,sav:i-e}); if(Math.abs(i-e)>maxSav) maxSav=Math.abs(i-e); }
+  for(let m=0;m<12;m++){
+    const mt2=getMonthTxs(Y,m);
+    let i=0,e=0,saved=0;
+    mt2.forEach(t=>{
+      const a=Number(t.amount)||0;
+      if(t.type==='Ingreso') i+=a;
+      else { e+=a; if(t.category==='Savings') saved+=a; }
+    });
+    savsByMonth.push({month:m,inc:i,exp:e,sav:saved});
+    if(saved>maxSav) maxSav=saved;
+  }
   maxSav=maxSav||1;
   rows=savsByMonth.map((r,idx)=>{
     const prev=idx>0?savsByMonth[idx-1].sav:null;
