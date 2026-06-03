@@ -1083,6 +1083,11 @@ function selCalMonth(m,y) { curDate=new Date(y,m,1); updateMonthDisplay(); close
 // ══════════════════════════════════
 // GOOGLE SHEETS — Fuente de verdad
 // ══════════════════════════════════
+// NOTA TÉCNICA: Google Apps Script requiere mode:'no-cors' para POST
+// desde apps web externas. Con no-cors no podemos leer la respuesta,
+// pero los datos SÍ llegan a Sheets correctamente.
+// Para leer datos (GET) sí podemos usar fetch normal con ?action=get_all
+
 function setSS(s) {
   ['sdot','sdot2'].forEach(id => {
     const d = document.getElementById(id);
@@ -1090,17 +1095,14 @@ function setSS(s) {
   });
 }
 
+// ── LEER desde Sheets (GET — sin problemas de CORS) ──
 async function loadFromSheets(show) {
-  if(!sheetUrl) return;
+  if(!sheetUrl) return false;
   setSS('sy');
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
-    const res = await fetch(sheetUrl + '?action=get_all', { signal: controller.signal });
-    clearTimeout(timeout);
+    const res = await fetch(sheetUrl + '?action=get_all');
     const data = await res.json();
 
-    // Sheets data always wins over local — this is the source of truth
     if(data.transactions && data.transactions.length > 0) {
       txs = data.transactions;
       localStorage.setItem('fp_txs', JSON.stringify(txs));
@@ -1114,7 +1116,7 @@ async function loadFromSheets(show) {
       localStorage.setItem('fp_budgets', JSON.stringify(budgets));
     }
     setSS('');
-    if(show) toast('✅ Sincronizado con Sheets');
+    if(show) toast('✅ Datos actualizados desde Sheets');
     return true;
   } catch(e) {
     setSS('er');
@@ -1123,30 +1125,33 @@ async function loadFromSheets(show) {
   }
 }
 
+// ── ESCRIBIR a Sheets (POST con no-cors — datos llegan aunque no leamos respuesta) ──
+async function postToSheets(body) {
+  if(!sheetUrl) return;
+  await fetch(sheetUrl, {
+    method: 'POST',
+    mode: 'no-cors',                          // ← soluciona el error CORS en iPhone
+    headers: { 'Content-Type': 'text/plain' }, // ← text/plain funciona con no-cors
+    body: JSON.stringify(body)
+  });
+}
+
 async function syncData(action, payload) {
   if(!sheetUrl) return;
   setSS('sy');
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-    await fetch(sheetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, data: payload }),
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
+    await postToSheets({ action, data: payload });
     setSS('');
   } catch(e) {
     setSS('er');
-    // Queue failed syncs for retry — save locally and retry next open
+    // Guardar en cola para reintentar
     const queue = JSON.parse(localStorage.getItem('fp_sync_queue') || '[]');
     queue.push({ action, payload, ts: Date.now() });
     localStorage.setItem('fp_sync_queue', JSON.stringify(queue));
   }
 }
 
-// Retry any failed syncs from the queue
+// ── Reintentar sincronizaciones fallidas ──
 async function retryQueue() {
   if(!sheetUrl) return;
   const queue = JSON.parse(localStorage.getItem('fp_sync_queue') || '[]');
@@ -1154,33 +1159,34 @@ async function retryQueue() {
   const remaining = [];
   for(const item of queue) {
     try {
-      await fetch(sheetUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: item.action, data: item.payload })
-      });
+      await postToSheets({ action: item.action, data: item.payload });
     } catch(e) {
       remaining.push(item);
     }
   }
   localStorage.setItem('fp_sync_queue', JSON.stringify(remaining));
+  if(queue.length !== remaining.length) {
+    toast('✅ ' + (queue.length - remaining.length) + ' movimientos sincronizados');
+  }
 }
 
+// ── Subir TODO de una vez ──
 async function forceSyncToSheets() {
-  if(!sheetUrl) { toast('⚠️ Configura Sheets primero'); return; }
-  toast('⬆️ Subiendo todos los datos...');
+  if(!sheetUrl) { toast('⚠️ Sin URL configurada'); return; }
   setSS('sy');
+  toast('⬆️ Subiendo datos...');
   try {
-    await fetch(sheetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action:'sync_all', data:{ transactions:txs, categories:cats, budgets } })
+    await postToSheets({
+      action: 'sync_all',
+      data: { transactions: txs, categories: cats, budgets }
     });
     setSS('');
-    toast('✅ Todo sincronizado con Sheets');
+    toast('✅ Datos subidos a Sheets');
+    // Verificar descargando de vuelta
+    setTimeout(() => loadFromSheets(false), 2000);
   } catch(e) {
     setSS('er');
-    toast('❌ Error al sincronizar');
+    toast('❌ Error — revisa tu conexión');
   }
 }
 
