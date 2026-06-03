@@ -629,7 +629,11 @@ const DEF_CATS = {
 let cats      = JSON.parse(localStorage.getItem('fp_cats'))    || JSON.parse(JSON.stringify(DEF_CATS));
 let txs       = JSON.parse(localStorage.getItem('fp_txs'))     || [];
 let budgets   = JSON.parse(localStorage.getItem('fp_budgets')) || {};
-let sheetUrl  = localStorage.getItem('fp_url')   || '';
+// ══════════════════════════════════════════════════════════════
+// SHEETS URL — Pega tu URL aquí para que quede fija en el código
+// Ejemplo: const SHEETS_URL = 'https://script.google.com/macros/s/ABC/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxu3j7HydGODSwm76l_PTUI_RpGTzEz4qtMnNd5Ez0J/dev';  // <-- PON TU URL AQUÍ
+let sheetUrl = SHEETS_URL || localStorage.getItem('fp_url') || '';
 let userName  = localStorage.getItem('fp_name')  || 'Angelo';
 let savGoal   = parseFloat(localStorage.getItem('fp_goal'))    || 2000;
 let taxPct    = parseFloat(localStorage.getItem('fp_taxpct'))  || 20;
@@ -663,8 +667,34 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('h-greeting').textContent = 'Hola, ' + userName + ' 👋';
   document.getElementById('inp-taxpct').value = taxPct;
   updateSheetBadge();
-  updateMonthDisplay();
-  if(sheetUrl) loadFromSheets(false);
+
+  if(sheetUrl) {
+    // Sheets is the source of truth — always load from cloud first
+    loadFromSheets(false).then(() => {
+      updateMonthDisplay();
+    });
+  } else {
+    // No sheet connected — use local data
+    updateMonthDisplay();
+  }
+
+  // Auto-refresh every 5 minutes while app is open
+  setInterval(() => {
+    if(sheetUrl && document.visibilityState === 'visible') {
+      loadFromSheets(false);
+    }
+  }, 5 * 60 * 1000);
+
+  // Refresh when user comes back to the app (from background)
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible' && sheetUrl) {
+      retryQueue();  // retry any failed syncs first
+      loadFromSheets(false);
+    }
+  });
+
+  // Retry failed syncs on start too
+  if(sheetUrl) retryQueue();
 });
 
 // ── NAV ──
@@ -1008,7 +1038,15 @@ function promptName() { const n=prompt('Tu nombre:',userName); if(!n?.trim()) re
 function promptGoal() { const n=prompt('Meta de ahorro mensual ($):',savGoal); if(!n||isNaN(n)) return; savGoal=parseFloat(n); localStorage.setItem('fp_goal',savGoal); document.getElementById('sv-goal').textContent=fmt(savGoal); renderHome(); }
 function openSheetsModal() { document.getElementById('modal-sheets').classList.add('mon'); }
 function closeSheetsModal() { document.getElementById('modal-sheets').classList.remove('mon'); }
-function saveSheetUrl() { const url=document.getElementById('sheet-url').value.trim(); localStorage.setItem('fp_url',url); sheetUrl=url; updateSheetBadge(); closeSheetsModal(); toast('✅ URL guardada'); if(url) loadFromSheets(false); }
+function saveSheetUrl() {
+  const url = document.getElementById('sheet-url').value.trim();
+  localStorage.setItem('fp_url', url);
+  sheetUrl = url;
+  updateSheetBadge();
+  closeSheetsModal();
+  toast('✅ URL guardada — conectando...');
+  if(url) loadFromSheets(true);
+}
 function updateSheetBadge() {
   const p=document.getElementById('sv-sheets-status'); const p2=document.getElementById('sv-sheets-url');
   if(sheetUrl){ if(p) p.textContent='Conectado a Sheets ✓'; if(p2) p2.textContent=sheetUrl.substring(0,34)+'…'; }
@@ -1043,27 +1081,114 @@ function renderCal() {
 function selCalMonth(m,y) { curDate=new Date(y,m,1); updateMonthDisplay(); closeCal(); }
 
 // ══════════════════════════════════
-// GOOGLE SHEETS
+// GOOGLE SHEETS — Fuente de verdad
 // ══════════════════════════════════
-function setSS(s) { const d=document.getElementById('sdot'); if(d) d.className='sdot'+(s==='sy'?' sy':s==='er'?' er':''); }
-async function loadFromSheets(show) {
-  if(!sheetUrl) return; setSS('sy');
-  try {
-    const res=await fetch(sheetUrl+'?action=get_all'); const data=await res.json();
-    if(data.transactions?.length){ txs=data.transactions; localStorage.setItem('fp_txs',JSON.stringify(txs)); }
-    if(data.categories){ cats=data.categories; localStorage.setItem('fp_cats',JSON.stringify(cats)); }
-    if(data.budgets&&Object.keys(data.budgets).length){ budgets=data.budgets; localStorage.setItem('fp_budgets',JSON.stringify(budgets)); }
-    setSS(''); updateMonthDisplay(); if(show) toast('✅ Datos actualizados');
-  } catch(e){ setSS('er'); if(show) toast('❌ Error al conectar'); }
+function setSS(s) {
+  ['sdot','sdot2'].forEach(id => {
+    const d = document.getElementById(id);
+    if(d) d.className = 'sdot' + (s==='sy'?' sy': s==='er'?' er':'');
+  });
 }
-async function syncData(action,payload) { if(!sheetUrl) return; setSS('sy'); try{ await fetch(sheetUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,data:payload})}); setSS(''); } catch(e){ setSS('er'); } }
-async function forceSyncToSheets() { if(!sheetUrl){toast('⚠️ Configura Sheets primero');return;} toast('⬆️ Subiendo...'); setSS('sy'); try{ await fetch(sheetUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'sync_all',data:{transactions:txs,categories:cats,budgets}})}); setSS(''); toast('✅ Todo sincronizado'); } catch(e){ setSS('er'); toast('❌ Error'); } }
+
+async function loadFromSheets(show) {
+  if(!sheetUrl) return;
+  setSS('sy');
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const res = await fetch(sheetUrl + '?action=get_all', { signal: controller.signal });
+    clearTimeout(timeout);
+    const data = await res.json();
+
+    // Sheets data always wins over local — this is the source of truth
+    if(data.transactions && data.transactions.length > 0) {
+      txs = data.transactions;
+      localStorage.setItem('fp_txs', JSON.stringify(txs));
+    }
+    if(data.categories) {
+      cats = data.categories;
+      localStorage.setItem('fp_cats', JSON.stringify(cats));
+    }
+    if(data.budgets && Object.keys(data.budgets).length > 0) {
+      budgets = data.budgets;
+      localStorage.setItem('fp_budgets', JSON.stringify(budgets));
+    }
+    setSS('');
+    if(show) toast('✅ Sincronizado con Sheets');
+    return true;
+  } catch(e) {
+    setSS('er');
+    if(show) toast('❌ Sin conexión — usando datos locales');
+    return false;
+  }
+}
+
+async function syncData(action, payload) {
+  if(!sheetUrl) return;
+  setSS('sy');
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    await fetch(sheetUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, data: payload }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    setSS('');
+  } catch(e) {
+    setSS('er');
+    // Queue failed syncs for retry — save locally and retry next open
+    const queue = JSON.parse(localStorage.getItem('fp_sync_queue') || '[]');
+    queue.push({ action, payload, ts: Date.now() });
+    localStorage.setItem('fp_sync_queue', JSON.stringify(queue));
+  }
+}
+
+// Retry any failed syncs from the queue
+async function retryQueue() {
+  if(!sheetUrl) return;
+  const queue = JSON.parse(localStorage.getItem('fp_sync_queue') || '[]');
+  if(!queue.length) return;
+  const remaining = [];
+  for(const item of queue) {
+    try {
+      await fetch(sheetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: item.action, data: item.payload })
+      });
+    } catch(e) {
+      remaining.push(item);
+    }
+  }
+  localStorage.setItem('fp_sync_queue', JSON.stringify(remaining));
+}
+
+async function forceSyncToSheets() {
+  if(!sheetUrl) { toast('⚠️ Configura Sheets primero'); return; }
+  toast('⬆️ Subiendo todos los datos...');
+  setSS('sy');
+  try {
+    await fetch(sheetUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action:'sync_all', data:{ transactions:txs, categories:cats, budgets } })
+    });
+    setSS('');
+    toast('✅ Todo sincronizado con Sheets');
+  } catch(e) {
+    setSS('er');
+    toast('❌ Error al sincronizar');
+  }
+}
 
 // ══════════════════════════════════
 // EXPORT & UTILS
 // ══════════════════════════════════
 function exportCSV() { const h=['ID','Fecha','Tipo','Categoría','Subcategoría','Monto','Notas']; const r=txs.map(t=>[t.id,t.date,t.type,t.category,t.subcategory,t.amount,t.notes||''].map(v=>`"${v}"`).join(',')); const csv=[h.join(','),...r].join('\n'); const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='finanzas_'+new Date().toISOString().slice(0,10)+'.csv'; a.click(); toast('📄 CSV exportado'); }
-function clearData() { if(!confirm('¿Borrar TODOS los datos?')) return; ['fp_txs','fp_cats','fp_budgets','fp_url','fp_name','fp_goal','fp_taxpct'].forEach(k=>localStorage.removeItem(k)); location.reload(); }
+function clearData() { if(!confirm('¿Borrar TODOS los datos locales?')) return; ['fp_txs','fp_cats','fp_budgets','fp_url','fp_name','fp_goal','fp_taxpct','fp_sync_queue'].forEach(k=>localStorage.removeItem(k)); location.reload(); }
 let tt=null; function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2800); }
 </script>
 </body>
