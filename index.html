@@ -29,9 +29,10 @@
             -webkit-tap-highlight-color: transparent;
             touch-action: pan-x pan-y;
             color: #1C1C1E;
+            -webkit-user-select: none; /* Prevenir selección al mantener presionado */
+            user-select: none;
         }
 
-        /* Ocultar scrollbars pero permitir scroll */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -62,6 +63,10 @@
         .modal-active .modal-content { transform: translateY(0); }
         .drag-pill { width: 36px; height: 5px; background: #E5E5EA; border-radius: 3px; margin: 8px auto; }
 
+        /* Action Sheet nativo */
+        .action-sheet-btn { w-full; padding: 16px; text-align: center; font-size: 17px; font-weight: 500; background: white; border-bottom: 0.5px solid #E5E5EA; }
+        .action-sheet-btn:active { background: #F2F2F7; }
+
         /* Micrófono AI */
         @keyframes pulse-ring {
             0% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.4); }
@@ -70,29 +75,21 @@
         }
         .mic-listening { animation: pulse-ring 1.5s infinite; background-color: var(--ios-blue) !important; color: white !important; }
 
-        /* Segmented Control iOS */
         .segmented-control { display: flex; background: #E5E5EA; border-radius: 8px; padding: 2px; }
         .segmented-btn { flex: 1; text-align: center; padding: 6px 0; font-size: 13px; font-weight: 600; border-radius: 6px; color: #000; transition: all 0.2s; }
         .segmented-btn.active { background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); }
 
-        /* Header flotante blur */
         .glass-header { background: rgba(242, 242, 247, 0.85); backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.1); }
-        
         .main-container { padding-top: calc(var(--sat) + 50px); padding-bottom: calc(var(--sab) + 80px); }
 
         /* FAB Draggable */
-        #fab-add {
-            position: fixed;
-            z-index: 9999;
-            touch-action: none; /* Previene scroll nativo al arrastrar */
-            transition: transform 0.1s;
-        }
+        #fab-add { position: fixed; z-index: 9999; touch-action: none; transition: transform 0.1s; }
         #fab-add:active { transform: scale(0.9); }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex flex-col relative">
 
-    <!-- HEADER GLOBAL (Dynamic Island Safe) -->
+    <!-- HEADER GLOBAL -->
     <header class="glass-header absolute top-0 w-full z-40 pt-[var(--sat)] flex justify-center items-center pb-2">
         <div class="flex items-center bg-white rounded-full px-2 py-1 shadow-sm border border-gray-200/60">
             <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100"><i class="fa-solid fa-chevron-left text-sm"></i></button>
@@ -109,40 +106,51 @@
         <!-- VISTA: RESUMEN -->
         <div id="view-home" class="view-section view-active space-y-4">
             
-            <div class="bg-gray-900 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden mt-2">
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl opacity-30"></div>
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Balance Neto</p>
-                <h2 id="kpi-balance" class="text-5xl font-black tracking-tighter mb-5">$0.00</h2>
-                
-                <div class="flex justify-between border-t border-gray-700/50 pt-4">
+            <!-- Balance Compacto -->
+            <div class="bg-gray-900 text-white rounded-2xl p-4 shadow-lg relative overflow-hidden mt-1">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-green-500 rounded-full blur-3xl opacity-20"></div>
+                <div class="flex justify-between items-end">
                     <div>
-                        <p class="text-[11px] text-gray-400 font-medium mb-1"><i class="fa-solid fa-arrow-down text-green-400 mr-1"></i> Ingresos</p>
-                        <p id="kpi-inc" class="font-bold text-lg">$0.00</p>
+                        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-0.5">Balance Neto</p>
+                        <h2 id="kpi-balance" class="text-3xl font-black tracking-tighter">$0.00</h2>
                     </div>
                     <div class="text-right">
-                        <p class="text-[11px] text-gray-400 font-medium mb-1"><i class="fa-solid fa-arrow-up text-red-400 mr-1"></i> Gastos</p>
-                        <p id="kpi-exp" class="font-bold text-lg">$0.00</p>
+                        <p class="text-[10px] text-gray-400 font-medium mb-0.5"><i class="fa-solid fa-arrow-down text-green-400 mr-1"></i> Ing: <span id="kpi-inc" class="font-bold text-white">$0</span></p>
+                        <p class="text-[10px] text-gray-400 font-medium"><i class="fa-solid fa-arrow-up text-red-400 mr-1"></i> Gto: <span id="kpi-exp" class="font-bold text-white">$0</span></p>
                     </div>
                 </div>
             </div>
 
+            <!-- Gráfica de Barras (Avance de Gastos) -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-[13px] font-bold text-gray-400 uppercase tracking-wider">Progreso de Presupuestos</h3>
-                    <button onclick="switchView('budget')" class="text-[11px] text-[#007AFF] font-bold bg-blue-50 px-2 py-1 rounded-md">Ver todos</button>
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-[12px] font-bold text-gray-400 uppercase tracking-wider">Avance de Gastos</h3>
                 </div>
-                <div id="home-budget-bars" class="space-y-4">
-                    <!-- Barras de progreso inyectadas por JS -->
+                <div id="home-budget-bars" class="space-y-3.5">
+                    <!-- Barras inyectadas por JS -->
                 </div>
             </div>
 
+            <!-- Lista de Movimientos Agrupada -->
             <div>
                 <div class="flex justify-between items-center mb-2 px-1">
                     <h3 class="font-bold text-xl text-gray-900 tracking-tight">Movimientos</h3>
                     <span id="tx-count" class="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">0</span>
                 </div>
-                <div id="tx-list" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
+                <p class="text-[10px] text-gray-400 mb-2 px-1"><i class="fa-solid fa-hand-pointer mr-1"></i>Deja presionado un registro para editar/borrar</p>
+                <div id="tx-list" class="space-y-3">
                     <!-- Lista de transacciones -->
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: REPORTES -->
+        <div id="view-reports" class="view-section space-y-4">
+            <h2 class="text-3xl font-black tracking-tight text-gray-900 mt-2 px-1">Reportes Anuales</h2>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                <h3 class="text-[12px] font-bold text-gray-400 uppercase tracking-wider mb-2">Ingresos vs Gastos (<span id="lbl-rep-year"></span>)</h3>
+                <div class="h-64 relative">
+                    <canvas id="chart-reports"></canvas>
                 </div>
             </div>
         </div>
@@ -216,23 +224,29 @@
             <div class="px-4">
                 <button onclick="clearData()" class="w-full bg-white text-red-500 font-bold py-3.5 rounded-xl shadow-sm border border-red-100">Borrar datos locales</button>
             </div>
-            <p class="text-center text-xs font-medium text-gray-400 mt-4">Finanzas Pro para iOS</p>
         </div>
     </main>
 
     <!-- BARRA NAVEGACIÓN INFERIOR (Fixed for iPhone) -->
     <nav class="fixed bottom-0 w-full glass-header pb-[var(--sab)] pt-2 z-30">
-        <div class="flex justify-around items-center px-6">
-            <button onclick="switchView('home')" id="tab-home" class="flex flex-col items-center text-[#007AFF] w-16">
+        <div class="flex justify-between items-center px-6">
+            <button onclick="switchView('home')" id="tab-home" class="flex flex-col items-center text-[#007AFF] w-14">
                 <i class="fa-solid fa-chart-pie text-xl mb-1"></i>
                 <span class="text-[10px] font-semibold">Resumen</span>
             </button>
+            <button onclick="switchView('reports')" id="tab-reports" class="flex flex-col items-center text-gray-400 w-14">
+                <i class="fa-solid fa-chart-simple text-xl mb-1"></i>
+                <span class="text-[10px] font-semibold">Reportes</span>
+            </button>
             
-            <button onclick="switchView('budget')" id="tab-budget" class="flex flex-col items-center text-gray-400 w-16">
+            <!-- Espaciador para el FAB visual -->
+            <div class="w-10"></div>
+
+            <button onclick="switchView('budget')" id="tab-budget" class="flex flex-col items-center text-gray-400 w-14">
                 <i class="fa-solid fa-bullseye text-xl mb-1"></i>
                 <span class="text-[10px] font-semibold">Topes</span>
             </button>
-            <button onclick="switchView('settings')" id="tab-settings" class="flex flex-col items-center text-gray-400 w-16">
+            <button onclick="switchView('settings')" id="tab-settings" class="flex flex-col items-center text-gray-400 w-14">
                 <i class="fa-solid fa-gear text-xl mb-1"></i>
                 <span class="text-[10px] font-semibold">Ajustes</span>
             </button>
@@ -244,6 +258,23 @@
         <i class="fa-solid fa-plus"></i>
     </div>
 
+    <!-- MODAL: ACTION SHEET (LONG PRESS) -->
+    <div id="modal-action" class="modal-active-toggle">
+        <div class="modal-overlay" onclick="closeActionSheet()"></div>
+        <div class="modal-content !bg-transparent !shadow-none !pb-0 px-4">
+            <div class="bg-white/90 backdrop-blur-xl rounded-xl overflow-hidden mb-2">
+                <div class="py-3 px-4 text-center border-b border-gray-200">
+                    <p class="text-xs text-gray-500 font-semibold" id="action-title">Opciones de Registro</p>
+                </div>
+                <button onclick="editTx()" class="w-full py-4 text-center text-[#007AFF] text-lg font-medium border-b border-gray-200 active:bg-gray-100">Editar Registro</button>
+                <button onclick="deleteTx()" class="w-full py-4 text-center text-red-500 text-lg font-medium active:bg-gray-100">Eliminar</button>
+            </div>
+            <div class="bg-white/90 backdrop-blur-xl rounded-xl overflow-hidden mb-8">
+                <button onclick="closeActionSheet()" class="w-full py-4 text-center text-[#007AFF] text-lg font-bold active:bg-gray-100">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: TRANSACCIÓN (+ IA de Voz) -->
     <div id="modal-tx" class="modal-active-toggle">
         <div class="modal-overlay" onclick="closeTxModal()"></div>
@@ -251,13 +282,13 @@
             <div class="drag-pill"></div>
             <div class="flex justify-between items-center px-4 pb-2 border-b border-gray-200">
                 <button onclick="closeTxModal()" class="text-[#007AFF] text-[17px]">Cancelar</button>
-                <h3 class="font-bold text-[17px]">Nuevo</h3>
+                <h3 class="font-bold text-[17px]" id="tx-modal-title">Nuevo</h3>
                 <button id="btn-save" onclick="saveTx()" class="text-[#007AFF] font-bold text-[17px]">Guardar</button>
             </div>
             
             <div class="p-4 space-y-4">
                 <!-- Asistente de Voz -->
-                <div class="bg-blue-50 rounded-xl p-3 flex items-center justify-between border border-blue-100">
+                <div class="bg-blue-50 rounded-xl p-3 flex items-center justify-between border border-blue-100" id="voice-assistant-box">
                     <div class="flex-1 pr-2">
                         <p class="text-[13px] font-bold text-blue-800"><i class="fa-solid fa-sparkles text-blue-500 mr-1"></i>Siri Financiero</p>
                         <p class="text-[11px] text-blue-600 mt-0.5 leading-tight">Presiona y di: "Gasté 40 en supermercado"</p>
@@ -268,7 +299,6 @@
                     </button>
                 </div>
 
-                <!-- Segmented Control Ingreso/Gasto -->
                 <div class="segmented-control" id="type-seg">
                     <button class="segmented-btn active" id="seg-exp" onclick="setType('Gasto')">Gasto</button>
                     <button class="segmented-btn" id="seg-inc" onclick="setType('Ingreso')">Ingreso</button>
@@ -308,7 +338,7 @@
         </div>
     </div>
 
-    <!-- MODAL: CALENDARIO (Años y Meses) -->
+    <!-- MODAL: CALENDARIO -->
     <div id="modal-cal" class="modal-active-toggle">
         <div class="modal-overlay" onclick="closeCalendar()"></div>
         <div class="modal-content !bg-white">
@@ -322,7 +352,7 @@
         </div>
     </div>
 
-    <!-- MODAL: IMPUESTOS (Taxes) -->
+    <!-- MODAL: IMPUESTOS -->
     <div id="modal-taxes" class="modal-active-toggle">
         <div class="modal-overlay" onclick="closeTaxesModal()"></div>
         <div class="modal-content">
@@ -351,14 +381,12 @@
                             <span id="tax-net-val">$0.00</span>
                         </div>
                     </div>
-                    
-                    <p class="text-[10px] opacity-80 mt-4 text-center">Tus taxes se calculan al <span id="tax-pct-lbl" class="font-bold">20</span>% de tu Beneficio Neto.</p>
                 </div>
                 
                 <p class="text-[13px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Configurar Retención</p>
                 <div class="ios-list-group shadow-sm">
                     <div class="ios-list-row justify-between">
-                        <span class="text-[15px] font-medium text-gray-900">% a guardar de ingresos</span>
+                        <span class="text-[15px] font-medium text-gray-900">% a guardar</span>
                         <div class="flex items-center">
                             <input type="number" id="inp-tax-pct" value="20" class="text-right text-[#007AFF] font-bold bg-transparent outline-none w-12 text-[17px]">
                             <span class="text-gray-400 font-bold ml-1">%</span>
@@ -370,16 +398,14 @@
         </div>
     </div>
 
-    <!-- LÓGICA JAVASCRIPT -->
     <script>
-        // 1. ESTRUCTURAS POR DEFECTO
         const defaultCats = {
             Ingreso: { "Ingresos": { icon: "💵", color: "#34C759", subs: ["Sueldo", "Negocio", "Propinas", "Otros"] } },
             Gasto: {
                 "CASA Y SERVICIOS": { icon: "🏠", color: "#007AFF", subs: ["House Rent", "National Grid", "Internet"] },
                 "TRANSPORTE": { icon: "🚗", color: "#AF52DE", subs: ["Gasolina", "Seguro", "Mantenimiento", "Uber"] },
                 "COMIDA": { icon: "🍔", color: "#FF9500", subs: ["Restaurantes", "Supermercado", "Delivery"] },
-                "APPS": { icon: "📱", color: "#FF2D55", subs: ["Netflix", "Spotify", "Claude AI", "ChatGPT"] },
+                "APPS": { icon: "📱", color: "#FF2D55", subs: ["Netflix", "Spotify", "Claude AI"] },
                 "DEUDAS": { icon: "💳", color: "#FF3B30", subs: ["Auto Loan", "Tarjeta", "IRS"] }
             }
         };
@@ -389,15 +415,9 @@
             { cat: "COMIDA", limit: 770 }, { cat: "APPS", limit: 100 }, { cat: "DEUDAS", limit: 500 }
         ];
 
-        // 2. SISTEMA DE MIGRACIÓN (Evita error Undefined)
         let rawCats = localStorage.getItem('fp_ios_cats');
         let cats = rawCats ? JSON.parse(rawCats) : defaultCats;
-        
-        // Check de seguridad: si las categorías son arrays antiguos, forzar reseteo.
-        if (cats.Gasto && !cats.Gasto["CASA Y SERVICIOS"]?.icon) {
-            cats = defaultCats; 
-            localStorage.setItem('fp_ios_cats', JSON.stringify(cats));
-        }
+        if (cats.Gasto && !cats.Gasto["CASA Y SERVICIOS"]?.icon) { cats = defaultCats; localStorage.setItem('fp_ios_cats', JSON.stringify(cats)); }
 
         let txs = JSON.parse(localStorage.getItem('fp_ios_txs')) || [];
         let budgets = JSON.parse(localStorage.getItem('fp_ios_buds')) || {};
@@ -407,64 +427,61 @@
         let curType = 'Gasto';
         let calYear = curDate.getFullYear();
         let isEditBud = false;
-        let chartInst = null;
+        let reportsChartInst = null;
 
         const ms = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const fmt = v => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
 
-        // 3. INICIALIZACIÓN
         document.addEventListener('DOMContentLoaded', () => {
             updateMonthUI();
             initDraggableFAB();
         });
 
-        // 3.1 BOTÓN FLOTANTE DRAGGABLE (FAB)
         function initDraggableFAB() {
             const fab = document.getElementById('fab-add');
             let isDragging = false;
             let startX, startY, initialLeft, initialTop;
+            let returnTimer;
 
-            // Cargar posición guardada
+            const resetFab = () => {
+                fab.style.transition = 'all 0.5s cubic-bezier(0.32, 0.72, 0, 1)';
+                fab.style.left = '';
+                fab.style.top = '';
+                fab.style.bottom = '90px';
+                fab.style.right = '20px';
+                localStorage.removeItem('fp_ios_fab_pos');
+            };
+
             const savedPos = localStorage.getItem('fp_ios_fab_pos');
             if (savedPos) {
                 const pos = JSON.parse(savedPos);
                 fab.style.left = pos.left + 'px';
                 fab.style.top = pos.top + 'px';
+                returnTimer = setTimeout(resetFab, 5000);
             } else {
-                // Posición inicial por defecto
-                fab.style.bottom = '100px';
+                fab.style.bottom = '90px';
                 fab.style.right = '20px';
             }
 
             fab.addEventListener('touchstart', (e) => {
+                clearTimeout(returnTimer);
                 isDragging = false;
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 const rect = fab.getBoundingClientRect();
                 initialLeft = rect.left;
                 initialTop = rect.top;
-                fab.style.transition = 'none'; // Quitar animación al mover
+                fab.style.transition = 'none';
             }, { passive: false });
 
             fab.addEventListener('touchmove', (e) => {
                 let dx = e.touches[0].clientX - startX;
                 let dy = e.touches[0].clientY - startY;
-
-                // Si se mueve más de 5px, se considera drag y no un tap
                 if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
                     isDragging = true;
-                    e.preventDefault(); // Prevenir el scroll de la pantalla
-
-                    let newLeft = initialLeft + dx;
-                    let newTop = initialTop + dy;
-
-                    // Mantener dentro de los bordes de la pantalla
-                    const maxLeft = window.innerWidth - fab.offsetWidth;
-                    const maxTop = window.innerHeight - fab.offsetHeight;
-                    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-                    newTop = Math.max(0, Math.min(newTop, maxTop));
-
-                    // Limpiar right/bottom para usar coordenadas absolutas
+                    e.preventDefault();
+                    let newLeft = Math.max(0, Math.min(initialLeft + dx, window.innerWidth - fab.offsetWidth));
+                    let newTop = Math.max(0, Math.min(initialTop + dy, window.innerHeight - fab.offsetHeight));
                     fab.style.bottom = 'auto';
                     fab.style.right = 'auto';
                     fab.style.left = newLeft + 'px';
@@ -473,43 +490,36 @@
             }, { passive: false });
 
             fab.addEventListener('touchend', (e) => {
-                fab.style.transition = 'transform 0.1s'; // Restaurar animación de click
+                fab.style.transition = 'transform 0.1s';
                 if (isDragging) {
-                    // Guardar nueva posición
-                    localStorage.setItem('fp_ios_fab_pos', JSON.stringify({
-                        left: parseInt(fab.style.left),
-                        top: parseInt(fab.style.top)
-                    }));
+                    localStorage.setItem('fp_ios_fab_pos', JSON.stringify({ left: parseInt(fab.style.left), top: parseInt(fab.style.top) }));
+                    returnTimer = setTimeout(resetFab, 5000); // 5 segundos para volver
                 } else {
-                    // Si no hubo arrastre, es un tap normal
                     openTxModal();
+                    returnTimer = setTimeout(resetFab, 5000);
                 }
             });
             
-            // Fallback para clicks en navegador de escritorio
-            fab.addEventListener('click', (e) => {
-                if(!isDragging) openTxModal();
-            });
+            fab.addEventListener('click', (e) => { if(!isDragging) openTxModal(); });
         }
 
-        // 4. CONTROL DE MESES
         function changeMonth(d) { curDate.setMonth(curDate.getMonth() + d); updateMonthUI(); }
         function updateMonthUI() {
             document.getElementById('global-month').innerText = `${ms[curDate.getMonth()]} ${curDate.getFullYear()}`;
             document.getElementById('lbl-bud-month').innerText = `Topes de ${ms[curDate.getMonth()]}`;
             renderHome();
             if(document.getElementById('view-budget').classList.contains('view-active')) renderBudget();
+            if(document.getElementById('view-reports').classList.contains('view-active')) renderReports();
         }
         function getMonthTxs(y = curDate.getFullYear(), m = curDate.getMonth()) {
             return txs.filter(tx => { const d = new Date(tx.date + 'T12:00:00'); return d.getMonth() === m && d.getFullYear() === y; });
         }
 
-        // 5. NAVEGACIÓN INFERIOR
         function switchView(vid) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('view-active'));
             document.getElementById('view-' + vid).classList.add('view-active');
             
-            ['home', 'budget', 'settings'].forEach(id => {
+            ['home', 'budget', 'settings', 'reports'].forEach(id => {
                 const btn = document.getElementById('tab-' + id);
                 if(btn) { btn.classList.remove('text-[#007AFF]'); btn.classList.add('text-gray-400'); }
             });
@@ -518,9 +528,9 @@
 
             if(vid === 'home') renderHome();
             if(vid === 'budget') renderBudget();
+            if(vid === 'reports') renderReports();
         }
 
-        // 6. RENDER HOME
         function renderHome() {
             const mtxs = getMonthTxs();
             let inc = 0, exp = 0, sums = {};
@@ -535,89 +545,195 @@
             document.getElementById('kpi-exp').innerText = fmt(exp);
             document.getElementById('tx-count').innerText = mtxs.length;
 
-            renderHomeBars(sums, mtxs);
-            renderList(mtxs);
+            renderHomeProgressBars(sums);
+            renderListByDate(mtxs);
         }
 
-        function renderHomeBars(sums, mtxs) {
+        function renderHomeProgressBars(sums) {
             const currBudgets = getBuds();
-            let budgetStats = [];
+            const container = document.getElementById('home-budget-bars');
             
+            let activeBudgets = [];
             currBudgets.forEach(b => {
                 const spent = sums[b.cat] || 0;
-                if (b.limit > 0 || spent > 0) {
-                    budgetStats.push({
-                        cat: b.cat,
-                        spent: spent,
-                        limit: b.limit,
-                        pct: b.limit > 0 ? (spent / b.limit) * 100 : (spent > 0 ? 100 : 0)
-                    });
+                if (spent > 0) { // Solo si hay movimientos
+                    activeBudgets.push({ cat: b.cat, limit: b.limit, spent: spent, pct: b.limit > 0 ? (spent/b.limit)*100 : 0 });
                 }
             });
 
-            // Ordenar de mayor a menor porcentaje utilizado
-            budgetStats.sort((a, b) => b.pct - a.pct);
+            activeBudgets.sort((a,b) => b.pct - a.pct); // Ordenar por mayor porcentaje
 
-            const container = document.getElementById('home-budget-bars');
-            if(!budgetStats.length) {
-                container.innerHTML = `<div class="text-center text-sm font-medium text-gray-400 py-6">Sin presupuestos o gastos</div>`;
+            if(!activeBudgets.length) {
+                container.innerHTML = `<div class="text-center text-sm font-medium text-gray-400 py-6">Sin gastos este mes</div>`;
                 return;
             }
 
-            // Mostrar el top 5 categorías de mayor gasto
-            container.innerHTML = budgetStats.slice(0, 5).map(b => { 
+            container.innerHTML = activeBudgets.map(b => {
                 const cdata = cats.Gasto[b.cat] || { icon: '🔹', color: '#999' };
-                const isBad = b.spent >= b.limit && b.limit > 0;
-                const isWarn = b.pct > 75 && !isBad;
+                const pct = Math.min(b.pct, 100);
+                const isWarn = b.pct > 80;
+                const isBad = b.pct >= 100;
                 const barColor = isBad ? 'var(--ios-red)' : (isWarn ? '#FF9500' : cdata.color);
-                const displayPct = Math.min(b.pct, 100);
-                const pctText = b.limit > 0 ? `${b.pct.toFixed(0)}%` : 'Límite 0';
 
                 return `
                 <div>
-                    <div class="flex justify-between items-end mb-1.5">
+                    <div class="flex justify-between items-end mb-1">
                         <span class="text-[12px] font-bold text-gray-800 flex items-center">
-                            <span class="w-5 text-sm">${cdata.icon}</span> <span class="truncate max-w-[120px]">${b.cat}</span>
+                            <span class="w-5">${cdata.icon}</span> ${b.cat.length > 15 ? b.cat.substring(0,14)+'...' : b.cat}
                         </span>
                         <span class="text-[11px] font-bold ${isBad ? 'text-red-500' : 'text-gray-500'}">
-                            ${fmt(b.spent)} <span class="text-gray-300 font-medium mx-0.5">/</span> ${b.limit > 0 ? fmt(b.limit) : '∞'} 
-                            <span class="ml-1 px-1.5 py-0.5 rounded-md ${isBad ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}">${pctText}</span>
+                            ${fmt(b.spent)} <span class="text-gray-300 mx-0.5 font-normal">/</span> ${fmt(b.limit)}
                         </span>
                     </div>
-                    <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                        <div class="h-full rounded-full transition-all duration-500" style="width: ${displayPct}%; background: ${barColor}"></div>
+                    <div class="h-4 w-full bg-gray-100 rounded-md overflow-hidden relative border border-gray-200/50">
+                        <div class="h-full rounded-md transition-all duration-700" style="width: ${pct}%; background: ${barColor}"></div>
+                        <span class="absolute inset-0 flex items-center px-2 text-[9px] font-black ${pct > 15 ? 'text-white' : 'text-gray-500'} mix-blend-difference">${b.pct.toFixed(0)}%</span>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        function renderList(mtxs) {
-            const list = document.getElementById('tx-list');
-            if(!mtxs.length) { list.innerHTML = `<div class="p-8 text-center text-gray-400 font-medium">Sin registros</div>`; return; }
+        let pressTimer;
+        let activeTxId = null;
+
+        function startPress(id) {
+            pressTimer = setTimeout(() => {
+                activeTxId = id;
+                const tx = txs.find(t => t.id === id);
+                document.getElementById('action-title').innerText = `${tx.subcategory} (${fmt(tx.amount)})`;
+                document.getElementById('modal-action').classList.add('modal-active');
+            }, 500); // 500ms para detectar el long press
+        }
+        function cancelPress() { clearTimeout(pressTimer); }
+
+        function closeActionSheet() { document.getElementById('modal-action').classList.remove('modal-active'); activeTxId = null; }
+
+        function deleteTx() {
+            if(activeTxId && confirm("¿Seguro que deseas eliminar este registro?")) {
+                txs = txs.filter(t => t.id !== activeTxId);
+                localStorage.setItem('fp_ios_txs', JSON.stringify(txs));
+                closeActionSheet();
+                updateMonthUI();
+            }
+        }
+
+        function editTx() {
+            const tx = txs.find(t => t.id === activeTxId);
+            if(!tx) return;
             
-            list.innerHTML = mtxs.map(tx => {
-                const isInc = tx.type === 'Ingreso';
-                const cdata = isInc ? cats.Ingreso[tx.category] : cats.Gasto[tx.category];
-                const color = cdata ? cdata.color : '#999';
-                const icon = cdata ? cdata.icon : '🔹';
+            document.getElementById('tx-modal-title').innerText = "Editar";
+            document.getElementById('voice-assistant-box').classList.add('hidden'); // Ocultar voz en edición
+            
+            setType(tx.type);
+            document.getElementById('inp-amt').value = tx.amount;
+            document.getElementById('inp-date').value = tx.date;
+            document.getElementById('inp-cat').value = tx.category;
+            renderSubcats();
+            document.getElementById('inp-sub').value = tx.subcategory;
+            document.getElementById('inp-meth').value = tx.method;
+            document.getElementById('inp-note').value = tx.notes || '';
+            
+            // Re-mapear botón guardar temporalmente
+            const btn = document.getElementById('btn-save');
+            btn.onclick = function() {
+                tx.type = curType;
+                tx.amount = parseFloat(document.getElementById('inp-amt').value);
+                tx.date = document.getElementById('inp-date').value;
+                tx.category = document.getElementById('inp-cat').value;
+                tx.subcategory = document.getElementById('inp-sub').value;
+                tx.method = document.getElementById('inp-meth').value;
+                tx.notes = document.getElementById('inp-note').value;
+                localStorage.setItem('fp_ios_txs', JSON.stringify(txs));
+                closeTxModal();
+                updateMonthUI();
+            };
+            
+            closeActionSheet();
+            document.getElementById('modal-tx').classList.add('modal-active');
+        }
+
+        function renderListByDate(mtxs) {
+            const list = document.getElementById('tx-list');
+            if(!mtxs.length) { list.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-gray-400 font-medium border border-gray-100">Sin registros</div>`; return; }
+            
+            const groups = {};
+            mtxs.forEach(tx => {
+                if(!groups[tx.date]) groups[tx.date] = [];
+                groups[tx.date].push(tx);
+            });
+
+            const sortedDates = Object.keys(groups).sort((a,b) => new Date(b) - new Date(a));
+            
+            list.innerHTML = sortedDates.map(dateStr => {
+                const d = new Date(dateStr + 'T12:00:00');
+                const dateLabel = `${d.getDate()} ${ms[d.getMonth()]} ${d.getFullYear()}`;
                 
-                return `
-                <div class="p-3.5 flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl mr-3" style="background: ${color}20">${icon}</div>
-                        <div>
-                            <p class="font-bold text-[14px] text-gray-900 leading-tight">${tx.subcategory}</p>
-                            <p class="text-[11px] text-gray-500">${tx.date} · ${tx.method} ${tx.notes ? '· '+tx.notes : ''}</p>
+                const rows = groups[dateStr].map(tx => {
+                    const isInc = tx.type === 'Ingreso';
+                    const cdata = isInc ? cats.Ingreso[tx.category] : cats.Gasto[tx.category];
+                    const color = cdata ? cdata.color : '#999';
+                    const icon = cdata ? cdata.icon : '🔹';
+                    
+                    // Se agregan los eventos de touch para el Long-Press
+                    return `
+                    <div class="ios-list-row bg-white justify-between select-none" 
+                         ontouchstart="startPress('${tx.id}')" ontouchend="cancelPress()" ontouchmove="cancelPress()"
+                         onmousedown="startPress('${tx.id}')" onmouseup="cancelPress()" onmouseleave="cancelPress()">
+                        <div class="flex items-center">
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-lg mr-3" style="background: ${color}20">${icon}</div>
+                            <div>
+                                <p class="font-bold text-[14px] text-gray-900 leading-tight">${tx.subcategory}</p>
+                                <p class="text-[11px] text-gray-500">${tx.method} ${tx.notes ? '· '+tx.notes : ''}</p>
+                            </div>
                         </div>
+                        <div class="text-right">
+                            <p class="font-bold text-[15px] ${isInc ? 'text-green-500' : 'text-gray-900'}">${isInc ? '+' : '-'}${fmt(tx.amount)}</p>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                return `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-3">
+                    <div class="bg-gray-50 px-4 py-1.5 border-b border-gray-100">
+                        <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">${dateLabel}</span>
                     </div>
-                    <div class="text-right">
-                        <p class="font-bold text-[15px] ${isInc ? 'text-green-500' : 'text-gray-900'}">${isInc ? '+' : '-'}${fmt(tx.amount)}</p>
+                    <div class="divide-y divide-gray-100">
+                        ${rows}
                     </div>
                 </div>`;
             }).join('');
         }
 
-        // 7. RENDER BUDGET
+        function renderReports() {
+            document.getElementById('lbl-rep-year').innerText = curDate.getFullYear();
+            const ctx = document.getElementById('chart-reports').getContext('2d');
+            if(reportsChartInst) reportsChartInst.destroy();
+
+            const y = curDate.getFullYear();
+            let incData = new Array(12).fill(0);
+            let expData = new Array(12).fill(0);
+
+            txs.forEach(tx => {
+                const d = new Date(tx.date + 'T12:00:00');
+                if(d.getFullYear() === y) {
+                    if(tx.type === 'Ingreso') incData[d.getMonth()] += tx.amount;
+                    if(tx.type === 'Gasto') expData[d.getMonth()] += tx.amount;
+                }
+            });
+
+            reportsChartInst = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ms,
+                    datasets: [
+                        { label: 'Ingresos', data: incData, borderColor: '#34C759', backgroundColor: 'rgba(52, 199, 89, 0.1)', fill: true, tension: 0.4, borderWidth: 2 },
+                        { label: 'Gastos', data: expData, borderColor: '#FF3B30', backgroundColor: 'transparent', borderDash: [5, 5], tension: 0.4, borderWidth: 2 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: {boxWidth:12, font:{size:10}} } }, scales: { y: { display: false }, x: { grid: {display: false}, ticks: {font: {size:10}} } } }
+            });
+        }
+
         function getBuds() {
             const k = `${curDate.getFullYear()}-${curDate.getMonth()}`;
             if(!budgets[k]) { budgets[k] = JSON.parse(JSON.stringify(defaultBuds)); localStorage.setItem('fp_ios_buds', JSON.stringify(budgets)); }
@@ -674,11 +790,16 @@
         }
         function updateBL(i, v) { getBuds()[i].limit = parseFloat(v) || 0; }
 
-        // 8. MODAL TRANSACCIONES Y VOZ
         function openTxModal() { 
+            document.getElementById('tx-modal-title').innerText = "Nuevo";
+            document.getElementById('voice-assistant-box').classList.remove('hidden');
             document.getElementById('inp-date').valueAsDate = new Date();
             document.getElementById('inp-amt').value = '';
             document.getElementById('inp-note').value = '';
+            
+            // Restaurar onclick original
+            document.getElementById('btn-save').onclick = saveTx;
+            
             setType('Gasto'); 
             document.getElementById('modal-tx').classList.add('modal-active'); 
         }
@@ -712,7 +833,6 @@
             closeTxModal(); updateMonthUI();
         }
 
-        // IA DE VOZ
         let recog = null, isL = false;
         if ('webkitSpeechRecognition' in window) {
             recog = new webkitSpeechRecognition(); recog.lang = 'es-ES'; recog.continuous = false;
@@ -759,13 +879,9 @@
             }
         }
 
-        // 9. MODAL IMPUESTOS (TAXES 1099)
         function openTaxesModal() {
             document.getElementById('inp-tax-pct').value = taxPct;
-            
-            // Calcular ingresos y gastos anuales (Base 1099)
-            let incYear = 0;
-            let expYear = 0;
+            let incYear = 0, expYear = 0;
             const y = new Date().getFullYear();
             
             txs.forEach(t => { 
@@ -776,12 +892,9 @@
                 }
             });
             
-            const netProfit = Math.max(0, incYear - expYear); // Beneficio neto
-            const taxesToPay = netProfit * (taxPct / 100);
-            
+            const netProfit = Math.max(0, incYear - expYear);
             document.getElementById('tax-pct-lbl').innerText = taxPct;
-            document.getElementById('tax-total').innerText = fmt(taxesToPay);
-            
+            document.getElementById('tax-total').innerText = fmt(netProfit * (taxPct / 100));
             document.getElementById('tax-inc-val').innerText = fmt(incYear);
             document.getElementById('tax-exp-val').innerText = "-" + fmt(expYear);
             document.getElementById('tax-net-val').innerText = fmt(netProfit);
@@ -792,10 +905,9 @@
         function saveTaxes() {
             taxPct = parseFloat(document.getElementById('inp-tax-pct').value) || 20;
             localStorage.setItem('fp_ios_tax_pct', taxPct);
-            openTaxesModal(); // recargar
+            openTaxesModal();
         }
 
-        // 10. CALENDARIO
         function openCalendar() { calYear = curDate.getFullYear(); renderCal(); document.getElementById('modal-cal').classList.add('modal-active'); }
         function closeCalendar() { document.getElementById('modal-cal').classList.remove('modal-active'); }
         function changeCalYear(d) { calYear+=d; renderCal(); }
