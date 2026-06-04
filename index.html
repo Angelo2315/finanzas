@@ -776,15 +776,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if(sheetUrl) {
     lStatus.textContent = 'Descargando tus datos...';
-    const ok = await loadFromSheets(false);
-    lStatus.textContent = ok ? '¡Listo!' : 'Usando datos locales';
+    // Race: load from sheets vs 5s timeout — loading screen ALWAYS exits
+    await Promise.race([
+      loadFromSheets(false).then(ok => {
+        lStatus.textContent = ok ? '¡Listo!' : 'Usando datos locales';
+      }),
+      new Promise(r => setTimeout(() => {
+        lStatus.textContent = 'Usando datos locales...';
+        r();
+      }, 5000))
+    ]);
   } else {
-    lStatus.textContent = 'Sin conexión a Sheets';
-    await new Promise(r => setTimeout(r, 1200));
+    lStatus.textContent = 'Listo';
+    await new Promise(r => setTimeout(r, 800));
   }
 
-  // Small delay so loading bar finishes animation nicely
-  await new Promise(r => setTimeout(r, 400));
+  // Small delay so animation finishes nicely, then ALWAYS hide loading
+  await new Promise(r => setTimeout(r, 350));
   ls.classList.add('hide');
 
   updateMonthDisplay();
@@ -1172,16 +1180,26 @@ async function postToSheets(body){
 }
 
 async function loadFromSheets(show){
-  if(!sheetUrl)return false;
+  if(!sheetUrl) return false;
   setSS('sy');
-  try{
-    const res=await fetch(sheetUrl+'?action=get_all');
-    const data=await res.json();
-    if(data.transactions&&data.transactions.length>0){txs=data.transactions;localStorage.setItem('fp_txs',JSON.stringify(txs));}
-    if(data.categories){cats=data.categories;localStorage.setItem('fp_cats',JSON.stringify(cats));}
-    if(data.budgets&&Object.keys(data.budgets).length>0){budgets=data.budgets;localStorage.setItem('fp_budgets',JSON.stringify(budgets));}
-    setSS('');if(show)toast('✅ Datos actualizados');return true;
-  }catch(e){setSS('er');if(show)toast('❌ Sin conexión — datos locales');return false;}
+  try {
+    // 6 second timeout — never hangs forever
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 6000);
+    const res  = await fetch(sheetUrl + '?action=get_all', { signal: controller.signal });
+    clearTimeout(tid);
+    const data = await res.json();
+    if(data.transactions && data.transactions.length > 0) { txs=data.transactions; localStorage.setItem('fp_txs',JSON.stringify(txs)); }
+    if(data.categories)  { cats=data.categories;  localStorage.setItem('fp_cats',JSON.stringify(cats)); }
+    if(data.budgets && Object.keys(data.budgets).length > 0) { budgets=data.budgets; localStorage.setItem('fp_budgets',JSON.stringify(budgets)); }
+    setSS('');
+    if(show) toast('✅ Datos actualizados desde Sheets');
+    return true;
+  } catch(e) {
+    setSS('er');
+    if(show) toast('⚠️ Sin conexión — mostrando datos locales');
+    return false;
+  }
 }
 
 async function syncData(action,payload){
