@@ -29,32 +29,6 @@
   --r: 14px; --rs: 10px;
   --sh: 0 1px 3px rgba(44,40,37,.05), 0 3px 10px rgba(44,40,37,.06);
 }
-/* ── DARK MODE ── */
-body.dark {
-  --bg:    #0E0E10;
-  --card:  #1A1A1E;
-  --bdr:   rgba(255,255,255,.1);
-  --t1:    #F0EDE8;
-  --t2:    #9B9490;
-  --t3:    #5A5652;
-  --terra: #E09E88;
-  --green: #6E9E74;
-  --blue:  #7A9EAB;
-  --gold:  #E0BC6E;
-  --purp:  #A090A0;
-  --sh: 0 1px 4px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25);
-}
-body.dark .loading-bar-bg { background: #2a2a2e; }
-body.dark .catbar-bg { background: #2a2a2e; }
-body.dark .bbar { background: rgba(255,255,255,.07); }
-body.dark .rcat-bg { background: rgba(255,255,255,.07); }
-body.dark .mini-donut { }
-body.dark select.fc option { background: #1A1A1E; }
-body.dark .seg { background: #2a2a2e; }
-body.dark .ptab { background: #1A1A1E; }
-body.dark .tw.off { background: #3a3a3e; }
-body.dark .skel { background: linear-gradient(90deg,#2a2a2e 25%,#333338 50%,#2a2a2e 75%); background-size:200% 100%; }
-body.dark .loading-screen-bg { background: #0E0E10; }
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 html, body { height:100%; width:100%; overflow:hidden; }
 body {
@@ -547,10 +521,7 @@ select.fc option { background:var(--card); color:var(--t1); }
     </div>
     <div class="card mb12"><div style="padding:14px 15px;border-bottom:1px solid var(--bdr)"><div style="font-size:10px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.08em">Categorías Deducibles</div></div><div id="deduct-list"></div></div>
     <div class="card cp mb12"><div class="ct">Desglose Deducible</div><div id="tax-breakdown"></div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <button onclick="exportCSV()" style="padding:14px;border-radius:var(--r);border:1.5px solid var(--bdr);background:var(--card);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-file-csv"></i>CSV Completo</button>
-      <button onclick="exportTaxReport()" style="padding:14px;border-radius:var(--r);border:none;background:var(--gold);font-size:13px;font-weight:800;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 3px 10px rgba(212,172,91,.35)"><i class="fa-solid fa-file-invoice-dollar"></i>Reporte Taxes</button>
-    </div>
+    <button onclick="exportCSV()" style="width:100%;padding:14px;border-radius:var(--r);border:1.5px solid var(--bdr);background:var(--card);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px"><i class="fa-solid fa-download"></i>Exportar CSV</button>
   </div>
 </div>
 
@@ -570,16 +541,6 @@ select.fc option { background:var(--card); color:var(--t1); }
         <div class="sico" style="background:#F0EDE8;color:var(--terra)"><i class="fa-solid fa-bullseye"></i></div>
         <div class="srow-info"><h4>Meta de ahorro mensual</h4></div>
         <span class="srow-val" id="sv-goal">$2,000</span>
-        <i class="fa-solid fa-chevron-right chev"></i>
-      </div>
-      <div class="srow" onclick="toggleDark()">
-        <div class="sico" style="background:#1a1a2e;color:#a0a0c0"><i class="fa-solid fa-moon"></i></div>
-        <div class="srow-info"><h4>Modo Oscuro</h4><p>Cambia la apariencia de la app</p></div>
-        <button id="dark-toggle" class="tw off" onclick="event.stopPropagation();toggleDark()"></button>
-      </div>
-      <div class="srow" onclick="openPayMgr()">
-        <div class="sico" style="background:#EAF0F5;color:var(--blue)"><i class="fa-solid fa-credit-card"></i></div>
-        <div class="srow-info"><h4>Métodos de Pago</h4><p>Gestiona tus formas de pago</p></div>
         <i class="fa-solid fa-chevron-right chev"></i>
       </div>
     </div>
@@ -640,19 +601,9 @@ select.fc option { background:var(--card); color:var(--t1); }
   <div class="awrap"><span class="asym">$</span><input type="number" class="ainp" id="txAmt" placeholder="0.00" step="0.01" inputmode="decimal"></div>
   <div style="padding:12px 16px 0;font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em">Categoría</div>
   <div class="catg" id="cat-grid"></div>
-  <!-- Subcategoría más grande visualmente -->
-  <div style="padding:0 16px 6px">
-    <div style="font-size:10px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px">Subcategoría</div>
-    <div id="sub-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px"></div>
-  </div>
   <div class="frows">
     <div class="fr"><span class="fl"><i class="fa-regular fa-calendar"></i>Fecha</span><input type="date" id="txDate" class="fc"></div>
-    <div class="fr"><span class="fl"><i class="fa-solid fa-credit-card"></i>Método</span>
-      <div style="display:flex;align-items:center;gap:6px">
-        <div id="pay-display" style="font-size:13px;font-weight:700;color:var(--t1);cursor:pointer" onclick="openPayModal()">Débito</div>
-        <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--t3)"></i>
-      </div>
-    </div>
+    <div class="fr"><span class="fl"><i class="fa-solid fa-tag"></i>Subcategoría</span><select id="txSub" class="fc"></select></div>
     <div class="fr" style="border-bottom:none"><span class="fl"><i class="fa-regular fa-comment"></i>Nota</span><input type="text" id="txNote" class="fc" placeholder="Opcional..."></div>
   </div>
   <button class="sbtn" onclick="saveTx()">Guardar Movimiento</button>
@@ -690,20 +641,6 @@ select.fc option { background:var(--card); color:var(--t1); }
     <button onclick="changeCalYear(1)"  style="border:1px solid var(--bdr);background:var(--card);border-radius:9px;width:32px;height:32px;cursor:pointer;color:var(--t2)"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
   </div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:13px 13px calc(13px + var(--sab))" id="cal-grid"></div>
-</div></div>
-
-<!-- ══ MODAL MÉTODOS DE PAGO ══ -->
-<div id="modal-pay"><div class="mbg" onclick="closePayModal()"></div><div class="msh">
-  <div class="dpill"></div>
-  <div class="mhdr"><button class="mc" onclick="closePayModal()">Cancelar</button><span class="mttl">Método de Pago</span><div style="width:70px"></div></div>
-  <div style="padding:12px 16px 4px;font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em">Selecciona o agrega uno</div>
-  <div id="pay-list" style="padding:0 16px 8px"></div>
-  <div style="padding:0 16px 16px;border-top:1px solid var(--bdr);padding-top:12px">
-    <div style="display:flex;gap:8px">
-      <input type="text" id="new-pay-inp" placeholder="Ej. Zelle, PayPal, Cash App..." style="flex:1;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:11px 12px;font-size:13px;outline:none;font-family:inherit;color:var(--t1);background:var(--card)">
-      <button onclick="addPayMethod()" style="padding:11px 16px;border-radius:var(--rs);border:none;background:var(--green);color:#fff;font-size:13px;font-weight:800;cursor:pointer">+ Agregar</button>
-    </div>
-  </div>
 </div></div>
 
 <script>
@@ -776,23 +713,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if(sheetUrl) {
     lStatus.textContent = 'Descargando tus datos...';
-    // Race: load from sheets vs 5s timeout — loading screen ALWAYS exits
-    await Promise.race([
-      loadFromSheets(false).then(ok => {
-        lStatus.textContent = ok ? '¡Listo!' : 'Usando datos locales';
-      }),
-      new Promise(r => setTimeout(() => {
-        lStatus.textContent = 'Usando datos locales...';
-        r();
-      }, 5000))
-    ]);
+    const ok = await loadFromSheets(false);
+    lStatus.textContent = ok ? '¡Listo!' : 'Usando datos locales';
   } else {
-    lStatus.textContent = 'Listo';
-    await new Promise(r => setTimeout(r, 800));
+    lStatus.textContent = 'Sin conexión a Sheets';
+    await new Promise(r => setTimeout(r, 1200));
   }
 
-  // Small delay so animation finishes nicely, then ALWAYS hide loading
-  await new Promise(r => setTimeout(r, 350));
+  // Small delay so loading bar finishes animation nicely
+  await new Promise(r => setTimeout(r, 400));
   ls.classList.add('hide');
 
   updateMonthDisplay();
@@ -1094,20 +1023,7 @@ function closeModal(){document.getElementById('modal-tx').classList.remove('mon'
 function onTC(){curType=document.querySelector('input[name="tt"]:checked').value;document.getElementById('lbl-i').className='slbl'+(curType==='Ingreso'?' ai':'');document.getElementById('lbl-e').className='slbl'+(curType==='Gasto'?' ae':'');const sel=document.getElementById('cat-grid');sel.innerHTML='';Object.entries(cats[curType]).forEach(([key,cd])=>{const isSel=false;sel.innerHTML+=`<button class="cbtn" onclick="selectCat('${key}',this)" style=""><span class="cbtn-ico">${getCatIconFull(curType,key,cd)}</span><span>${key.length>8?key.substring(0,7)+'…':key}</span></button>`;});}
 function getCatIconFull(type,key,cd){const icons={'Ingresos':'💵','Rent':'🏠','Food':'🍔','Transport':'🚗','Utilities':'⚡','Entertainment':'🎮','Savings':'🐷','Other':'📦'};return icons[key]||'📁';}
 let selCat='';
-function selectCat(key,btn){
-  selCat=key; selSub='';
-  document.querySelectorAll('.cbtn').forEach(b=>{b.classList.remove('sel');b.style='';});
-  btn.classList.add('sel');
-  const cd=cats[curType][key]||{color:'#8C867F'};
-  btn.style=`border-color:${cd.color};background:${cd.color}14;color:${cd.color}`;
-  const subs=cats[curType][key]?.subs||[];
-  renderSubGrid(subs);
-  // auto-select first sub
-  if(subs.length>0){ selSub=subs[0]; setTimeout(()=>{ const firstBtn=document.querySelector('#sub-grid button'); if(firstBtn) selectSub(subs[0],firstBtn); },50); }
-  // also update hidden select for compatibility
-  const sub=document.getElementById('txSub'); if(sub){sub.innerHTML='';subs.forEach(s=>sub.innerHTML+=`<option value="${s}">${s}</option>`);}
-}
-function openPayMgr(){ renderPayList(); document.getElementById('modal-pay').classList.add('mon'); }
+function selectCat(key,btn){selCat=key;document.querySelectorAll('.cbtn').forEach(b=>{b.classList.remove('sel');b.style='';});btn.classList.add('sel');const cd=cats[curType][key]||{color:'#8C867F'};btn.style=`border-color:${cd.color};background:${cd.color}14;color:${cd.color}`;const sub=document.getElementById('txSub');sub.innerHTML='';(cats[curType][key]?.subs||[]).forEach(s=>sub.innerHTML+=`<option value="${s}">${s}</option>`);}
 function saveTx(){const amt=parseFloat(document.getElementById('txAmt').value);if(!amt||amt<=0){toast('⚠️ Ingresa un monto válido');return;}if(!selCat){toast('⚠️ Selecciona una categoría');return;}const tx={id:'TX-'+Date.now().toString().slice(-9),date:document.getElementById('txDate').value,type:curType,category:selCat,subcategory:document.getElementById('txSub').value||selCat,amount:amt,notes:document.getElementById('txNote').value};txs.unshift(tx);localStorage.setItem('fp_txs',JSON.stringify(txs));syncData('save_tx',tx);closeModal();updateMonthDisplay();toast('✅ Guardado');}
 
 // ══════════════════════════════════════
@@ -1180,26 +1096,16 @@ async function postToSheets(body){
 }
 
 async function loadFromSheets(show){
-  if(!sheetUrl) return false;
+  if(!sheetUrl)return false;
   setSS('sy');
-  try {
-    // 6 second timeout — never hangs forever
-    const controller = new AbortController();
-    const tid = setTimeout(() => controller.abort(), 6000);
-    const res  = await fetch(sheetUrl + '?action=get_all', { signal: controller.signal });
-    clearTimeout(tid);
-    const data = await res.json();
-    if(data.transactions && data.transactions.length > 0) { txs=data.transactions; localStorage.setItem('fp_txs',JSON.stringify(txs)); }
-    if(data.categories)  { cats=data.categories;  localStorage.setItem('fp_cats',JSON.stringify(cats)); }
-    if(data.budgets && Object.keys(data.budgets).length > 0) { budgets=data.budgets; localStorage.setItem('fp_budgets',JSON.stringify(budgets)); }
-    setSS('');
-    if(show) toast('✅ Datos actualizados desde Sheets');
-    return true;
-  } catch(e) {
-    setSS('er');
-    if(show) toast('⚠️ Sin conexión — mostrando datos locales');
-    return false;
-  }
+  try{
+    const res=await fetch(sheetUrl+'?action=get_all');
+    const data=await res.json();
+    if(data.transactions&&data.transactions.length>0){txs=data.transactions;localStorage.setItem('fp_txs',JSON.stringify(txs));}
+    if(data.categories){cats=data.categories;localStorage.setItem('fp_cats',JSON.stringify(cats));}
+    if(data.budgets&&Object.keys(data.budgets).length>0){budgets=data.budgets;localStorage.setItem('fp_budgets',JSON.stringify(budgets));}
+    setSS('');if(show)toast('✅ Datos actualizados');return true;
+  }catch(e){setSS('er');if(show)toast('❌ Sin conexión — datos locales');return false;}
 }
 
 async function syncData(action,payload){
@@ -1225,299 +1131,8 @@ async function forceSyncToSheets(){
 // ══════════════════════════════════════
 // UTILS
 // ══════════════════════════════════════
-// ══════════════════════════════════════
-// DARK MODE
-// ══════════════════════════════════════
-let darkMode = localStorage.getItem('fp_dark') === '1';
-function applyDark() {
-  document.body.classList.toggle('dark', darkMode);
-  const tw = document.getElementById('dark-toggle');
-  if(tw) tw.className = 'tw ' + (darkMode ? 'on' : 'off');
-}
-function toggleDark() {
-  darkMode = !darkMode;
-  localStorage.setItem('fp_dark', darkMode ? '1' : '0');
-  applyDark();
-  toast(darkMode ? '🌙 Modo oscuro activado' : '☀️ Modo claro activado');
-}
-// Apply on load
-applyDark();
-
-// ══════════════════════════════════════
-// PAYMENT METHODS
-// ══════════════════════════════════════
-const DEF_PAYMENTS = ['Débito','Crédito','Efectivo','Apple Pay','Zelle','Venmo','PayPal','Cash App','Transferencia'];
-let payments = JSON.parse(localStorage.getItem('fp_payments')) || [...DEF_PAYMENTS];
-let selPayment = payments[0];
-
-function savePayments() { localStorage.setItem('fp_payments', JSON.stringify(payments)); }
-
-function openPayModal() {
-  renderPayList();
-  document.getElementById('modal-pay').classList.add('mon');
-}
-function closePayModal() { document.getElementById('modal-pay').classList.remove('mon'); }
-
-function renderPayList() {
-  const list = document.getElementById('pay-list');
-  const icons = {
-    'Débito':'💳','Crédito':'💳','Efectivo':'💵','Apple Pay':'🍎',
-    'Zelle':'⚡','Venmo':'🔵','PayPal':'🅿️','Cash App':'💚','Transferencia':'🏦'
-  };
-  list.innerHTML = payments.map((p,i) => `
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr)">
-      <div style="width:38px;height:38px;border-radius:10px;background:${selPayment===p?'var(--green)14':'var(--bg)'};border:1.5px solid ${selPayment===p?'var(--green)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;cursor:pointer" onclick="selectPay('${p}')">${icons[p]||'💰'}</div>
-      <span style="flex:1;font-size:14px;font-weight:${selPayment===p?'800':'600'};color:${selPayment===p?'var(--green)':'var(--t1)'};cursor:pointer" onclick="selectPay('${p}')">${p}</span>
-      ${selPayment===p?'<i class="fa-solid fa-check" style="color:var(--green);font-size:14px"></i>':''}
-      ${i>=DEF_PAYMENTS.length?`<button onclick="delPay(${i})" style="border:none;background:transparent;color:var(--terra);cursor:pointer;padding:4px 8px;font-size:14px"><i class="fa-solid fa-xmark"></i></button>`:''}
-    </div>`).join('');
-}
-
-function selectPay(p) {
-  selPayment = p;
-  document.getElementById('pay-display').textContent = p;
-  renderPayList();
-  setTimeout(closePayModal, 200);
-}
-
-function addPayMethod() {
-  const inp = document.getElementById('new-pay-inp');
-  const val = inp.value.trim();
-  if(!val) return;
-  if(payments.includes(val)) { toast('Ya existe'); return; }
-  payments.push(val);
-  savePayments();
-  inp.value = '';
-  renderPayList();
-  selectPay(val);
-  toast('✅ Método agregado');
-}
-
-function delPay(i) {
-  const name = payments[i];
-  payments.splice(i, 1);
-  savePayments();
-  if(selPayment === name) selPayment = payments[0] || 'Efectivo';
-  document.getElementById('pay-display').textContent = selPayment;
-  renderPayList();
-}
-
-// ══════════════════════════════════════
-// SUBCATEGORY GRID IN MODAL
-// ══════════════════════════════════════
-function renderSubGrid(subs) {
-  const grid = document.getElementById('sub-grid');
-  if(!grid) return;
-  grid.innerHTML = subs.map((s,i) => `
-    <button onclick="selectSub('${s}',this)"
-      style="padding:10px 8px;border-radius:var(--rs);border:1.5px solid var(--bdr);background:var(--bg);font-size:13px;font-weight:700;color:var(--t2);cursor:pointer;text-align:left;transition:all .18s;display:flex;align-items:center;gap:7px">
-      <span style="font-size:16px">${subIcon(s)}</span> ${s}
-    </button>`).join('');
-}
-
-let selSub = '';
-function selectSub(s, btn) {
-  selSub = s;
-  document.querySelectorAll('#sub-grid button').forEach(b => {
-    b.style.borderColor = 'var(--bdr)';
-    b.style.background = 'var(--bg)';
-    b.style.color = 'var(--t2)';
-  });
-  btn.style.borderColor = 'var(--green)';
-  btn.style.background = 'rgba(90,125,95,.1)';
-  btn.style.color = 'var(--green)';
-}
-
-function subIcon(s) {
-  const m = {'House Rent':'🏠','Mortgage':'🏦','Groceries':'🛒','Restaurants':'🍽️','Coffee':'☕','Gas':'⛽','Car Payment':'🚗','Uber':'🚕','Transit':'🚌','Internet':'🌐','Phone':'📱','Electricity':'💡','Water':'💧','Movies':'🎬','Subscriptions':'📺','Drinks':'🥂','Emergency Fund':'🛡️','Vacation':'✈️','Goal':'🎯','Shopping':'🛍️','Health':'💊','Misc':'📦','Sueldo':'💰','Negocio':'💼','Propinas':'🪙','Freelance':'💻','Otros':'➕'};
-  return m[s] || '•';
-}
-
-// ══════════════════════════════════════
-// SAVE TX — updated to include payment + sub from grid
-// ══════════════════════════════════════
-function saveTx() {
-  const amt = parseFloat(document.getElementById('txAmt').value);
-  if(!amt || amt<=0) { toast('⚠️ Ingresa un monto válido'); return; }
-  if(!selCat)        { toast('⚠️ Selecciona una categoría'); return; }
-  const subFromGrid = selSub || document.getElementById('txSub')?.value || selCat;
-  const tx = {
-    id:          'TX-'+Date.now().toString().slice(-9),
-    date:        document.getElementById('txDate').value,
-    type:        curType,
-    category:    selCat,
-    subcategory: subFromGrid,
-    amount:      amt,
-    method:      selPayment,
-    notes:       document.getElementById('txNote').value
-  };
-  txs.unshift(tx);
-  localStorage.setItem('fp_txs', JSON.stringify(txs));
-  syncData('save_tx', tx);
-  selSub = '';
-  closeModal();
-  updateMonthDisplay();
-  toast('✅ Guardado');
-}
-
-// ══════════════════════════════════════
-// PROFESSIONAL CSV EXPORT
-// ══════════════════════════════════════
-function exportCSV() {
-  const year = curDate.getFullYear();
-  const name = userName || 'Cliente';
-  const now  = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
-
-  // Header info block
-  const info = [
-    [`REPORTE FINANCIERO PERSONAL — ${name}`],
-    [`Año Fiscal: ${year}`],
-    [`Generado: ${now}`],
-    [`Preparado por: Finanzas Pro App`],
-    [],
-    ['RESUMEN EJECUTIVO'],
-    ['Concepto','Valor','Descripción'],
-  ];
-
-  // Compute annual totals
-  const yearTxs = txs.filter(t => { if(!t||!t.date) return false; return new Date(t.date+'T12:00:00').getFullYear()===year; });
-  let totalInc=0, totalExp=0, totalSaved=0, dedTotal=0;
-  const byCat = {};
-  yearTxs.forEach(t => {
-    const a = Number(t.amount)||0;
-    if(t.type==='Ingreso') totalInc+=a;
-    else {
-      totalExp+=a;
-      byCat[t.category]=(byCat[t.category]||0)+a;
-      if(t.category==='Savings') totalSaved+=a;
-      const cd=cats.Gasto[t.category];
-      if(cd&&cd.deductible) dedTotal+=a;
-    }
-  });
-  const net = totalInc - totalExp;
-  const taxEst = Math.max(0,net)*(taxPct/100);
-
-  info.push(['Ingresos Totales (Brutos)', `$${totalInc.toFixed(2)}`, 'Suma de todos los ingresos del año']);
-  info.push(['Gastos Totales',           `$${totalExp.toFixed(2)}`, 'Suma de todos los gastos del año']);
-  info.push(['Ingreso Neto',             `$${net.toFixed(2)}`,      'Ingresos menos Gastos']);
-  info.push(['Total Ahorrado',           `$${totalSaved.toFixed(2)}`,'Depósitos en categoría Savings']);
-  info.push(['Gastos Deducibles',        `$${dedTotal.toFixed(2)}`, 'Gastos marcados como deducibles de impuestos']);
-  info.push(['Estimado de Impuesto',     `$${taxEst.toFixed(2)}`,   `Basado en tasa ${taxPct}% sobre ingreso neto`]);
-  info.push([]);
-  info.push(['GASTOS POR CATEGORÍA (Año Completo)']);
-  info.push(['Categoría','Total','Deducible','Descripción']);
-  Object.entries(byCat).sort((a,b)=>b[1]-a[1]).forEach(([cat,amt]) => {
-    const cd = cats.Gasto[cat]||{};
-    info.push([cat, `$${amt.toFixed(2)}`, cd.deductible?'SÍ':'NO', `Gastos en ${cat} durante ${year}`]);
-  });
-
-  info.push([]);
-  info.push(['DETALLE DE TRANSACCIONES']);
-  info.push(['#','ID','Fecha','Día','Tipo','Categoría','Subcategoría','Monto','Método de Pago','Notas','Deducible']);
-
-  // All transactions sorted by date
-  const sorted = [...txs].sort((a,b) => a.date > b.date ? 1 : -1);
-  sorted.forEach((t, i) => {
-    const d  = t.date ? new Date(t.date+'T12:00:00') : new Date();
-    const cd = t.type==='Gasto' ? (cats.Gasto[t.category]||{}) : {};
-    const dayName = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][d.getDay()];
-    info.push([
-      i+1, t.id||'', t.date||'', dayName,
-      t.type||'', t.category||'', t.subcategory||'',
-      `$${(Number(t.amount)||0).toFixed(2)}`,
-      t.method||'N/A', t.notes||'',
-      (t.type==='Gasto'&&cd.deductible)?'SÍ':'NO'
-    ]);
-  });
-
-  info.push([]);
-  info.push(['━━━ FIN DEL REPORTE ━━━']);
-  info.push([`Este documento fue generado automáticamente por Finanzas Pro.`]);
-  info.push([`Para uso fiscal, presente este reporte a su agente de taxes junto con sus recibos.`]);
-  info.push([`Tasa estimada aplicada: ${taxPct}% | Año fiscal: ${year}`]);
-
-  const csv = info.map(row => row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('
-');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
-  a.download = `Reporte_Financiero_${name}_${year}.csv`;
-  a.click();
-  toast('📊 Reporte profesional exportado');
-}
-
-// ══════════════════════════════════════
-// EXPORT TAXES REPORT (HTML printable)
-// ══════════════════════════════════════
-function exportTaxReport() {
-  const year  = curDate.getFullYear();
-  const name  = userName || 'Cliente';
-  const now   = new Date().toLocaleDateString('es-US',{year:'numeric',month:'long',day:'numeric'});
-  const yearTxs = txs.filter(t=>{ if(!t||!t.date)return false; return new Date(t.date+'T12:00:00').getFullYear()===year; });
-  let inc=0,exp=0,ded=0,saved=0;
-  const dedMap={}, incMap={};
-  yearTxs.forEach(t=>{
-    const a=Number(t.amount)||0;
-    if(t.type==='Ingreso'){inc+=a;incMap[t.subcategory]=(incMap[t.subcategory]||0)+a;}
-    else{exp+=a;if(t.category==='Savings')saved+=a;const cd=cats.Gasto[t.category];if(cd&&cd.deductible){ded+=a;dedMap[t.category]=(dedMap[t.category]||0)+a;}}
-  });
-  const net=Math.max(0,inc-exp), est=net*(taxPct/100);
-  const f=v=>'$'+v.toFixed(2);
-  const dedRows=Object.entries(dedMap).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>`<tr><td>${cat}</td><td style="text-align:right">${f(amt)}</td><td style="text-align:right;color:#16a34a">Deducible</td></tr>`).join('');
-  const incRows=Object.entries(incMap).sort((a,b)=>b[1]-a[1]).map(([src,amt])=>`<tr><td>${src}</td><td style="text-align:right">${f(amt)}</td></tr>`).join('');
-  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte Taxes ${year} — ${name}</title>
-  <style>body{font-family:'Helvetica Neue',Arial,sans-serif;color:#1a1a1a;margin:0;padding:32px;font-size:14px;line-height:1.6;max-width:800px;margin:0 auto;}
-  h1{font-size:26px;font-weight:900;border-bottom:3px solid #2C2825;padding-bottom:12px;margin-bottom:4px;}
-  h2{font-size:15px;font-weight:800;color:#2C2825;margin:28px 0 10px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #E8E6DF;padding-bottom:6px;}
-  .meta{font-size:12px;color:#666;margin-bottom:28px;}
-  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
-  .kpi{background:#F7F5F0;border-radius:10px;padding:14px;border-left:4px solid #2C2825;}
-  .kpi.green{border-color:#5A7D5F;}.kpi.red{border-color:#D18F77;}.kpi.gold{border-color:#D4AC5B;}
-  .kpi-l{font-size:10px;font-weight:700;color:#8C867F;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
-  .kpi-v{font-size:22px;font-weight:900;}
-  table{width:100%;border-collapse:collapse;margin-bottom:6px;}
-  th{background:#2C2825;color:#fff;padding:9px 12px;font-size:12px;text-align:left;font-weight:700;letter-spacing:.04em;}
-  td{padding:8px 12px;border-bottom:1px solid #E8E6DF;font-size:13px;}
-  tr:last-child td{border-bottom:none;}
-  .total-row td{font-weight:900;font-size:14px;background:#F7F5F0;}
-  .disclaimer{background:#FFFBEB;border:1px solid #D4AC5B;border-radius:8px;padding:14px;font-size:12px;color:#666;margin-top:28px;line-height:1.7;}
-  .footer{text-align:center;font-size:11px;color:#aaa;margin-top:32px;border-top:1px solid #E8E6DF;padding-top:16px;}
-  @media print{body{padding:16px;}.disclaimer{background:#fff9e6;}}</style></head>
-  <body>
-  <h1>Reporte Fiscal ${year}</h1>
-  <div class="meta">Preparado para: <strong>${name}</strong> &nbsp;|&nbsp; Fecha: ${now} &nbsp;|&nbsp; Tasa aplicada: <strong>${taxPct}%</strong></div>
-  <div class="kpi-grid">
-    <div class="kpi green"><div class="kpi-l">Ingresos Brutos</div><div class="kpi-v" style="color:#5A7D5F">${f(inc)}</div></div>
-    <div class="kpi red"><div class="kpi-l">Gastos Deducibles</div><div class="kpi-v" style="color:#D18F77">${f(ded)}</div></div>
-    <div class="kpi gold"><div class="kpi-l">Impuesto Estimado</div><div class="kpi-v" style="color:#D4AC5B">${f(est)}</div></div>
-    <div class="kpi"><div class="kpi-l">Gastos Totales</div><div class="kpi-v">${f(exp)}</div></div>
-    <div class="kpi green"><div class="kpi-l">Ingreso Neto</div><div class="kpi-v" style="color:#5A7D5F">${f(net)}</div></div>
-    <div class="kpi green"><div class="kpi-l">Total Ahorrado</div><div class="kpi-v" style="color:#5A7D5F">${f(saved)}</div></div>
-  </div>
-  <h2>Fuentes de Ingreso</h2>
-  <table><thead><tr><th>Fuente</th><th style="text-align:right">Monto</th></tr></thead><tbody>${incRows}<tr class="total-row"><td>TOTAL INGRESOS</td><td style="text-align:right">${f(inc)}</td></tr></tbody></table>
-  <h2>Gastos Deducibles por Categoría</h2>
-  <table><thead><tr><th>Categoría</th><th style="text-align:right">Monto</th><th style="text-align:right">Estado</th></tr></thead><tbody>${dedRows}<tr class="total-row"><td>TOTAL DEDUCIBLE</td><td style="text-align:right">${f(ded)}</td><td></td></tr></tbody></table>
-  <h2>Cálculo Fiscal Estimado</h2>
-  <table><thead><tr><th>Concepto</th><th style="text-align:right">Monto</th></tr></thead><tbody>
-  <tr><td>Ingresos Brutos</td><td style="text-align:right">${f(inc)}</td></tr>
-  <tr><td>Menos: Gastos Deducibles</td><td style="text-align:right">(${f(ded)})</td></tr>
-  <tr class="total-row"><td>Ingreso Neto Gravable</td><td style="text-align:right">${f(net)}</td></tr>
-  <tr><td>Tasa Estimada (${taxPct}%)</td><td style="text-align:right">${taxPct}%</td></tr>
-  <tr class="total-row"><td>RESERVA SUGERIDA PARA IRS</td><td style="text-align:right;color:#D4AC5B;font-size:16px">${f(est)}</td></tr>
-  </tbody></table>
-  <div class="disclaimer">⚠️ <strong>Aviso importante para el agente de taxes:</strong> Este reporte fue generado automáticamente con la aplicación Finanzas Pro. Las cifras representan un estimado basado en los datos ingresados por el cliente. Los gastos deducibles deben ser verificados con los recibos correspondientes. Este documento NO reemplaza la preparación oficial de taxes por un CPA o agente autorizado. Tasa de retención estimada: ${taxPct}%. Año fiscal: ${year}.</div>
-  <div class="footer">Finanzas Pro · Reporte Fiscal ${year} · ${name} · Generado: ${now}</div>
-  </body></html>`;
-  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  const url  = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `Reporte_Taxes_${name}_${year}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('📄 Reporte de taxes exportado');
-}
-
-function clearData(){if(!confirm('¿Borrar TODOS los datos?'))return;['fp_txs','fp_cats','fp_budgets','fp_url','fp_name','fp_goal','fp_taxpct','fp_sync_queue','fp_payments','fp_dark'].forEach(k=>localStorage.removeItem(k));location.reload();}
+function exportCSV(){const h=['ID','Fecha','Tipo','Categoría','Subcategoría','Monto','Notas'];const r=txs.map(t=>[t.id,t.date,t.type,t.category,t.subcategory,t.amount,t.notes||''].map(v=>`"${v}"`).join(','));const csv=[h.join(','),...r].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='finanzas_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('📄 CSV exportado');}
+function clearData(){if(!confirm('¿Borrar TODOS los datos?'))return;['fp_txs','fp_cats','fp_budgets','fp_url','fp_name','fp_goal','fp_taxpct','fp_sync_queue'].forEach(k=>localStorage.removeItem(k));location.reload();}
 let tt=null;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800);}
 </script>
 </body>
