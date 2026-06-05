@@ -64,21 +64,33 @@ const fmtK=v=>{const n=Number(v)||0;return Math.abs(n)>=1000?'$'+(n/1000).toFixe
 
 function toast(msg){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800);}
 
-// ═══ INIT & LOADING ═══
-document.addEventListener('DOMContentLoaded', async () => {
+// ═══ INIT & BLINDADO ═══
+document.addEventListener('DOMContentLoaded', () => {
   applyLang();
-  document.getElementById('txDate').valueAsDate=new Date();
-  document.getElementById('sheet-url').value=sheetUrl;
-  document.getElementById('sv-name').textContent=userName;
-  document.getElementById('inp-taxpct').value=taxPct;
+  
+  if(document.getElementById('txDate')) document.getElementById('txDate').valueAsDate=new Date();
+  if(document.getElementById('sheet-url')) document.getElementById('sheet-url').value=sheetUrl;
+  if(document.getElementById('sv-name')) document.getElementById('sv-name').textContent=userName;
+  if(document.getElementById('inp-taxpct')) document.getElementById('inp-taxpct').value=taxPct;
 
-  setTimeout(() => {
+  const finishLoad = () => {
     const loader = document.getElementById('loading-screen');
     if (loader) loader.classList.add('hide');
     updateMonthDisplay();
-  }, 1200);
+  };
 
-  if(sheetUrl) { await loadFromSheets(false); }
+  // 🛡️ SEGURO: SIEMPRE ocultará la pantalla de carga máximo a los 1.5s aunque falle la red o haya error.
+  const fallbackTimer = setTimeout(finishLoad, 1500);
+
+  if(sheetUrl) { 
+     loadFromSheets(false).then(() => {
+        clearTimeout(fallbackTimer);
+        finishLoad();
+     });
+  } else {
+     clearTimeout(fallbackTimer);
+     finishLoad();
+  }
 
   setInterval(()=>{if(sheetUrl&&document.visibilityState==='visible')loadFromSheets(false);},5*60*1000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&sheetUrl){retryQueue();loadFromSheets(false);}});
@@ -107,7 +119,6 @@ function switchView(v) {
   const tgt = document.getElementById('v-'+v);
   if(tgt) tgt.classList.add('on');
   
-  // Limpiar botones nav y activar el correspondiente si existe (Deudas/Taxes no están en el nav inferior)
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   const btn = document.getElementById('nav-'+v);
   if(btn) btn.classList.add('on');
@@ -116,7 +127,6 @@ function switchView(v) {
   if(v==='budget')renderBudget(); if(v==='taxes')renderTaxes(); if(v==='debts')renderDebts();
 }
 
-// ═══ MES ═══
 function getKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
 function changeMonth(d){curDate=new Date(curDate.getFullYear(),curDate.getMonth()+d,1);updateMonthDisplay();}
 function updateMonthDisplay(){
@@ -145,30 +155,34 @@ function renderHome(){
   let pInc=0,pExp=0;pm.forEach(t=>t.type==='Ingreso'?pInc+=Number(t.amount||0):pExp+=Number(t.amount||0));
   const gap=inc-exp,incDiff=inc-pInc,expDiff=exp-pExp;
   
-  document.getElementById('sc-inc').textContent=fmt(inc); 
-  document.getElementById('sc-exp').textContent=fmt(exp); 
-  document.getElementById('sc-sav').textContent=fmt(totalSaved);
+  const sci = document.getElementById('sc-inc'); if(sci) sci.textContent=fmt(inc); 
+  const sce = document.getElementById('sc-exp'); if(sce) sce.textContent=fmt(exp); 
+  const scs = document.getElementById('sc-sav'); if(scs) scs.textContent=fmt(totalSaved);
   
   const gEl=document.getElementById('sc-gap'),gSub=document.getElementById('sc-gap-sub');
-  gEl.textContent=fmt(gap);
+  if(gEl) gEl.textContent=fmt(gap);
   if(gSub) { gSub.textContent=gap>=0?(currentLang==='es'?'Disponible este mes':'Available this month'):(currentLang==='es'?'Déficit este mes':'Deficit this month'); }
   
-  document.getElementById('sc-rate').textContent=(currentLang==='es'?'Meta: ':'Goal: ')+fmt(savGoal);
-  document.getElementById('h-count').textContent=mt.length;
+  const scr = document.getElementById('sc-rate'); if(scr) scr.textContent=(currentLang==='es'?'Meta: ':'Goal: ')+fmt(savGoal);
+  const hct = document.getElementById('h-count'); if(hct) hct.textContent=mt.length;
 
   const pct=Math.max(0,Math.min(100,(totalSaved/savGoal)*100));
-  document.getElementById('mini-donut').style.background=`conic-gradient(var(--beige) ${pct}%,rgba(255,247,230,0.2) 0%)`;
-  document.getElementById('mini-donut-pct').textContent=pct.toFixed(0)+'%';
+  const md = document.getElementById('mini-donut'); if(md) md.style.background=`conic-gradient(var(--beige) ${pct}%,rgba(255,247,230,0.2) 0%)`;
+  const mdp = document.getElementById('mini-donut-pct'); if(mdp) mdp.textContent=pct.toFixed(0)+'%';
   
-  const hc=document.getElementById('home-cats'); const entries=Object.entries(catSums).sort((a,b)=>b[1]-a[1]);
-  if(!entries.length){hc.innerHTML=`<p style="font-size:12px;color:var(--c-muted);padding:4px 0;font-weight:500">${currentLang==='es'?'Sin gastos este mes':'No expenses this month'}</p>`;}
-  else{const mx=entries[0][1]||1;hc.innerHTML=entries.map(([cat,amt])=>{return`<div class="catbar"><div class="catbar-name" style="width:100px"><span style="margin-right:5px;font-size:8px">●</span>${cat}</div><div class="catbar-bg"><div class="catbar-fill" style="width:${(amt/mx*100).toFixed(0)}%;background:var(--beige)"></div></div><div class="catbar-amt">${fmt(amt)}</div></div>`;}).join('');}
+  const hc=document.getElementById('home-cats'); 
+  if(hc) {
+    const entries=Object.entries(catSums).sort((a,b)=>b[1]-a[1]);
+    if(!entries.length){hc.innerHTML=`<p style="font-size:12px;color:var(--c-muted);padding:4px 0;font-weight:500">${currentLang==='es'?'Sin gastos este mes':'No expenses this month'}</p>`;}
+    else{const mx=entries[0][1]||1;hc.innerHTML=entries.map(([cat,amt])=>{return`<div class="catbar"><div class="catbar-name" style="width:100px"><span style="margin-right:5px;font-size:8px">●</span>${cat}</div><div class="catbar-bg"><div class="catbar-fill" style="width:${(amt/mx*100).toFixed(0)}%;background:var(--beige)"></div></div><div class="catbar-amt">${fmt(amt)}</div></div>`;}).join('');}
+  }
   
   renderDayList(mt);
 }
 
 function renderDayList(monthly){
   const list=document.getElementById('h-list');
+  if(!list) return;
   if(!monthly.length){list.innerHTML=`<div style="text-align:center;padding:40px 0"><div style="font-size:40px;margin-bottom:10px">👻</div><p style="font-size:13px;font-weight:700;color:var(--t-main)">${currentLang==='es'?'Sin movimientos':'No transactions'}</p></div>`;return;}
   const groups={}; monthly.forEach(tx=>{if(!groups[tx.date])groups[tx.date]=[];groups[tx.date].push(tx);});
   const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
@@ -202,7 +216,7 @@ function renderDayList(monthly){
   initSwipe();
 }
 
-// CORRECCIÓN SWIPE (Math.max / Math.min y reinicio seguro)
+// CORRECCIÓN SWIPE (Matemática mejorada)
 function initSwipe(){
   document.querySelectorAll('.txr-wrap').forEach(wrap=>{
     const id=wrap.id.replace('txw-','');const surf=document.getElementById('txs-'+id);if(!surf)return;
@@ -226,7 +240,7 @@ function initSwipe(){
       }else if(dx<-45){
         surf.style.transform='translateX(-100%)';
         setTimeout(()=>{
-          surf.style.transform='translateX(0)'; // Reset por si cancela
+          surf.style.transform='translateX(0)';
           confirmDelete(id);
         }, 250);
       }else{
@@ -247,8 +261,9 @@ function getCurrentBudgets(){
   return budgets[key];
 }
 function renderBudget(){
+  const bl=document.getElementById('bud-list'); if(!bl) return;
   const monthly=getMonthTxs(),curr=getCurrentBudgets();let tL=0,tS=0;
-  document.getElementById('bud-list').innerHTML=curr.map((b,i)=>{
+  bl.innerHTML=curr.map((b,i)=>{
     tL+=b.limit; const spent=monthly.filter(tx=>tx.type!=='Ingreso'&&tx.category===b.cat).reduce((s,tx)=>s+(Number(tx.amount)||0),0);tS+=spent;
     const raw=b.limit>0?(spent/b.limit)*100:0,pct=Math.min(raw,100);
     const lf=isEditBud?`<input type="number" value="${b.limit}" onchange="updateBL(${i},this.value)" style="border:1px solid var(--beige);border-radius:6px;padding:4px;font-size:14px;font-weight:800;width:80px;text-align:right;background:transparent;color:var(--beige);outline:none">`:`<div class="bcat-val">${fmt(spent)}</div><div class="bcat-rem" style="color:var(--c-muted)">de ${fmt(b.limit)}</div>`;
@@ -262,30 +277,50 @@ function setPeriod(p,btn){curPeriod=p;document.querySelectorAll('.ptab').forEach
 function renderReports(){
   const mt=getMonthTxs();let inc=0,exp=0,catSums={}; mt.forEach(tx=>{const a=Number(tx.amount)||0;if(tx.type==='Ingreso')inc+=a;else{exp+=a;catSums[tx.category]=(catSums[tx.category]||0)+a;}});
   
-  const titles={month:currentLang==='es'?'Por Día del Mes':'By Month Day',week:currentLang==='es'?'Últimos 7 Días':'Last 7 Days',year:currentLang==='es'?'Resumen Anual':'Yearly Summary',day:currentLang==='es'?'Por Día':'By Day'};
-  document.getElementById('r-title').textContent=titles[curPeriod];
+  const titles={month:currentLang==='es'?'Por Día del Mes':'By Month Day',week:currentLang==='es'?'Últimos 7 Días':'Last 7 Days',year:currentLang==='es'?'Resumen Anual':'Yearly Summary'};
+  const rt=document.getElementById('r-title'); if(rt) rt.textContent=titles[curPeriod] || titles['month'];
+  
   const Y=curDate.getFullYear(),M=curDate.getMonth(); let labels=[],incD=[],expD=[];
   if(curPeriod==='month'){const dim=new Date(Y,M+1,0).getDate();for(let d=1;d<=dim;d++){const ds=`${Y}-${String(M+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const dt=txs.filter(t=>t.date===ds);labels.push(d);incD.push(dt.filter(t=>t.type==='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0));expD.push(dt.filter(t=>t.type!=='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0));}}
   else if(curPeriod==='year'){for(let m=0;m<12;m++){const mt2=getMonthTxs(Y,m);labels.push(MS[m]);incD.push(mt2.filter(t=>t.type==='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0));expD.push(mt2.filter(t=>t.type!=='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0));}}
   else if(curPeriod==='week'){const today=new Date();for(let i=6;i>=0;i--){const dt=new Date(today);dt.setDate(today.getDate()-i);const ds=dt.toISOString().slice(0,10);const dt2=txs.filter(t=>t.date===ds);labels.push(DAYS[dt.getDay()]);incD.push(dt2.filter(t=>t.type==='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0));expD.push(dt2.filter(t=>t.type!=='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0));}}
-  else if(curPeriod==='day'){for(let i=0;i<7;i++){labels.push(DAYS[i]);incD.push(0);expD.push(0);}mt.forEach(tx=>{const dw=new Date(tx.date+'T12:00:00').getDay();const a=Number(tx.amount)||0;if(tx.type==='Ingreso')incD[dw]+=a;else expD[dw]+=a;});}
-  if(rChart){rChart.destroy();rChart=null;} const ctx=document.getElementById('rChart').getContext('2d');
-  rChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Ingresos',data:incD,backgroundColor:'rgba(255,247,230,.9)',borderRadius:4},{label:'Gastos',data:expD,backgroundColor:'rgba(255,247,230,.4)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#FFF7E6',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#FFF7E6',font:{size:9},callback:v=>'$'+v},grid:{color:'rgba(255,247,230,.1)'}}}}});
   
-  const rcats=document.getElementById('r-cats'); const entries=Object.entries(catSums).sort((a,b)=>b[1]-a[1]);
-  if(!entries.length){rcats.innerHTML=`<p style="font-size:12px;color:var(--c-muted);padding:4px 0;font-weight:500">${currentLang==='es'?'Sin gastos':'No expenses'}</p>`;return;} const mx=entries[0][1]||1;
-  rcats.innerHTML=entries.map(([cat,amt])=>{return`<div class="catbar"><div class="catbar-name" style="width:90px"><span style="margin-right:5px;font-size:8px">●</span>${cat}</div><div class="catbar-bg"><div class="catbar-fill" style="width:${(amt/mx*100).toFixed(0)}%;background:var(--beige)"></div></div><div class="catbar-amt">${fmtK(amt)}</div></div>`;}).join('');
+  if(rChart){rChart.destroy();rChart=null;} 
+  const cEl = document.getElementById('rChart');
+  if(cEl) {
+    const ctx=cEl.getContext('2d');
+    rChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Ingresos',data:incD,backgroundColor:'rgba(255,247,230,.9)',borderRadius:4},{label:'Gastos',data:expD,backgroundColor:'rgba(255,247,230,.4)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#FFF7E6',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#FFF7E6',font:{size:9},callback:v=>'$'+v},grid:{color:'rgba(255,247,230,.1)'}}}}});
+  }
+  
+  const rcats=document.getElementById('r-cats'); 
+  if(rcats) {
+    const entries=Object.entries(catSums).sort((a,b)=>b[1]-a[1]);
+    if(!entries.length){rcats.innerHTML=`<p style="font-size:12px;color:var(--c-muted);padding:4px 0;font-weight:500">${currentLang==='es'?'Sin gastos':'No expenses'}</p>`;}
+    else{const mx=entries[0][1]||1;rcats.innerHTML=entries.map(([cat,amt])=>{return`<div class="catbar"><div class="catbar-name" style="width:90px"><span style="margin-right:5px;font-size:8px">●</span>${cat}</div><div class="catbar-bg"><div class="catbar-fill" style="width:${(amt/mx*100).toFixed(0)}%;background:var(--beige)"></div></div><div class="catbar-amt">${fmtK(amt)}</div></div>`;}).join('');}
+  }
 }
 
 function renderTaxes(){
-  const Y=curDate.getFullYear();document.getElementById('tax-year').textContent=Y;document.getElementById('inp-taxpct').value=taxPct;
+  const Y=curDate.getFullYear();
+  const ty=document.getElementById('tax-year'); if(ty) ty.textContent=Y;
+  
   let incY=0,expY=0,dedMap={}; txs.forEach(tx=>{const d=new Date(tx.date+'T12:00:00');if(d.getFullYear()!==Y)return;const a=Number(tx.amount)||0;if(tx.type==='Ingreso')incY+=a;else{expY+=a;const cd=cats.Gasto[tx.category];if(cd&&cd.deductible){dedMap[tx.category]=(dedMap[tx.category]||0)+a;}}});
   const net=Math.max(0,incY-expY),est=net*(taxPct/100);
-  document.getElementById('tax-total').textContent=fmt2(est);document.getElementById('tax-inc').textContent=fmt(incY);document.getElementById('tax-exp').textContent='-'+fmt(expY);document.getElementById('tax-net').textContent=fmt(net);
-  document.getElementById('deduct-list').innerHTML=Object.entries(cats.Gasto).map(([cat,cd])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,247,230,.1)"><div style="font-size:13px;font-weight:700;color:var(--beige)">${cat}</div><div style="font-size:10px;color:var(--c-muted)">${cd.deductible?'✓ Deducible':'-'}</div></div>`).join('');
-  const entries=Object.entries(dedMap).sort((a,b)=>b[1]-a[1]); const bd=document.getElementById('tax-breakdown');
-  if(!entries.length){bd.innerHTML=`<p style="font-size:12px;color:var(--c-muted);padding:6px 0;font-weight:500">${currentLang==='es'?'Sin deducciones':'No deductions'}</p>`;}
-  else{bd.innerHTML=entries.map(([cat,amt])=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,247,230,.1)"><span style="font-size:13px;color:var(--c-muted);font-weight:500">${cat}</span><span style="font-size:13px;font-weight:800;color:var(--beige)">${fmt(amt)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:10px 0"><span style="font-size:13px;font-weight:800;color:var(--beige)">Total</span><span style="font-size:13px;font-weight:900;color:var(--beige)">${fmt(Object.values(dedMap).reduce((s,v)=>s+v,0))}</span></div>`;}
+  
+  const tt=document.getElementById('tax-total'); if(tt) tt.textContent=fmt2(est);
+  const ti=document.getElementById('tax-inc'); if(ti) ti.textContent=fmt(incY);
+  const te=document.getElementById('tax-exp'); if(te) te.textContent='-'+fmt(expY);
+  const tn=document.getElementById('tax-net'); if(tn) tn.textContent=fmt(net);
+  
+  const dl=document.getElementById('deduct-list');
+  if(dl) dl.innerHTML=Object.entries(cats.Gasto).map(([cat,cd])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,247,230,.1)"><div style="font-size:13px;font-weight:700;color:var(--beige)">${cat}</div><div style="font-size:10px;color:var(--c-muted)">${cd.deductible?'✓ Deducible':'-'}</div></div>`).join('');
+  
+  const bd=document.getElementById('tax-breakdown');
+  if(bd) {
+    const entries=Object.entries(dedMap).sort((a,b)=>b[1]-a[1]); 
+    if(!entries.length){bd.innerHTML=`<p style="font-size:12px;color:var(--c-muted);padding:6px 0;font-weight:500">${currentLang==='es'?'Sin deducciones':'No deductions'}</p>`;}
+    else{bd.innerHTML=entries.map(([cat,amt])=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,247,230,.1)"><span style="font-size:13px;color:var(--c-muted);font-weight:500">${cat}</span><span style="font-size:13px;font-weight:800;color:var(--beige)">${fmt(amt)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:10px 0"><span style="font-size:13px;font-weight:800;color:var(--beige)">Total</span><span style="font-size:13px;font-weight:900;color:var(--beige)">${fmt(Object.values(dedMap).reduce((s,v)=>s+v,0))}</span></div>`;}
+  }
 }
 function calcTaxes(){taxPct=parseFloat(document.getElementById('inp-taxpct').value)||0;localStorage.setItem('fp_taxpct',taxPct);renderTaxes();}
 
@@ -314,7 +349,7 @@ function selectCat(key,btn){
   const subs=cats[curType][key]?.subs||[]; 
   const sec = document.getElementById('sub-sec'); const sg = document.getElementById('sub-grid');
   if(subs.length){
-    sec.style.display='block';
+    sec.style.display='grid';
     sg.innerHTML = subs.map(s => `<button class="sbtns" onclick="selectSub('${s}',this)"><span>${s}</span></button>`).join('');
     selSub = subs[0]; setTimeout(() => { const first = sg.querySelector('button'); if(first) first.classList.add('sel'); }, 20);
   } else { sec.style.display='none'; }
@@ -384,8 +419,7 @@ function promptName(){const n=prompt('Tu nombre / Your name:',userName);if(!n?.t
 function promptGoal(){const n=prompt('Meta mensual ($):',savGoal);if(!n||isNaN(n))return;savGoal=parseFloat(n);localStorage.setItem('fp_goal',savGoal);renderHome();}
 function openSheetsModal(){document.getElementById('modal-sheets').classList.add('mon');}
 function closeSheetsModal(){document.getElementById('modal-sheets').classList.remove('mon');}
-function saveSheetUrl(){const url=document.getElementById('sheet-url').value.trim();localStorage.setItem('fp_url',url);sheetUrl=url;updateSheetBadge();closeSheetsModal();toast('✅ URL OK');if(url)loadFromSheets(true);}
-function updateSheetBadge(){const p=document.getElementById('sv-sheets-url');if(sheetUrl){if(p)p.textContent='Conectado ✓';}else{if(p)p.textContent='Sin configurar';}}
+function saveSheetUrl(){const url=document.getElementById('sheet-url').value.trim();localStorage.setItem('fp_url',url);sheetUrl=url;closeSheetsModal();toast('✅ URL OK');if(url)loadFromSheets(true);}
 
 function openCal(){calYear=curDate.getFullYear();renderCal();document.getElementById('modal-cal').classList.add('mon');}
 function closeCal(){document.getElementById('modal-cal').classList.remove('mon');}
