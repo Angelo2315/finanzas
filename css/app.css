@@ -12,7 +12,7 @@
   /* Mapeo a la UI */
   --bg: var(--c4);
   --card: var(--c5);
-  --bdr: rgba(15,42,29,.15); /* Borde sutil basado en el color más fuerte */
+  --bdr: rgba(15,42,29,.15); 
   
   --t1: var(--c1);
   --t2: var(--c2);
@@ -102,8 +102,8 @@ body{font-family:'Sora','Inter',-apple-system,sans-serif;background:var(--bg);co
 .view.on{display:flex;animation:vu .25s ease;}
 @keyframes vu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
-/* HEADER MEJORADO */
-.hdr{flex-shrink:0;padding:calc(var(--sat)+14px) 20px 16px;display:flex;justify-content:space-between;align-items:center;background:var(--bg);}
+/* HEADER MEJORADO Y ALEJADO DE LAS ESQUINAS */
+.hdr{flex-shrink:0;padding:calc(var(--sat) + 14px) 28px 16px;display:flex;justify-content:space-between;align-items:center;background:var(--bg);}
 .hdr-center{flex:1;display:flex;justify-content:center;}
 .month-pill{display:flex;align-items:center;gap:2px;background:var(--card);border:1px solid var(--bdr);border-radius:50px;padding:5px 7px;box-shadow:var(--sh);cursor:pointer;}
 .month-pill button{border:none;background:transparent;cursor:pointer;color:var(--t2);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;}
