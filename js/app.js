@@ -57,14 +57,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('inp-taxpct').value=taxPct;
   updateSheetBadge();
 
-  // Animación del login loader alineado con el color fuerte
   let count = 0;
   const ls = document.getElementById('loading-status');
   const bar = document.querySelector('.loading-bar-fill');
   
   const interval = setInterval(() => {
     count += Math.floor(Math.random() * 12) + 4;
-    if(count > 85) count = 85; // Se detiene en 85% esperando datos de internet
+    if(count > 85) count = 85; 
     if(ls) ls.textContent = count + '%';
     if(bar) bar.style.width = count + '%';
   }, 120);
@@ -198,7 +197,6 @@ function renderDayList(monthly){
       const sub=tx.subcategory||tx.category||'—';
       const metaParts=[tx.category,tx.method,tx.notes].filter(Boolean);
       
-      /* Insignias usando los colores de la corrección del usuario */
       const badgeBg=isI?'rgba(209,143,119,.15)':'rgba(140,134,127,.15)';
       const badgeClr=isI?'var(--terra)':'var(--gray)';
       const dotClr=isI?'var(--terra)':'var(--gray)';
@@ -285,7 +283,6 @@ function renderReports(){
   if(rChart){rChart.destroy();rChart=null;}
   const ctx=document.getElementById('rChart').getContext('2d');
   
-  /* Uso de los colores de corrección para las barras de la gráfica */
   rChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Ingresos',data:incD,backgroundColor:'rgba(209,143,119,.85)',borderRadius:5,borderSkipped:false},{label:'Gastos',data:expD,backgroundColor:'rgba(140,134,127,.85)',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:9,font:{size:10,family:'Inter'},color:'#375534'}}},scales:{x:{ticks:{color:'#375534',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#375534',font:{size:9},callback:v=>'$'+v},grid:{color:'rgba(15,42,29,.04)'}}}}});
   
   const mst=document.getElementById('monthly-savings-table');
@@ -491,6 +488,7 @@ function selCalMonth(m,y){curDate=new Date(y,m,1);updateMonthDisplay();closeCal(
 // ═══ GOOGLE SHEETS ═══
 function setSS(s){const d=document.getElementById('sdot');if(d)d.className='sdot'+(s==='sy'?' sy':s==='er'?' er':'');}
 async function postToSheets(body){if(!sheetUrl)return;await fetch(sheetUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)});}
+
 async function loadFromSheets(show){
   if(!sheetUrl)return false;setSS('sy');
   try{
@@ -499,23 +497,31 @@ async function loadFromSheets(show){
     if(data.transactions&&data.transactions.length>0){txs=data.transactions;localStorage.setItem('fp_txs',JSON.stringify(txs));changed=true;}
     if(data.categories){cats=data.categories;localStorage.setItem('fp_cats',JSON.stringify(cats));}
     if(data.budgets&&Object.keys(data.budgets).length>0){budgets=data.budgets;localStorage.setItem('fp_budgets',JSON.stringify(budgets));}
-    setSS('');if(changed)updateMonthDisplay();if(show)toast('✅ Datos actualizados');return true;
+    if(data.debts){debts=data.debts;localStorage.setItem('fp_debts',JSON.stringify(debts));changed=true;}
+    
+    setSS('');
+    if(changed){ updateMonthDisplay(); renderDebts(); } 
+    if(show)toast('✅ Datos actualizados');
+    return true;
   }catch(e){setSS('er');if(show)toast('⚠️ Sin conexión — datos locales');return false;}
 }
+
 async function syncData(action,payload){
   if(!sheetUrl)return;setSS('sy');
   try{await postToSheets({action,data:payload});setSS('');}
   catch(e){setSS('er');const q=JSON.parse(localStorage.getItem('fp_sync_queue')||'[]');q.push({action,payload,ts:Date.now()});localStorage.setItem('fp_sync_queue',JSON.stringify(q));}
 }
+
 async function retryQueue(){
   if(!sheetUrl)return;const q=JSON.parse(localStorage.getItem('fp_sync_queue')||'[]');if(!q.length)return;
   const rem=[];for(const item of q){try{await postToSheets({action:item.action,data:item.payload});}catch(e){rem.push(item);}}
   localStorage.setItem('fp_sync_queue',JSON.stringify(rem));
   if(q.length!==rem.length)toast('✅ '+(q.length-rem.length)+' movimientos sincronizados');
 }
+
 async function forceSyncToSheets(){
   if(!sheetUrl){toast('⚠️ Sin URL configurada');return;}setSS('sy');toast('⬆️ Subiendo...');
-  try{await postToSheets({action:'sync_all',data:{transactions:txs,categories:cats,budgets}});setSS('');toast('✅ Datos subidos');setTimeout(()=>loadFromSheets(false),2000);}
+  try{await postToSheets({action:'sync_all',data:{transactions:txs,categories:cats,budgets,debts}});setSS('');toast('✅ Datos subidos');setTimeout(()=>loadFromSheets(false),2000);}
   catch(e){setSS('er');toast('❌ Error — revisa tu conexión');}
 }
 
@@ -645,6 +651,7 @@ function openDebtModal(id) {
   document.getElementById('modal-debt').classList.add('mon');
 }
 function closeDebtModal() { document.getElementById('modal-debt').classList.remove('mon'); editDebtId = null; }
+
 function saveDebt() {
   const name = document.getElementById('debt-name').value.trim();
   const original = parseFloat(document.getElementById('debt-original').value)||0;
@@ -666,12 +673,19 @@ function saveDebt() {
   if(editDebtId) { debts = debts.map(d => d.id===editDebtId ? debt : d); }
   else { debts.push(debt); }
   localStorage.setItem('fp_debts', JSON.stringify(debts));
+  
+  syncData('save_debt', debt);
+
   closeDebtModal(); renderDebts(); toast('✅ Deuda guardada');
 }
+
 function deleteDebt(id) {
   if(!confirm('¿Eliminar esta deuda? (El historial de movimientos no se borrará)')) return;
   debts = debts.filter(d => d.id !== id);
   localStorage.setItem('fp_debts', JSON.stringify(debts));
+  
+  syncData('delete_debt', { id });
+
   renderDebts(); toast('🗑 Deuda eliminada');
 }
 
@@ -773,5 +787,33 @@ function renderDebts() {
   if(dtEl) dtEl.textContent = fmt(totalRem);
 }
 
-// ═══ UTILS ═══
-function clearData(){if(!confirm('¿Borrar TODOS los datos?'))return;['fp_txs','fp_cats','fp_budgets','fp_url','fp_name','fp_goal','fp_taxpct','fp_sync_queue','fp_payments','fp_dark','fp_debts'].forEach(k=>localStorage.removeItem(k));location.reload();}
+// ═══ UTILS & SECURITY ═══
+function clearData() {
+  let storedPin = localStorage.getItem('fp_del_pin');
+  
+  // Paso 1: Si no hay clave, forzar al usuario a configurarla
+  if (!storedPin) {
+    let newPin = prompt('🔒 SEGURIDAD: Crea una clave o PIN nuevo para proteger tus datos de borrados accidentales:');
+    if (!newPin || newPin.trim() === '') {
+      toast('⚠️ Cancelado: Debes configurar una clave primero.');
+      return;
+    }
+    localStorage.setItem('fp_del_pin', newPin.trim());
+    toast('✅ Clave guardada. Ahora vuelve a intentar borrar.');
+    return;
+  }
+
+  // Paso 2: Si ya hay clave, pedirla para continuar
+  let enteredPin = prompt('🔒 Introduce tu clave de seguridad para autorizar el borrado de TODOS los datos:');
+  if (enteredPin !== storedPin) {
+    toast('❌ Clave incorrecta. Borrado cancelado.');
+    return;
+  }
+
+  // Paso 3: Confirmación final
+  if(!confirm('🚨 ¿Estás ABSOLUTAMENTE SEGURO? Se borrará todo tu progreso local y se reiniciará la app.')) return;
+  
+  // Borrado
+  ['fp_txs','fp_cats','fp_budgets','fp_url','fp_name','fp_goal','fp_taxpct','fp_sync_queue','fp_payments','fp_dark','fp_debts','fp_del_pin'].forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
