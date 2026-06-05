@@ -1,244 +1,347 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Finanzas">
-<link rel="apple-touch-icon" href="assets/icon.png">
-<link rel="icon" type="image/png" href="assets/icon.png">
-<title>Finanzas Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="css/app.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Finanzas">
+  <link rel="apple-touch-icon" href="assets/icon.png">
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  <title>Finanzas Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-<!-- LOADING -->
+
 <div id="loading-screen">
   <div class="loading-logo">
-    <svg viewBox="0 0 44 44" fill="none"><rect x="4" y="28" width="7" height="12" rx="2" fill="#D18F77"/><rect x="14" y="22" width="7" height="18" rx="2" fill="#D4AC5B"/><rect x="24" y="14" width="7" height="26" rx="2" fill="#5A7D5F"/><rect x="34" y="8" width="7" height="32" rx="2" fill="#5C7B89"/><path d="M7.5 24 L17.5 18 L27.5 10 L37.5 4" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <img src="assets/icon.png" alt="Logo" onerror="this.style.display='none'">
   </div>
   <div class="loading-title">Finanzas Pro</div>
-  <div class="loading-sub" id="loading-status">Cargando...</div>
-  <div class="loading-bar-bg"><div class="loading-bar-fill"></div></div>
-  <div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+  <div class="loading-sub" id="loading-status">0%</div>
+  <div class="loading-bar-bg">
+    <div class="loading-bar-fill"></div>
+  </div>
+  <div class="loading-dots">
+    <div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div>
+  </div>
 </div>
 
-<!-- INICIO -->
 <div id="v-home" class="view on">
   <div class="hdr">
-    <div class="hdr-left-space"><div class="sdot" id="sdot" style="margin-top:4px"></div></div>
-    <div class="hdr-center"><div class="month-pill"><button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button><span class="mn" id="mn-home" onclick="openCal()">Jun 2026</span><button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button></div></div>
-    <div class="hdr-settings-btn" onclick="switchView('settings')"><i class="fa-solid fa-gear"></i></div>
-  </div>
-  <div class="sa hs">
-    <div class="kpi-row mb12">
-      <div class="kpi-card inc"><div class="kpi-lbl">Ingresos</div><div class="kpi-val inc" id="sc-inc">$0</div><div class="kpi-diff" id="sd-inc">—</div></div>
-      <div class="kpi-card exp"><div class="kpi-lbl">Gastos</div><div class="kpi-val exp" id="sc-exp">$0</div><div class="kpi-diff" id="sd-exp">—</div></div>
+    <div style="display:flex;align-items:center;gap:8px;width:38px">
+      <div id="sdot" class="sdot"></div>
     </div>
-    <div class="balance-row">
-      <div class="bal-card" id="gap-card"><div class="bal-lbl">Disponible</div><div class="bal-val" id="sc-gap">$0</div><div class="bal-sub" id="sc-gap-sub" style="color:var(--t2)">Ingresos − Gastos</div></div>
-      <div class="bal-card sav">
-        <div style="flex:1"><div class="bal-lbl">Guardado</div><div class="bal-val" style="color:var(--green)" id="sc-sav">$0</div><div class="bal-sub" style="color:var(--t2)" id="sc-rate">Meta: $2,000</div></div>
-        <div><div class="mini-donut" id="mini-donut" style="background:conic-gradient(var(--green) 0%,#E8E6DF 0%)"><div class="mini-donut-inner"><div class="mini-donut-pct" id="mini-donut-pct">0%</div></div></div></div>
+    <div class="hdr-center">
+      <div class="month-pill" onclick="openCal()">
+        <button onclick="changeMonth(-1); event.stopPropagation()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="mn" id="mn-home">Cargando...</div>
+        <button onclick="changeMonth(1); event.stopPropagation()"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
     </div>
-    <div class="card cp mb12"><div class="ct">Gastos por Categoría</div><div id="home-cats"><div class="skel" style="height:12px;margin-bottom:8px"></div><div class="skel" style="height:12px;margin-bottom:8px;width:80%"></div><div class="skel" style="height:12px;width:60%"></div></div></div>
-    <div class="card cp mb12" id="sav-by-cat-card" style="display:none"><div class="ct">Ahorros Guardados</div><div id="sav-by-cat"></div></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 2px">
-      <span style="font-size:18px;font-weight:900">Movimientos</span>
-      <span id="h-count" style="font-size:11px;font-weight:700;color:var(--t2);background:rgba(44,40,37,.08);padding:3px 10px;border-radius:50px">0</span>
+    <button class="hdr-settings-btn" onclick="switchView('settings')"><i class="fa-solid fa-gear"></i></button>
+  </div>
+
+  <div class="sa hs">
+    <div class="balance-row">
+      <div class="bal-card gap-pos" id="gap-card">
+        <div class="bal-lbl">Balance Neto</div>
+        <div class="bal-val" id="sc-gap">$0</div>
+        <div class="bal-sub" id="sc-gap-sub">Disponible</div>
+      </div>
+      <div class="bal-card sav">
+        <div class="mini-donut" id="mini-donut"><div class="mini-donut-inner"><span class="mini-donut-pct" id="mini-donut-pct">0%</span></div></div>
+        <div>
+          <div class="bal-lbl">Ahorro</div>
+          <div class="bal-val" id="sc-sav" style="font-size:16px">$0</div>
+          <div class="bal-sub" id="sc-rate">Meta: $0</div>
+        </div>
+      </div>
     </div>
-    <div id="h-list"><div class="card cp" style="text-align:center;padding:32px"><div class="skel" style="height:14px;margin-bottom:10px"></div><div class="skel" style="height:14px;width:70%;margin:0 auto"></div></div></div>
+
+    <div class="kpi-row">
+      <div class="kpi-card inc">
+        <div class="kpi-lbl">Ingresos</div>
+        <div class="bal-val" id="sc-inc" style="font-size:18px">$0</div>
+        <div class="kpi-diff good" id="sd-inc" style="margin-top:5px">0</div>
+      </div>
+      <div class="kpi-card exp">
+        <div class="kpi-lbl">Gastos</div>
+        <div class="bal-val" id="sc-exp" style="font-size:18px">$0</div>
+        <div class="kpi-diff bad" id="sd-exp" style="margin-top:5px">0</div>
+      </div>
+    </div>
+
+    <div class="card mb12">
+      <div class="cp">
+        <div class="ct">Gastos por Categoría</div>
+        <div id="home-cats"></div>
+      </div>
+    </div>
+
+    <div class="card mb16" id="sav-by-cat-card" style="display:none">
+      <div class="cp">
+        <div class="ct">Ahorro por Subcategoría</div>
+        <div id="sav-by-cat"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 4px 10px;">
+      <h3 style="font-size:14px;font-weight:800;">Movimientos</h3>
+      <span style="font-size:11px;font-weight:700;color:var(--t2);background:var(--card);padding:4px 10px;border-radius:50px;border:1px solid var(--bdr)" id="h-count">0</span>
+    </div>
+    <div id="h-list" style="padding-bottom:10px"></div>
   </div>
 </div>
 
-<!-- REPORTES -->
 <div id="v-reports" class="view">
-  <div class="hdr"><div class="hdr-left-space"></div><div class="hdr-center"><div class="month-pill"><button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button><span class="mn" id="mn-rep" onclick="openCal()">Jun 2026</span><button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button></div></div><div style="width:36px"></div></div>
+  <div class="hdr">
+    <div class="hdr-left-space"></div>
+    <div class="hdr-center">
+      <div class="month-pill" onclick="openCal()">
+        <button onclick="changeMonth(-1); event.stopPropagation()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="mn" id="mn-rep">Cargando...</div>
+        <button onclick="changeMonth(1); event.stopPropagation()"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+    <button class="hdr-settings-btn" onclick="switchView('settings')"><i class="fa-solid fa-gear"></i></button>
+  </div>
   <div class="sa hs">
-    <div style="font-size:20px;font-weight:900;margin-bottom:12px;padding:0 2px">Reportes</div>
-    <div class="ptabs"><button class="ptab on" onclick="setPeriod('month',this)">Por Mes</button><button class="ptab" onclick="setPeriod('week',this)">Semana</button><button class="ptab" onclick="setPeriod('year',this)">Año</button><button class="ptab" onclick="setPeriod('day',this)">Por Día</button></div>
-    <div class="card cp mb12"><div class="ct" id="r-title">Ingresos vs Gastos</div><div class="cwrap"><canvas id="rChart"></canvas></div></div>
-    <div class="card cp mb12"><div class="ct">Resumen</div><div class="rsum-row"><span style="font-size:13px;color:var(--t2);font-weight:500">Ingresos</span><span style="font-size:13px;font-weight:800;color:var(--green)" id="r-inc">$0</span></div><div class="rsum-row"><span style="font-size:13px;color:var(--t2);font-weight:500">Gastos</span><span style="font-size:13px;font-weight:800;color:var(--terra)" id="r-exp">$0</span></div><div class="rsum-row" style="border-bottom:none"><span style="font-size:13px;color:var(--t2);font-weight:500">Disponible</span><span style="font-size:13px;font-weight:800" id="r-sav">$0</span></div></div>
-    <div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;padding:0 2px;margin-bottom:8px">Resumen por Mes — toca para detalles</div>
-    <div id="month-cards-list" class="mb12"></div>
-    <div class="card cp mb12"><div class="ct">Ahorro Guardado por Mes (Savings)</div><div id="monthly-savings-table"></div></div>
-    <div class="card cp mb12"><div class="ct">Gastos por Categoría</div><div id="r-cats"></div></div>
+    <div class="ptabs">
+      <button class="ptab on" onclick="setPeriod('month',this)">Mes</button>
+      <button class="ptab" onclick="setPeriod('week',this)">Semana</button>
+      <button class="ptab" onclick="setPeriod('day',this)">Día</button>
+      <button class="ptab" onclick="setPeriod('year',this)">Año</button>
+    </div>
+    
+    <div class="card mb12">
+      <div class="cp">
+        <div class="ct" id="r-title">Por Día del Mes</div>
+        <div class="cwrap"><canvas id="rChart"></canvas></div>
+        <div style="margin-top:16px">
+          <div class="rsum-row"><span style="font-size:12px;font-weight:700;color:var(--t2)">Ingresos</span><span style="font-size:14px;font-weight:900;color:var(--t1)" id="r-inc">$0</span></div>
+          <div class="rsum-row"><span style="font-size:12px;font-weight:700;color:var(--t2)">Gastos</span><span style="font-size:14px;font-weight:900;color:var(--t1)" id="r-exp">$0</span></div>
+          <div class="rsum-row"><span style="font-size:12px;font-weight:700;color:var(--t2)">Neto</span><span style="font-size:14px;font-weight:900;color:var(--t1)" id="r-sav">$0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb12">
+      <div class="cp">
+        <div class="ct">Ahorro Mensual (Año Actual)</div>
+        <div id="monthly-savings-table"></div>
+      </div>
+    </div>
+
+    <div class="card mb12">
+      <div class="cp">
+        <div class="ct">Desglose de Gastos</div>
+        <div id="r-cats"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- PRESUPUESTO -->
 <div id="v-budget" class="view">
-  <div class="hdr"><div class="hdr-left-space"></div><div class="hdr-center"><div class="month-pill"><button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button><span class="mn" id="mn-bud" onclick="openCal()">Jun 2026</span><button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button></div></div><button onclick="toggleEditBud()" id="edit-bud-btn" style="font-size:12px;font-weight:700;color:var(--blue);border:1px solid rgba(92,123,137,.25);background:rgba(92,123,137,.08);padding:6px 12px;border-radius:8px;cursor:pointer">Editar</button></div>
+  <div class="hdr">
+    <div class="hdr-left-space"></div>
+    <div class="hdr-center">
+      <div class="month-pill" onclick="openCal()">
+        <button onclick="changeMonth(-1); event.stopPropagation()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="mn" id="mn-bud">Cargando...</div>
+        <button onclick="changeMonth(1); event.stopPropagation()"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+    <button class="hdr-settings-btn" onclick="switchView('settings')"><i class="fa-solid fa-gear"></i></button>
+  </div>
   <div class="sa hs">
-    <div style="font-size:22px;font-weight:900;margin-bottom:4px;padding:0 2px">Presupuestos</div>
-    <div style="font-size:12px;color:var(--t2);margin-bottom:12px;font-weight:500;padding:0 2px" id="bud-sub">Topes de Junio 2026</div>
-    <div id="bud-health" class="bh-card ok"><div style="font-size:26px" id="bh-ico">🏆</div><div><div style="font-size:15px;font-weight:800" id="bh-title">Salud Financiera</div><div style="font-size:12px;opacity:.7;margin-top:1px;font-weight:500" id="bh-sub">Saludable</div></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div>
+        <h3 style="font-size:16px;font-weight:800">Presupuestos</h3>
+        <p style="font-size:11px;color:var(--t2);font-weight:500;margin-top:2px" id="bud-sub">Topes del mes</p>
+      </div>
+      <button id="edit-bud-btn" onclick="toggleEditBud()" style="font-size:12px;font-weight:700;color:var(--c2);border:none;background:rgba(15,42,29,.08);padding:6px 12px;border-radius:50px;cursor:pointer">Editar</button>
+    </div>
+    <div id="bud-health" class="bh-card ok">
+      <div style="font-size:24px" id="bh-ico">🏆</div>
+      <div><div style="font-size:13px;font-weight:800;color:var(--t1)" id="bh-title">Salud Financiera</div><div style="font-size:11px;color:var(--t2);font-weight:600;margin-top:2px" id="bh-sub">Saludable</div></div>
+    </div>
     <div id="bud-list"></div>
   </div>
 </div>
 
-<!-- TAXES -->
 <div id="v-taxes" class="view">
-  <div class="hdr"><div class="hdr-left-space"></div><div class="hdr-center"><span style="font-size:16px;font-weight:900">Taxes 1099</span></div><div style="width:36px"></div></div>
+  <div class="hdr">
+    <div class="hdr-left-space"></div>
+    <div class="hdr-center"><span style="font-size:16px;font-weight:800;font-family:'Sora',sans-serif">Reporte Taxes</span></div>
+    <button class="hdr-settings-btn" onclick="switchView('settings')"><i class="fa-solid fa-gear"></i></button>
+  </div>
   <div class="sa hs">
-    <div class="tax-big mb12"><div class="tax-lbl">Reserva Sugerida · <span id="tax-year">2026</span></div><div class="tax-val" id="tax-total">$0.00</div></div>
-    <div class="card cp mb12">
-      <div class="tax-row"><span style="font-size:13px;color:var(--t2);font-weight:500">Ingresos Brutos</span><span style="font-size:13px;font-weight:800;color:var(--green)" id="tax-inc">$0</span></div>
-      <div class="tax-row"><span style="font-size:13px;color:var(--t2);font-weight:500">Gastos Deducibles</span><span style="font-size:13px;font-weight:800;color:var(--terra)" id="tax-exp">-$0</span></div>
-      <div class="tax-row" style="border-bottom:none"><span style="font-size:13px;font-weight:800;color:var(--t1)">Beneficio Neto</span><span style="font-size:13px;font-weight:900;color:var(--green)" id="tax-net">$0</span></div>
+    <div class="tax-big">
+      <div class="tax-lbl">Reserva Sugerida (<span id="tax-year">2024</span>)</div>
+      <div class="tax-val" id="tax-total">$0.00</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:12px">
+        <span style="font-size:10px;font-weight:700;color:rgba(227,238,212,.7)">TASA ESTIMADA %</span>
+        <input type="number" id="inp-taxpct" onchange="calcTaxes()" style="width:50px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:6px;padding:4px;font-size:12px;font-weight:800;text-align:center;outline:none" value="20">
+      </div>
     </div>
-    <div class="card cp mb12"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600;color:var(--t2)">Tasa de retención</span><div style="display:flex;align-items:center;gap:4px"><input type="number" id="inp-taxpct" value="20" onchange="calcTaxes()" style="width:44px;font-size:18px;font-weight:900;border:none;outline:none;background:transparent;text-align:right;color:var(--t1);font-family:inherit"><span style="font-size:13px;font-weight:700;color:var(--t2)">%</span></div></div></div>
-    <div class="card mb12"><div style="padding:14px 15px;border-bottom:1px solid var(--bdr)"><div style="font-size:10px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.08em">Categorías Deducibles</div></div><div id="deduct-list"></div></div>
-    <div class="card cp mb12"><div class="ct">Desglose Deducible</div><div id="tax-breakdown"></div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <button onclick="exportCSV()" style="padding:14px;border-radius:var(--r);border:1.5px solid var(--bdr);background:var(--card);font-size:13px;font-weight:700;color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><i class="fa-solid fa-file-csv"></i>CSV</button>
-      <button onclick="exportTaxReport()" style="padding:14px;border-radius:var(--r);border:none;background:var(--gold);font-size:13px;font-weight:800;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 3px 10px rgba(212,172,91,.35)"><i class="fa-solid fa-file-invoice-dollar"></i>Reporte</button>
+    <div class="card mb12">
+      <div class="cp" style="padding:15px 20px">
+        <div class="tax-row"><span style="font-size:12px;font-weight:600;color:var(--t2)">Ingresos Totales</span><span style="font-size:14px;font-weight:800;color:var(--t1)" id="tax-inc">$0</span></div>
+        <div class="tax-row"><span style="font-size:12px;font-weight:600;color:var(--t2)">Gastos Totales</span><span style="font-size:14px;font-weight:800;color:var(--gray)" id="tax-exp">-$0</span></div>
+        <div class="tax-row"><span style="font-size:12px;font-weight:600;color:var(--t2)">Ingreso Neto Est.</span><span style="font-size:14px;font-weight:900;color:var(--t1)" id="tax-net">$0</span></div>
+      </div>
     </div>
+    <div class="card mb12">
+      <div class="cp" style="padding:16px 20px">
+        <div class="ct" style="margin-bottom:14px">Categorías Deducibles (W-9 / 1099)</div>
+        <div id="deduct-list" style="margin:0 -20px"></div>
+      </div>
+    </div>
+    <div class="card mb12">
+      <div class="cp" style="padding:16px 20px">
+        <div class="ct" style="margin-bottom:14px">Resumen de Deducciones</div>
+        <div id="tax-breakdown"></div>
+      </div>
+    </div>
+    <button onclick="exportTaxReport()" class="sbtn" style="margin:20px 0 10px;width:100%;background:var(--grad-main)"><i class="fa-solid fa-file-pdf" style="margin-right:8px"></i>Exportar Documento CPA</button>
   </div>
 </div>
 
-<!-- AJUSTES -->
-<div id="v-settings" class="view">
-  <div class="hdr"><div class="hdr-left-space"></div><div class="hdr-center"><span style="font-size:16px;font-weight:900">Ajustes</span></div><div style="width:36px"></div></div>
-  <div class="sa hs" style="padding-top:8px">
-    <div class="sgrp-title" style="margin-bottom:7px">Cuenta</div>
-    <div class="card mb16">
-      <div class="srow" onclick="promptName()"><div class="sico" style="background:#E8F0E9;color:var(--green)"><i class="fa-solid fa-user"></i></div><div class="srow-info"><h4>Nombre</h4></div><span class="srow-val" id="sv-name">Angelo</span><i class="fa-solid fa-chevron-right chev"></i></div>
-      <div class="srow" onclick="promptGoal()"><div class="sico" style="background:#F0EDE8;color:var(--terra)"><i class="fa-solid fa-bullseye"></i></div><div class="srow-info"><h4>Meta de ahorro mensual</h4></div><span class="srow-val" id="sv-goal">$2,000</span><i class="fa-solid fa-chevron-right chev"></i></div>
-      <div class="srow" onclick="toggleDark()"><div class="sico" style="background:#1a1a2e;color:#a0a0c0"><i class="fa-solid fa-moon"></i></div><div class="srow-info"><h4>Modo Oscuro</h4><p>Cambia la apariencia de la app</p></div><button id="dark-toggle" class="tw off" onclick="event.stopPropagation();toggleDark()"></button></div>
-      <div class="srow" onclick="openPayMgr()"><div class="sico" style="background:#EAF0F5;color:var(--blue)"><i class="fa-solid fa-credit-card"></i></div><div class="srow-info"><h4>Métodos de Pago</h4><p>Gestiona tus formas de pago</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
-    </div>
-    <div class="sgrp-title" style="margin-bottom:7px">Google Sheets</div>
-    <div class="card mb16">
-      <div class="srow" onclick="openSheetsModal()"><div class="sico" style="background:#E8F0E9;color:var(--green)"><i class="fa-brands fa-google"></i></div><div class="srow-info"><h4>Configurar Sheets</h4><p id="sv-sheets-url">Conectado</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
-      <div class="srow" onclick="forceSyncToSheets()"><div class="sico" style="background:#EAF0F5;color:var(--blue)"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="srow-info"><h4>Subir todos los datos</h4></div><i class="fa-solid fa-chevron-right chev"></i></div>
-      <div class="srow" onclick="loadFromSheets(true)"><div class="sico" style="background:#F5F0E8;color:var(--gold)"><i class="fa-solid fa-cloud-arrow-down"></i></div><div class="srow-info"><h4>Descargar desde Sheets</h4></div><i class="fa-solid fa-chevron-right chev"></i></div>
-    </div>
-    <div class="sgrp-title" style="margin-bottom:7px">Datos</div>
-    <div class="card mb16">
-      <div class="srow" onclick="openCatMgr()"><div class="sico" style="background:#F0E8F5;color:var(--purp)"><i class="fa-solid fa-layer-group"></i></div><div class="srow-info"><h4>Gestionar Categorías</h4></div><i class="fa-solid fa-chevron-right chev"></i></div>
-      <div class="srow" onclick="exportCSV()"><div class="sico" style="background:#E8F0E9;color:var(--green)"><i class="fa-solid fa-file-csv"></i></div><div class="srow-info"><h4>Exportar CSV Completo</h4></div><i class="fa-solid fa-chevron-right chev"></i></div>
-      <div class="srow" onclick="clearData()"><div class="sico" style="background:#F5E8E8;color:var(--terra)"><i class="fa-solid fa-trash"></i></div><div class="srow-info"><h4 style="color:var(--terra)">Borrar datos locales</h4></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- NAV -->
-<nav class="nav">
-  <button class="nb on" id="nav-home" onclick="switchView('home')"><i class="fa-solid fa-house"></i><span>Inicio</span></button>
-  <button class="nb" id="nav-reports" onclick="switchView('reports')"><i class="fa-solid fa-chart-bar"></i><span>Reportes</span></button>
-  <div class="nav-spacer"></div>
-  <button class="nb" id="nav-debts" onclick="switchView('debts')"><i class="fa-solid fa-credit-card"></i><span>Deudas</span></button>
-  <button class="nb" id="nav-taxes" onclick="switchView('taxes')"><i class="fa-solid fa-receipt"></i><span>Taxes</span></button>
-</nav>
-<button id="fab" onclick="openModal()"><i class="fa-solid fa-plus"></i></button>
-<div id="toast"></div>
-
-<!-- MODAL TX -->
-<div id="modal-tx"><div class="mbg" onclick="closeModal()"></div><div class="msh">
-  <div class="dpill"></div>
-  <div class="mhdr"><button class="mc" onclick="closeModal()">Cancelar</button><span class="mttl" id="mttl-tx">Nuevo Movimiento</span><div style="width:70px"></div></div>
-  <div class="seg"><label class="slbl ai" id="lbl-i"><input type="radio" name="tt" value="Ingreso" checked onchange="onTC()" style="display:none"><i class="fa-solid fa-arrow-up" style="font-size:10px;margin-right:3px"></i>Ingreso</label><label class="slbl" id="lbl-e"><input type="radio" name="tt" value="Gasto" onchange="onTC()" style="display:none"><i class="fa-solid fa-arrow-down" style="font-size:10px;margin-right:3px"></i>Gasto</label></div>
-  <div class="awrap"><span class="asym">$</span><input type="number" class="ainp" id="txAmt" placeholder="0.00" step="0.01" inputmode="decimal"></div>
-  <div style="padding:12px 16px 0;font-size:10px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.07em">Categoría</div>
-  <div class="catg" id="cat-grid"></div>
-  <!-- SUBCATEGORY GRID -->
-  <div class="sub-sec" id="sub-sec">
-    <div class="sub-sec-lbl">Subcategoría</div>
-    <div class="sub-grid" id="sub-grid"></div>
-  </div>
-  <!-- PAYMENT METHOD -->
-  <div class="pay-sec">
-    <div class="pay-sec-lbl">Método de Pago</div>
-    <div class="pay-grid" id="pay-grid-modal"></div>
-  </div>
-  <div class="frows">
-    <div class="fr"><span class="fl"><i class="fa-regular fa-calendar"></i>Fecha</span><input type="date" id="txDate" class="fc"></div>
-    <div class="fr" style="border-bottom:none"><span class="fl"><i class="fa-regular fa-comment"></i>Nota</span><input type="text" id="txNote" class="fc" placeholder="Opcional..."></div>
-  </div>
-  <button class="sbtn" onclick="saveTx()">Guardar Movimiento</button>
-</div></div>
-
-<!-- MODAL EDITAR -->
-<div id="modal-edit"><div class="mbg" onclick="closeEditModal()"></div><div class="msh">
-  <div class="dpill"></div>
-  <div class="mhdr"><button class="mc" onclick="closeEditModal()">Cancelar</button><span class="mttl">Editar Monto</span><button class="ms-green" onclick="saveEdit()">Guardar</button></div>
-  <div style="padding:18px 16px"><input type="hidden" id="edit-id"><p style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Nuevo monto</p><input type="number" class="einp" id="edit-amt" step="0.01" placeholder="0.00" inputmode="decimal"><div style="margin-top:12px;background:var(--bg);border-radius:var(--rs);padding:12px;font-size:12px;color:var(--t2);line-height:1.6;font-weight:500"><i class="fa-solid fa-lock" style="margin-right:5px;color:var(--t3)"></i>Solo el monto puede editarse.</div></div>
-</div></div>
-
-<!-- MODAL CATS -->
-<div id="modal-cats"><div class="mbg" onclick="closeCatMgr()"></div><div class="msh" style="height:88dvh;display:flex;flex-direction:column">
-  <div class="dpill"></div>
-  <div class="mhdr"><button class="mc" onclick="closeCatMgr()">Cerrar</button><span class="mttl">Categorías</span><div style="width:60px"></div></div>
-  <div style="display:flex;background:#E8E6DF;border-radius:10px;padding:3px;margin:10px 16px;gap:2px;flex-shrink:0"><button id="cmt-g" onclick="renderCatMgr('Gasto')" style="flex:1;padding:9px;border-radius:8px;border:none;background:var(--card);color:var(--terra);font-size:13px;font-weight:800;cursor:pointer">Gastos</button><button id="cmt-i" onclick="renderCatMgr('Ingreso')" style="flex:1;padding:9px;border-radius:8px;border:none;background:transparent;color:var(--t2);font-size:13px;font-weight:700;cursor:pointer">Ingresos</button></div>
-  <div style="flex:1;overflow-y:auto;padding:0 16px;-webkit-overflow-scrolling:touch" id="cat-editor"></div>
-  <div style="padding:12px 16px;border-top:1px solid var(--bdr);flex-shrink:0"><button onclick="promptNewCat()" style="width:100%;padding:13px;border-radius:var(--rs);border:1.5px dashed var(--bdr);background:transparent;font-size:13px;font-weight:700;color:var(--t2);cursor:pointer"><i class="fa-solid fa-plus" style="margin-right:5px"></i>Nueva Categoría</button></div>
-</div></div>
-
-<!-- MODAL MÉTODOS DE PAGO -->
-<div id="modal-pay"><div class="mbg" onclick="closePayMgr()"></div><div class="msh">
-  <div class="dpill"></div>
-  <div class="mhdr"><button class="mc" onclick="closePayMgr()">Cerrar</button><span class="mttl">Métodos de Pago</span><div style="width:60px"></div></div>
-  <div style="padding:14px 16px 4px;font-size:12px;color:var(--t2);font-weight:500">Tus métodos guardados. Los que tú agregues los puedes borrar.</div>
-  <div style="padding:0 16px 8px" id="pay-mgr-list"></div>
-  <div style="padding:12px 16px;border-top:1px solid var(--bdr)">
-    <div style="font-size:10px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Agregar nuevo método</div>
-    <div style="display:flex;gap:8px">
-      <input type="text" id="new-pay-inp" placeholder="Ej. Zelle, Venmo, Cash App..." style="flex:1;border:1.5px solid var(--bdr);border-radius:var(--rs);padding:11px 12px;font-size:13px;outline:none;font-family:inherit;color:var(--t1);background:var(--card)">
-      <button onclick="addPayMethod()" style="padding:11px 16px;border-radius:var(--rs);border:none;background:var(--green);color:#fff;font-size:13px;font-weight:800;cursor:pointer">Agregar</button>
-    </div>
-  </div>
-</div></div>
-
-<!-- MODAL SHEETS -->
-<div id="modal-sheets"><div class="mbg" onclick="closeSheetsModal()"></div><div class="msh">
-  <div class="dpill"></div>
-  <div class="mhdr"><button class="mc" onclick="closeSheetsModal()">Cancelar</button><span class="mttl">Google Sheets</span><button class="ms-green" onclick="saveSheetUrl()">Guardar</button></div>
-  <div style="padding:18px 16px"><p style="font-size:13px;color:var(--t2);margin-bottom:12px;line-height:1.65;font-weight:500">Pega la URL de tu Google Apps Script para sincronización automática.</p><input type="url" class="url-inp" id="sheet-url" placeholder="https://script.google.com/macros/s/.../exec"></div>
-</div></div>
-
-<!-- MODAL CAL -->
-<div id="modal-cal"><div class="mbg" onclick="closeCal()"></div><div class="msh" style="background:var(--bg)">
-  <div class="dpill"></div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 12px;border-bottom:1px solid var(--bdr)">
-    <button onclick="changeCalYear(-1)" style="border:1px solid var(--bdr);background:var(--card);border-radius:9px;width:32px;height:32px;cursor:pointer;color:var(--t2)"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
-    <span style="font-size:16px;font-weight:900" id="cal-yr">2026</span>
-    <button onclick="changeCalYear(1)" style="border:1px solid var(--bdr);background:var(--card);border-radius:9px;width:32px;height:32px;cursor:pointer;color:var(--t2)"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:13px 13px calc(13px + var(--sab))" id="cal-grid"></div>
-</div></div>
-
-<script src="js/app.js"></script>
-
-<!-- DEBTS VIEW -->
 <div id="v-debts" class="view">
   <div class="hdr">
     <div class="hdr-left-space"></div>
     <div class="hdr-center"><span style="font-size:16px;font-weight:800;font-family:'Sora',sans-serif">Deudas & Préstamos</span></div>
-    <button onclick="openDebtModal()" style="font-size:12px;font-weight:700;color:#8B5CF6;border:1px solid rgba(139,92,246,.25);background:rgba(139,92,246,.08);padding:6px 12px;border-radius:50px;cursor:pointer">+ Nueva</button>
+    <button onclick="openDebtModal()" style="font-size:12px;font-weight:700;color:var(--c1);border:1px solid rgba(15,42,29,.25);background:rgba(15,42,29,.08);padding:6px 12px;border-radius:50px;cursor:pointer">+ Nueva</button>
   </div>
   <div class="sa hs">
-    <div style="background:linear-gradient(135deg,#8B5CF6,#EC4899);border-radius:22px;padding:22px 20px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(139,92,246,.38)">
+    <div style="background:var(--grad-main);border-radius:22px;padding:22px 20px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 12px 30px rgba(15,42,29,.25)">
       <div style="position:absolute;top:-40px;right:-40px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.1)"></div>
-      <div style="font-size:10px;color:rgba(255,255,255,.55);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-family:'Sora',sans-serif">Total Adeudado</div>
-      <div style="font-size:38px;font-weight:800;color:#fff;letter-spacing:-.03em;font-family:'Sora',sans-serif" id="debt-total-remaining">$0</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:4px;font-weight:500">Suma de saldos pendientes</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-family:'Sora',sans-serif">Total Adeudado</div>
+      <div style="font-size:38px;font-weight:800;color:#ffffff;letter-spacing:-.03em;font-family:'Sora',sans-serif" id="debt-total-remaining">$0</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;font-weight:500">Suma de saldos pendientes</div>
     </div>
-    <div id="debt-list">
-      <div style="text-align:center;padding:48px 0">
-        <div style="font-size:40px;margin-bottom:12px">💳</div>
-        <p style="font-size:14px;font-weight:700;color:var(--t2)">Sin deudas registradas</p>
-        <p style="font-size:12px;color:var(--t3);margin-top:5px">Toca + Nueva para agregar</p>
-      </div>
-    </div>
+    <div id="debt-list"></div>
   </div>
 </div>
 
-<!-- DEBT MODAL -->
+<div id="v-settings" class="view">
+  <div class="hdr">
+    <div class="hdr-left-space"></div>
+    <div class="hdr-center"><span style="font-size:16px;font-weight:800;font-family:'Sora',sans-serif">Ajustes</span></div>
+    <div class="hdr-left-space"></div>
+  </div>
+  <div class="sa hs">
+    <div style="text-align:center;padding:10px 0 24px">
+      <div style="width:72px;height:72px;border-radius:22px;background:var(--grad-main);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;color:var(--c5);font-size:28px;font-weight:900;box-shadow:0 8px 24px rgba(15,42,29,.25)">FP</div>
+      <h2 style="font-size:18px;font-weight:800" id="sv-name">Usuario</h2>
+      <p style="font-size:12px;color:var(--t2);font-weight:500;margin-top:2px">Finanzas Pro v3.0</p>
+    </div>
+
+    <div class="sgrp-title">Cuenta & App</div>
+    <div class="card mb16">
+      <div class="srow" onclick="promptName()"><div class="sico" style="background:rgba(15,42,29,.08);color:var(--c1)"><i class="fa-regular fa-user"></i></div><div class="srow-info"><h4>Tu Nombre</h4><p>Personaliza tu app</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
+      <div class="srow" onclick="toggleDark()"><div class="sico" style="background:rgba(15,42,29,.08);color:var(--c1)"><i class="fa-regular fa-moon"></i></div><div class="srow-info"><h4>Modo Oscuro</h4><p>Cambiar tema visual</p></div><button id="dark-toggle" class="tw off"></button></div>
+      <div class="srow" onclick="openSheetsModal()"><div class="sico" style="background:rgba(107,144,113,.15);color:var(--c3)"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="srow-info"><h4>Google Sheets</h4><p id="sv-sheets-url">Sin configurar</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
+    </div>
+
+    <div class="sgrp-title">Finanzas</div>
+    <div class="card mb16">
+      <div class="srow" onclick="promptGoal()"><div class="sico" style="background:rgba(15,42,29,.08);color:var(--c1)"><i class="fa-solid fa-bullseye"></i></div><div class="srow-info"><h4>Meta de Ahorro</h4><p>Objetivo mensual</p></div><div class="srow-val" id="sv-goal">$0</div></div>
+      <div class="srow" onclick="openCatMgr()"><div class="sico" style="background:rgba(15,42,29,.08);color:var(--c1)"><i class="fa-solid fa-layer-group"></i></div><div class="srow-info"><h4>Categorías</h4><p>Gestionar y crear nuevas</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
+      <div class="srow" onclick="openPayMgr()"><div class="sico" style="background:rgba(15,42,29,.08);color:var(--c1)"><i class="fa-regular fa-credit-card"></i></div><div class="srow-info"><h4>Métodos de Pago</h4><p>Cuentas, tarjetas, efectivo</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
+    </div>
+
+    <div class="sgrp-title">Datos</div>
+    <div class="card mb16">
+      <div class="srow" onclick="exportCSV()"><div class="sico" style="background:rgba(15,42,29,.08);color:var(--c1)"><i class="fa-solid fa-file-csv"></i></div><div class="srow-info"><h4>Exportar CSV</h4><p>Para Excel o CPA</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
+      <div class="srow" onclick="forceSyncToSheets()"><div class="sico" style="background:rgba(55,85,52,.1);color:var(--c2)"><i class="fa-solid fa-rotate"></i></div><div class="srow-info"><h4>Forzar Sincronización</h4><p>Subir datos pendientes</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
+      <div class="srow" onclick="clearData()"><div class="sico" style="background:rgba(209,143,119,.15);color:var(--terra)"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="srow-info"><h4>Borrar Datos</h4><p>Reiniciar app a cero</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
+    </div>
+    
+    <div style="text-align:center;padding:20px 0;font-size:10px;color:var(--t3);font-weight:600">Amado Blends / Finanzas Pro<br>Diseñado para iOS & Web</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on" id="nav-home" onclick="switchView('home')"><i class="fa-solid fa-house"></i><span>Inicio</span></button>
+  <button class="nb" id="nav-reports" onclick="switchView('reports')"><i class="fa-solid fa-chart-simple"></i><span>Reportes</span></button>
+  <button class="nb" id="nav-budget" onclick="switchView('budget')"><i class="fa-solid fa-chart-pie"></i><span>Topes</span></button>
+  <div class="nav-spacer"></div>
+  <button class="nb" id="nav-debts" onclick="switchView('debts')"><i class="fa-solid fa-hand-holding-dollar"></i><span>Deudas</span></button>
+  <button class="nb" id="nav-taxes" onclick="switchView('taxes')"><i class="fa-solid fa-file-invoice-dollar"></i><span>Taxes</span></button>
+  <button class="nb" id="nav-settings" onclick="switchView('settings')" style="display:none"><i class="fa-solid fa-gear"></i><span>Más</span></button>
+</div>
+
+<button id="fab" onclick="openModal()"><i class="fa-solid fa-plus"></i></button>
+
+<div id="modal-tx"><div class="mbg" onclick="closeModal()"></div><div class="msh">
+  <div class="dpill"></div>
+  <div class="mhdr"><button class="mc" onclick="closeModal()">Cancelar</button><span class="mttl" id="mttl-tx">Nuevo</span><div style="width:70px"></div></div>
+  <div class="seg">
+    <label class="slbl ai" id="lbl-i"><input type="radio" name="tt" value="Ingreso" checked onchange="onTC()" style="display:none">Ingreso</label>
+    <label class="slbl" id="lbl-e"><input type="radio" name="tt" value="Gasto" onchange="onTC()" style="display:none">Gasto</label>
+  </div>
+  <div class="awrap">
+    <div style="display:flex;align-items:center;justify-content:center"><span class="asym">$</span><input type="number" id="txAmt" class="ainp" placeholder="0" inputmode="decimal"></div>
+  </div>
+  <div class="catg" id="cat-grid"></div>
+  <div class="sub-sec" id="sub-sec"><div class="sub-sec-lbl">Subcategoría</div><div class="sub-grid" id="sub-grid"></div></div>
+  <div class="pay-sec"><div class="pay-sec-lbl">Método de pago</div><div class="pay-grid" id="pay-grid-modal"></div></div>
+  <div class="frows">
+    <div class="fr"><span class="fl"><i class="fa-regular fa-calendar"></i>Fecha</span><input type="date" id="txDate" class="fc"></div>
+    <div class="fr" style="border-bottom:none"><span class="fl"><i class="fa-regular fa-comment"></i>Nota</span><input type="text" id="txNote" class="fc" placeholder="Opcional..."></div>
+  </div>
+  <button class="sbtn" onclick="saveTx()">Guardar</button>
+</div></div>
+
+<div id="modal-pay"><div class="mbg" onclick="closePayMgr()"></div><div class="msh">
+  <div class="dpill"></div>
+  <div class="mhdr"><button class="mc" onclick="closePayMgr()">Cerrar</button><span class="mttl">Métodos de Pago</span><div style="width:60px"></div></div>
+  <div style="padding:16px"><div style="display:flex;gap:8px"><input type="text" id="new-pay-inp" class="einp" style="padding:10px;font-size:14px;border-radius:10px" placeholder="Ej. Zelle Negocio..."><button class="ms-blue" style="border-radius:10px;padding:0 20px" onclick="addPayMethod()">Añadir</button></div></div>
+  <div id="pay-mgr-list" style="padding:0 16px 16px"></div>
+</div></div>
+
+<div id="modal-cats"><div class="mbg" onclick="closeCatMgr()"></div><div class="msh">
+  <div class="dpill"></div>
+  <div class="mhdr"><button class="mc" onclick="closeCatMgr()">Cerrar</button><span class="mttl">Categorías</span><button class="mc" style="color:var(--c1);font-weight:800" onclick="promptNewCat()"><i class="fa-solid fa-plus"></i></button></div>
+  <div style="display:flex;background:rgba(15,42,29,.08);padding:3px;border-radius:10px;margin:16px"><button id="cmt-g" onclick="renderCatMgr('Gasto')">Gastos</button><button id="cmt-i" onclick="renderCatMgr('Ingreso')">Ingresos</button></div>
+  <div id="cat-editor" style="padding:0 16px 16px"></div>
+</div></div>
+
+<div id="modal-cal"><div class="mbg" onclick="closeCal()"></div><div class="msh">
+  <div class="dpill"></div>
+  <div class="mhdr">
+    <button class="mc" onclick="changeCalYear(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+    <span class="mttl" id="cal-yr">2024</span>
+    <button class="mc" onclick="changeCalYear(1)"><i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px" id="cal-grid"></div>
+</div></div>
+
+<div id="modal-sheets"><div class="mbg" onclick="closeSheetsModal()"></div><div class="msh">
+  <div class="dpill"></div>
+  <div class="mhdr"><button class="mc" onclick="closeSheetsModal()">Cerrar</button><span class="mttl">Google Sheets</span><div style="width:60px"></div></div>
+  <div style="padding:20px 16px">
+    <p style="font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:16px">Conecta tu Web App URL de Google Apps Script para respaldar tus datos en la nube.</p>
+    <input type="text" id="sheet-url" class="url-inp" placeholder="https://script.google.com/macros/s/...">
+    <button class="sbtn" style="margin:20px 0 0;width:100%" onclick="saveSheetUrl()">Vincular URL</button>
+  </div>
+</div></div>
+
+<div id="modal-edit"><div class="mbg" onclick="closeEditModal()"></div><div class="msh" style="border-radius:24px 24px 0 0">
+  <div class="dpill"></div>
+  <div class="mhdr"><button class="mc" onclick="closeEditModal()">Cancelar</button><span class="mttl">Editar Monto</span><div style="width:70px"></div></div>
+  <div style="padding:20px 16px">
+    <input type="hidden" id="edit-id">
+    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:20px"><span class="asym">$</span><input type="number" id="edit-amt" class="ainp" inputmode="decimal"></div>
+    <button class="sbtn" style="margin:0;width:100%" onclick="saveEdit()">Actualizar Monto</button>
+  </div>
+</div></div>
+
 <div id="modal-debt"><div class="mbg" onclick="closeDebtModal()"></div><div class="msh">
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closeDebtModal()">Cancelar</button><span class="mttl" id="debt-modal-title">Nueva Deuda</span><div style="width:70px"></div></div>
@@ -251,7 +354,11 @@
     <div class="fr"><span class="fl"><i class="fa-regular fa-calendar"></i>Fecha inicio</span><input type="date" id="debt-start" class="fc"></div>
     <div class="fr" style="border-bottom:none"><span class="fl"><i class="fa-regular fa-comment"></i>Nota</span><input type="text" id="debt-note" class="fc" placeholder="Opcional..."></div>
   </div>
-  <button class="sbtn" style="background:linear-gradient(135deg,#8B5CF6,#EC4899);box-shadow:0 6px 20px rgba(139,92,246,.4)" onclick="saveDebt()">Guardar Deuda</button>
+  <button class="sbtn" style="background:var(--grad-main);box-shadow:0 6px 20px rgba(15,42,29,.25)" onclick="saveDebt()">Guardar Deuda</button>
 </div></div>
+
+<div id="toast"></div>
+
+<script src="js/app.js"></script>
 </body>
 </html>
