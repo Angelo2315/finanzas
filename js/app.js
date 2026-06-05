@@ -64,12 +64,10 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 // ═══ DARK MODE ═══
-function applyDark(){
   document.body.classList.toggle('dark',darkMode);
   const tw=document.getElementById('dark-toggle');
   if(tw)tw.className='tw '+(darkMode?'on':'off');
 }
-function toggleDark(){
   darkMode=!darkMode;
   localStorage.setItem('fp_dark',darkMode?'1':'0');
   applyDark();
@@ -323,21 +321,18 @@ function selectCat(key,btn){
   } else {sec.style.display='none';}
 }
 
-function selectSub(s,btn,color){
   selSub=s;
   document.querySelectorAll('.sbtns').forEach(b=>{b.style.borderColor='var(--bdr)';b.style.background='var(--bg)';b.style.color='var(--t2)';});
   btn.style.borderColor=color||'var(--green)';btn.style.background=(color||'#5A7D5F')+'18';btn.style.color=color||'var(--green)';
 }
 
 // Payment grid in modal
-function renderPayGridModal(){
   const grid=document.getElementById('pay-grid-modal');
   grid.innerHTML=payments.map(p=>{
     const isSel=p===selPay;const ico=PAY_ICONS[p]||'💰';
     return`<button class="pbtn${isSel?' sel':''}" onclick="selectPayModal('${p}',this)" style="${isSel?'border-color:var(--green);background:rgba(90,125,95,.1);color:var(--green)':''}"><span class="pbtn-ico">${ico}</span><span>${p}</span></button>`;
   }).join('');
 }
-function selectPayModal(p,btn){
   selPay=p;
   document.querySelectorAll('.pbtn').forEach(b=>{b.classList.remove('sel');b.style='';});
   btn.classList.add('sel');btn.style='border-color:var(--green);background:rgba(90,125,95,.1);color:var(--green)';
@@ -352,9 +347,6 @@ function saveTx(){
 }
 
 // ═══ PAYMENT MANAGER ═══
-function openPayMgr(){renderPayMgrList();document.getElementById('modal-pay').classList.add('mon');}
-function closePayMgr(){document.getElementById('modal-pay').classList.remove('mon');}
-function renderPayMgrList(){
   const list=document.getElementById('pay-mgr-list');
   list.innerHTML=payments.map((p,i)=>{
     const ico=PAY_ICONS[p]||'💰';const isDefault=DEF_PAYS.includes(p);
@@ -365,13 +357,11 @@ function renderPayMgrList(){
     </div>`;
   }).join('');
 }
-function addPayMethod(){
   const inp=document.getElementById('new-pay-inp');const val=inp.value.trim();
   if(!val){toast('⚠️ Escribe un nombre');return;}if(payments.includes(val)){toast('Ya existe');return;}
   payments.push(val);localStorage.setItem('fp_payments',JSON.stringify(payments));inp.value='';
   renderPayMgrList();renderPayGridModal();toast('✅ Método agregado: '+val);
 }
-function delPay(i){
   if(!confirm(`¿Borrar "${payments[i]}"?`))return;
   payments.splice(i,1);localStorage.setItem('fp_payments',JSON.stringify(payments));
   if(!payments.includes(selPay))selPay=payments[0]||'Efectivo';
@@ -456,7 +446,6 @@ async function forceSyncToSheets(){
 }
 
 // ═══ EXPORT CSV PROFESIONAL ═══
-function exportCSV(){
   const year=curDate.getFullYear(),name=userName||'Cliente',now=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
   const yearTxs=txs.filter(t=>{if(!t||!t.date)return false;return new Date(t.date+'T12:00:00').getFullYear()===year;});
   let totalInc=0,totalExp=0,totalSaved=0,dedTotal=0;const byCat={};
@@ -487,7 +476,6 @@ function exportCSV(){
 }
 
 // ═══ EXPORT TAX REPORT HTML ═══
-function exportTaxReport(){
   const year=curDate.getFullYear(),name=userName||'Cliente',now=new Date().toLocaleDateString('es-US',{year:'numeric',month:'long',day:'numeric'});
   const yearTxs=txs.filter(t=>{if(!t||!t.date)return false;return new Date(t.date+'T12:00:00').getFullYear()===year;});
   let inc=0,exp=0,ded=0,saved=0;const dedMap={},incMap={};
