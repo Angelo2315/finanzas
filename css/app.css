@@ -2,7 +2,7 @@
   --sat:env(safe-area-inset-top,59px);
   --sab:env(safe-area-inset-bottom,34px);
 
-  /* PALETA EXACTA DE LA IMAGEN */
+  /* PALETA EXACTA PANTONE PERCH */
   --c1: #0F2A1D; /* Verde más oscuro / Fuerte */
   --c2: #375534; /* Verde oscuro */
   --c3: #6B9071; /* Verde medio */
@@ -19,7 +19,7 @@
   --t3: var(--c3);
   --t4: var(--c4);
 
-  /* Lógica financiera (Mantenida discretamente para indicadores) */
+  /* Lógica financiera */
   --terra: #D18F77; 
   --gray: #8C867F;
   
@@ -48,6 +48,7 @@ body.dark {
 }
 
 body.dark .nav{background:rgba(15,42,29,.97);}
+body.dark .nav::before {background: var(--c2);}
 body.dark .catbar-bg{background:rgba(227,238,212,.1);}
 body.dark .bbar{background:rgba(227,238,212,.1);}
 body.dark .rcat-bg{background:rgba(227,238,212,.1);}
@@ -136,11 +137,6 @@ body{font-family:'Sora','Inter',-apple-system,sans-serif;background:var(--bg);co
 .sdot{width:8px;height:8px;border-radius:50%;background:var(--c3);transition:background .3s;flex-shrink:0;}
 .sdot.sy{background:var(--c2);animation:bl 1s infinite;}.sdot.er{background:var(--terra);}
 @keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
-
-/* SCROLL (Aumentamos el espacio inferior para que no tape contenido el menú flotante) */
-.sa{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:10px 16px calc(115px + var(--sab));}
-/* SKELETON */
-.skel{background:linear-gradient(90deg,rgba(15,42,29,.05) 25%,rgba(15,42,29,.1) 50%,rgba(15,42,29,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px;}
 
 /* CARDS */
 .card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);box-shadow:var(--sh);}
@@ -239,14 +235,18 @@ body{font-family:'Sora','Inter',-apple-system,sans-serif;background:var(--bg);co
 .tax-lbl{font-size:10px;color:rgba(227,238,212,.7);font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:4px;}
 .tax-val{font-size:36px;}
 .tax-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--bdr);}.tax-row:last-child{border-bottom:none;}
+
+/* TOGGLES / SWITCHES */
 .tw{width:42px;height:25px;border-radius:13px;position:relative;cursor:pointer;transition:background .28s;border:none;flex-shrink:0;}
 .tw.on{background:var(--c1);}.tw.off{background:var(--c3);}
 .tw::after{content:'';position:absolute;width:21px;height:21px;border-radius:50%;background:var(--card);top:2px;left:2px;transition:transform .28s;box-shadow:0 1px 3px rgba(15,42,29,.2);}
 .tw.on::after{transform:translateX(17px);}
 
 /* =========================================
-   NAV (Navegación Flotante con Hueco)
+   SCROLL & NAV (Navegación Flotante Notch)
 ========================================= */
+.sa{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:10px 16px calc(115px + var(--sab));}
+
 .nav {
     position: fixed;
     bottom: calc(24px + var(--sab));
@@ -260,11 +260,9 @@ body{font-family:'Sora','Inter',-apple-system,sans-serif;background:var(--bg);co
     height: 70px;
     padding: 0 10px;
     z-index: 100;
-    /* Usamos drop-shadow en lugar de box-shadow para que la sombra respete el hueco */
     filter: drop-shadow(0 10px 24px rgba(15,42,29,0.15));
 }
 
-/* La magia del hueco curvo (Notch) usando una máscara */
 .nav::before {
     content: '';
     position: absolute;
@@ -276,12 +274,8 @@ body{font-family:'Sora','Inter',-apple-system,sans-serif;background:var(--bg);co
     z-index: -1;
 }
 
-/* Ajuste de sombra para el Modo Oscuro */
 body.dark .nav { filter: drop-shadow(0 10px 24px rgba(0,0,0,0.5)); }
 
-/* =========================================
-   BOTONES DE NAVEGACIÓN
-========================================= */
 .nb {
     display: flex;
     flex-direction: column;
@@ -293,7 +287,7 @@ body.dark .nav { filter: drop-shadow(0 10px 24px rgba(0,0,0,0.5)); }
     border: none;
     background: transparent;
     cursor: pointer;
-    color: var(--t3); /* Color gris/verde medio para inactivos */
+    color: var(--t3); 
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -308,38 +302,32 @@ body.dark .nav { filter: drop-shadow(0 10px 24px rgba(0,0,0,0.5)); }
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Estado ACTIVO (El botón presionado) */
 .nb.on {
-    color: var(--t1); /* Color principal oscuro (#0F2A1D) */
+    color: var(--t1); 
 }
 
 .nb.on i {
-    transform: scale(1.25) translateY(-2px); /* El ícono crece y se eleva */
+    transform: scale(1.25) translateY(-2px); 
 }
 
 .nb.on span {
     font-weight: 800;
 }
 
-/* Espacio vacío en el medio para que repose el botón central */
 .nav-spacer {
     width: 80px; 
     flex-shrink: 0;
 }
 
-/* =========================================
-   FAB (Botón Central Flotante +)
-========================================= */
 #fab {
     position: fixed;
-    /* Ubicación exacta para que encaje como un rompecabezas en el hueco del nav */
     bottom: calc(77px + var(--sab));
     left: 50%;
     transform: translateX(-50%);
     width: 58px;
     height: 58px;
     border-radius: 50%;
-    background: var(--c1); /* Verde oscuro más fuerte */
+    background: var(--c1); 
     border: none;
     cursor: pointer;
     display: flex;
@@ -356,7 +344,9 @@ body.dark .nav { filter: drop-shadow(0 10px 24px rgba(0,0,0,0.5)); }
     transform: translateX(-50%) scale(0.9);
 }
 
-/* MODAL */
+/* =========================================
+   MODALES Y FORMULARIOS
+========================================= */
 .mbg{display:none;position:fixed;inset:0;background:rgba(15,42,29,.55);backdrop-filter:blur(4px);z-index:200;opacity:0;transition:opacity .3s;}
 .msh{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:430px;background:var(--bg);border-radius:20px 20px 0 0;z-index:201;visibility:hidden;transition:transform .36s cubic-bezier(.32,.72,0,1),visibility .36s;max-height:95dvh;overflow-y:auto;padding-bottom:max(var(--sab),18px);-webkit-overflow-scrolling:touch;}
 .mon .mbg{display:block;opacity:1;}.mon .msh{transform:translateX(-50%) translateY(0);visibility:visible;}
@@ -365,7 +355,6 @@ body.dark .nav { filter: drop-shadow(0 10px 24px rgba(0,0,0,0.5)); }
 .mttl{font-size:15px;font-weight:800;}.mc{font-size:14px;font-weight:600;border:none;background:transparent;color:var(--t2);cursor:pointer;}
 .ms-blue{font-size:14px;font-weight:800;border:none;background:var(--grad-main);color:var(--c5);cursor:pointer;padding:8px 18px;border-radius:50px;}
 
-/* FORM */
 .seg{display:flex;background:rgba(15,42,29,.08);border-radius:9px;padding:3px;margin:13px 16px 0;gap:2px;}
 .slbl{flex:1;text-align:center;padding:9px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;color:var(--t2);transition:all .18s;}
 .slbl.ai{background:var(--card);color:var(--terra);box-shadow:var(--sh);}
@@ -416,5 +405,5 @@ select.fc option{background:var(--card);color:var(--t1);}
 .cmc-diff{font-size:8px;font-weight:700;margin-top:1px;}
 
 /* TOAST */
-#toast{position:fixed;bottom:calc(75px + var(--sab));left:50%;transform:translateX(-50%) translateY(10px);background:rgba(15,42,29,.92);color:var(--c5);padding:10px 20px;border-radius:50px;font-size:12px;font-weight:700;opacity:0;transition:all .28s;z-index:9999;pointer-events:none;white-space:nowrap;}
+#toast{position:fixed;bottom:calc(105px + var(--sab));left:50%;transform:translateX(-50%) translateY(10px);background:rgba(15,42,29,.92);color:var(--c5);padding:10px 20px;border-radius:50px;font-size:12px;font-weight:700;opacity:0;transition:all .28s;z-index:9999;pointer-events:none;white-space:nowrap;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
