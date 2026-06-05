@@ -16,6 +16,7 @@
 </head>
 <body>
 
+<!-- LOADING SCREEN -->
 <div id="loading-screen">
   <div class="loading-logo">
     <img src="assets/icon.png" alt="Logo" onerror="this.style.display='none'">
@@ -30,6 +31,7 @@
   </div>
 </div>
 
+<!-- HOME VIEW -->
 <div id="v-home" class="view on">
   <div class="hdr">
     <div style="display:flex;align-items:center;gap:8px;width:38px">
@@ -97,6 +99,7 @@
   </div>
 </div>
 
+<!-- REPORTS VIEW -->
 <div id="v-reports" class="view">
   <div class="hdr">
     <div class="hdr-left-space"></div>
@@ -145,6 +148,7 @@
   </div>
 </div>
 
+<!-- BUDGET VIEW -->
 <div id="v-budget" class="view">
   <div class="hdr">
     <div class="hdr-left-space"></div>
@@ -173,6 +177,7 @@
   </div>
 </div>
 
+<!-- TAXES VIEW -->
 <div id="v-taxes" class="view">
   <div class="hdr">
     <div class="hdr-left-space"></div>
@@ -211,6 +216,7 @@
   </div>
 </div>
 
+<!-- DEBTS VIEW -->
 <div id="v-debts" class="view">
   <div class="hdr">
     <div class="hdr-left-space"></div>
@@ -228,6 +234,7 @@
   </div>
 </div>
 
+<!-- SETTINGS VIEW -->
 <div id="v-settings" class="view">
   <div class="hdr">
     <div class="hdr-left-space"></div>
@@ -266,18 +273,24 @@
   </div>
 </div>
 
+<!-- FLOATING NOTCH NAV -->
 <div class="nav">
   <button class="nb on" id="nav-home" onclick="switchView('home')"><i class="fa-solid fa-house"></i><span>Inicio</span></button>
   <button class="nb" id="nav-reports" onclick="switchView('reports')"><i class="fa-solid fa-chart-simple"></i><span>Reportes</span></button>
-  <button class="nb" id="nav-budget" onclick="switchView('budget')"><i class="fa-solid fa-chart-pie"></i><span>Topes</span></button>
+  
   <div class="nav-spacer"></div>
+  
   <button class="nb" id="nav-debts" onclick="switchView('debts')"><i class="fa-solid fa-hand-holding-dollar"></i><span>Deudas</span></button>
   <button class="nb" id="nav-taxes" onclick="switchView('taxes')"><i class="fa-solid fa-file-invoice-dollar"></i><span>Taxes</span></button>
-  <button class="nb" id="nav-settings" onclick="switchView('settings')" style="display:none"><i class="fa-solid fa-gear"></i><span>Más</span></button>
+  
+  <button class="nb" id="nav-budget" onclick="switchView('budget')" style="display:none"></button>
+  <button class="nb" id="nav-settings" onclick="switchView('settings')" style="display:none"></button>
 </div>
 
+<!-- FAB (Botón Central Flotante) -->
 <button id="fab" onclick="openModal()"><i class="fa-solid fa-plus"></i></button>
 
+<!-- MODAL: TX -->
 <div id="modal-tx"><div class="mbg" onclick="closeModal()"></div><div class="msh">
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closeModal()">Cancelar</button><span class="mttl" id="mttl-tx">Nuevo</span><div style="width:70px"></div></div>
@@ -298,6 +311,7 @@
   <button class="sbtn" onclick="saveTx()">Guardar</button>
 </div></div>
 
+<!-- MODAL: PAY MGR -->
 <div id="modal-pay"><div class="mbg" onclick="closePayMgr()"></div><div class="msh">
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closePayMgr()">Cerrar</button><span class="mttl">Métodos de Pago</span><div style="width:60px"></div></div>
@@ -305,6 +319,7 @@
   <div id="pay-mgr-list" style="padding:0 16px 16px"></div>
 </div></div>
 
+<!-- MODAL: CATS -->
 <div id="modal-cats"><div class="mbg" onclick="closeCatMgr()"></div><div class="msh">
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closeCatMgr()">Cerrar</button><span class="mttl">Categorías</span><button class="mc" style="color:var(--c1);font-weight:800" onclick="promptNewCat()"><i class="fa-solid fa-plus"></i></button></div>
@@ -312,6 +327,7 @@
   <div id="cat-editor" style="padding:0 16px 16px"></div>
 </div></div>
 
+<!-- MODAL: CAL -->
 <div id="modal-cal"><div class="mbg" onclick="closeCal()"></div><div class="msh">
   <div class="dpill"></div>
   <div class="mhdr">
@@ -322,6 +338,7 @@
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px" id="cal-grid"></div>
 </div></div>
 
+<!-- MODAL: SHEETS -->
 <div id="modal-sheets"><div class="mbg" onclick="closeSheetsModal()"></div><div class="msh">
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closeSheetsModal()">Cerrar</button><span class="mttl">Google Sheets</span><div style="width:60px"></div></div>
@@ -332,6 +349,7 @@
   </div>
 </div></div>
 
+<!-- MODAL: EDIT TX -->
 <div id="modal-edit"><div class="mbg" onclick="closeEditModal()"></div><div class="msh" style="border-radius:24px 24px 0 0">
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closeEditModal()">Cancelar</button><span class="mttl">Editar Monto</span><div style="width:70px"></div></div>
@@ -342,6 +360,7 @@
   </div>
 </div></div>
 
+<!-- MODAL: DEBT -->
 <div id="modal-debt"><div class="mbg" onclick="closeDebtModal()"></div><div class="msh">
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closeDebtModal()">Cancelar</button><span class="mttl" id="debt-modal-title">Nueva Deuda</span><div style="width:70px"></div></div>
@@ -357,6 +376,7 @@
   <button class="sbtn" style="background:var(--grad-main);box-shadow:0 6px 20px rgba(15,42,29,.25)" onclick="saveDebt()">Guardar Deuda</button>
 </div></div>
 
+<!-- TOAST -->
 <div id="toast"></div>
 
 <script src="js/app.js"></script>
