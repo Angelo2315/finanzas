@@ -71,8 +71,14 @@ body{font-family:'Sora','Inter',-apple-system,sans-serif;background:var(--bg);co
 .hs::-webkit-scrollbar{display:none;}.hs{-ms-overflow-style:none;scrollbar-width:none;}
 
 /* FORZAR NÚMEROS AL COLOR MÁS FUERTE */
-.bal-val, .kpi-val, .tax-val, #debt-total-remaining, .bcat-val, .txr-amt, .day-net, .hero-val, .cmc-sav, .debt-stat-val, .asym, .ainp, .einp, .rsum-row span:nth-child(2), .msav-row div:nth-child(3), .sc-inc, .sc-exp {
+.bal-val, .kpi-val, .bcat-val, .txr-amt, .day-net, .hero-val, .cmc-sav, .debt-stat-val, .asym, .ainp, .einp, .rsum-row span:nth-child(2), .msav-row div:nth-child(3), .sc-inc, .sc-exp {
     color: var(--t1) !important;
+    font-weight: 900 !important;
+}
+
+/* EXCEPCIÓN: FORZAR BLANCO EN FONDOS OSCUROS (Taxes y Deudas) */
+.tax-val, #debt-total-remaining {
+    color: #ffffff !important;
     font-weight: 900 !important;
 }
 
@@ -173,24 +179,25 @@ body{font-family:'Sora','Inter',-apple-system,sans-serif;background:var(--bg);co
 .catbar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
 .catbar-amt{font-size:11px;font-weight:800;color:var(--t1);text-align:right;min-width:50px;}
 
-/* TX */
-.day-hdr{display:flex;justify-content:center;flex-direction:column;align-items:center;gap:2px;padding:13px 2px 6px;}
-.day-lbl{font-size:11px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;}
-.day-net{font-size:12px;}
-.txr-wrap{position:relative;margin-bottom:8px;border-radius:var(--rs);overflow:hidden;box-shadow:var(--sh);}
-.txr-hint{position:absolute;inset:0;display:flex;align-items:center;padding:0 18px;border-radius:var(--rs);}
+/* TX (MOVIMIENTOS COMPACTOS Y ELEGANTES) */
+.day-hdr{display:flex;justify-content:center;flex-direction:column;align-items:center;gap:1px;padding:10px 2px 4px;}
+.day-lbl{font-size:10px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;}
+.day-net{font-size:11px;}
+.txr-wrap{position:relative;margin-bottom:6px;border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(15,42,29,.05);}
+.txr-hint{position:absolute;inset:0;display:flex;align-items:center;padding:0 18px;border-radius:12px;}
 .txr-hint.edit{background:var(--c2);justify-content:flex-start;}
 .txr-hint.del{background:var(--c1);justify-content:flex-end;}
-.txr-hint i{color:#fff;font-size:22px;}
-.txr-surface{background:var(--card);border-radius:var(--rs);border:1px solid var(--bdr);transition:transform .25s cubic-bezier(.25,.8,.25,1);will-change:transform;}
-.txr-body{display:flex;align-items:center;padding:12px 13px;gap:11px;}
-.txr-ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.txr-hint i{color:#fff;font-size:18px;}
+.txr-surface{background:var(--card);border-radius:12px;border:1px solid var(--bdr);transition:transform .25s cubic-bezier(.25,.8,.25,1);will-change:transform;}
+.txr-body{display:flex;align-items:center;padding:10px 12px;gap:10px;}
+.txr-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .txr-info{flex:1;min-width:0;}
-.txr-name{font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.txr-meta{font-size:10px;color:var(--t2);font-weight:500;margin-top:1px;}
+.txr-name{font-size:12px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.txr-meta{font-size:9px;color:var(--t2);font-weight:500;margin-top:2px;}
 .txr-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
-.txr-amt{font-size:14px;}
-.txr-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:50px;}
+.txr-amt{font-size:13px;}
+.txr-badge{font-size:8px;font-weight:700;padding:2px 6px;border-radius:50px;}
+.txr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 
 /* BUDGET */
 .bh-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r);margin-bottom:12px;border-left:4px solid var(--c1);}
@@ -231,7 +238,7 @@ body{font-family:'Sora','Inter',-apple-system,sans-serif;background:var(--bg);co
 /* TAXES */
 .tax-big{background:var(--grad-main);border-radius:var(--rx);padding:20px;margin-bottom:12px;position:relative;overflow:hidden;box-shadow:0 12px 30px rgba(15,42,29,.3);}
 .tax-lbl{font-size:10px;color:rgba(227,238,212,.7);font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:4px;}
-.tax-val{font-size:36px;color:var(--c5);}
+.tax-val{font-size:36px;}
 .tax-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--bdr);}.tax-row:last-child{border-bottom:none;}
 .tw{width:42px;height:25px;border-radius:13px;position:relative;cursor:pointer;transition:background .28s;border:none;flex-shrink:0;}
 .tw.on{background:var(--c1);}.tw.off{background:var(--c3);}
