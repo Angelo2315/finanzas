@@ -245,13 +245,81 @@ body{font-family:'Sora','Inter',-apple-system,sans-serif;background:var(--bg);co
 .tw::after{content:'';position:absolute;width:21px;height:21px;border-radius:50%;background:var(--card);top:2px;left:2px;transition:transform .28s;box-shadow:0 1px 3px rgba(15,42,29,.2);}
 .tw.on::after{transform:translateX(17px);}
 
-/* NAV */
-.nav{position:fixed;bottom:0;width:100%;max-width:430px;left:50%;transform:translateX(-50%);background:rgba(227,238,212,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bdr);display:flex;justify-content:space-around;align-items:center;padding-bottom:var(--sab);height:calc(62px + var(--sab));z-index:100;}
-.nb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 14px;border:none;background:transparent;cursor:pointer;color:var(--t2);transition:color .18s;}
-.nb span{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
-.nb i{font-size:20px;}.nb.on{color:var(--t1);}
-.nav-spacer{width:60px;flex-shrink:0;}
+/* NAV (Navegación Fluida Estilo Píldora) */
+.nav {
+    position: fixed; 
+    bottom: 0; 
+    width: 100%; 
+    max-width: 430px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background: rgba(227,238,212,.92); 
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--bdr); 
+    display: flex; 
+    justify-content: space-evenly; /* Distribuye el espacio dinámicamente */
+    align-items: center;
+    padding: 0 8px var(--sab); 
+    height: calc(72px + var(--sab)); /* Un poco más alto para dar respiro */
+    z-index: 100;
+}
 
+.nb {
+    display: flex; 
+    flex-direction: row; /* Elementos en línea */
+    align-items: center; 
+    justify-content: center;
+    height: 46px; 
+    padding: 0 14px; 
+    border: none; 
+    background: transparent;
+    cursor: pointer; 
+    color: var(--t2); 
+    border-radius: 50px;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Efecto rebote suave */
+    overflow: hidden;
+}
+
+.nb span {
+    font-size: 11px; 
+    font-weight: 800;
+    max-width: 0; 
+    opacity: 0; 
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap; 
+    margin-left: 0;
+}
+
+.nb i {
+    font-size: 22px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ESTADO ACTIVO (Presionado / En esa página) */
+.nb.on {
+    background: var(--grad-main); /* Mismo color que el botón '+' */
+    color: var(--c5); /* Letras claras */
+    box-shadow: 0 4px 14px rgba(15,42,29,.25);
+    padding: 0 20px;
+}
+
+.nb.on span {
+    max-width: 80px; /* Ancho suficiente para el texto */
+    opacity: 1; 
+    margin-left: 8px; /* Separa el texto del ícono */
+}
+
+.nb.on i {
+    transform: scale(1.05); /* Agranda ligeramente el ícono */
+}
+
+/* Espaciador central para el botón del '+' */
+.nav-spacer { 
+    width: 58px; 
+    flex-shrink: 0; 
+}
 /* FAB */
 #fab{position:fixed;bottom:calc(30px + var(--sab));left:50%;transform:translateX(-50%);width:58px;height:58px;border-radius:50%;background:var(--grad-main);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--c5);box-shadow:0 0 0 4px var(--bg),0 6px 24px rgba(15,42,29,.4);z-index:101;transition:transform .15s;}
 #fab:active{transform:translateX(-50%) scale(.91);}
