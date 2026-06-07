@@ -35,30 +35,29 @@
   </div>
 
   <div class="sa hs">
-    <div class="balance-row">
+    <div class="home-grid">
       <div class="card-pine" id="gap-card">
-        <div class="bal-lbl text-muted" data-i18n="net_balance">Balance Neto</div>
-        <div class="bal-val" id="sc-gap">$0</div>
-        <div class="bal-sub text-muted" id="sc-gap-sub" data-i18n="available">Disponible</div>
+        <div class="kpi-lbl text-muted" data-i18n="net_balance">Balance Neto</div>
+        <div class="kpi-val" id="sc-gap">$0</div>
+        <div class="kpi-sub text-muted" id="sc-gap-sub" data-i18n="available">Disponible este mes</div>
       </div>
-      <div class="card-beige sav">
-        <div class="mini-donut" id="mini-donut"><div class="mini-donut-inner"><span class="mini-donut-pct" id="mini-donut-pct">0%</span></div></div>
-        <div>
-          <div class="bal-lbl text-muted" data-i18n="savings">Ahorro</div>
-          <div class="bal-val" id="sc-sav" style="font-size:18px">$0</div>
-          <div class="bal-sub text-muted" id="sc-rate">Meta: $0</div>
+      <div class="card-beige" style="display:flex;flex-direction:column;justify-content:space-between">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+            <div class="mini-donut" id="mini-donut"><div class="mini-donut-inner"><span class="mini-donut-pct" id="mini-donut-pct">0%</span></div></div>
+            <div style="text-align:right">
+                <div class="kpi-lbl text-muted" data-i18n="savings">Ahorro</div>
+                <div class="kpi-val" id="sc-sav" style="font-size:20px;margin:0">$0</div>
+            </div>
         </div>
+        <div class="kpi-sub text-muted" id="sc-rate" style="margin-top:10px">Meta: $0</div>
       </div>
-    </div>
-
-    <div class="kpi-row">
       <div class="card-beige">
         <div class="kpi-lbl text-muted" data-i18n="income">Ingresos</div>
-        <div class="kpi-val" id="sc-inc">$0</div>
+        <div class="kpi-val" id="sc-inc" style="margin:0">$0</div>
       </div>
       <div class="card-beige">
         <div class="kpi-lbl text-muted" data-i18n="expenses">Gastos</div>
-        <div class="kpi-val" id="sc-exp">$0</div>
+        <div class="kpi-val" id="sc-exp" style="margin:0">$0</div>
       </div>
     </div>
 
@@ -67,9 +66,9 @@
         <div id="home-cats"></div>
     </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin:28px 4px 16px;">
-      <h3 style="font-size:18px;font-weight:900;color:var(--pine)" data-i18n="transactions">Movimientos</h3>
-      <span style="font-size:12px;font-weight:800;color:var(--white);background:var(--pine);padding:4px 12px;border-radius:50px;" id="h-count">0</span>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:32px 4px 12px;">
+      <h3 style="font-size:20px;font-weight:900;color:var(--pine)" data-i18n="transactions">Movimientos</h3>
+      <span style="font-size:12px;font-weight:900;color:var(--beige);background:var(--pine);padding:6px 12px;border-radius:50px;" id="h-count">0</span>
     </div>
     <div id="h-list" style="padding-bottom:20px"></div>
   </div>
@@ -108,12 +107,12 @@
         <button onclick="changeMonth(1); event.stopPropagation()"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
     </div>
-    <button id="edit-bud-btn" onclick="toggleEditBud()" style="font-size:13px;font-weight:800;color:var(--pine);border:none;background:rgba(0,49,31,.08);padding:8px 16px;border-radius:50px;cursor:pointer" data-i18n="edit">Editar</button>
+    <button id="edit-bud-btn" onclick="toggleEditBud()" style="font-size:13px;font-weight:800;color:var(--pine);border:none;background:var(--beige);padding:8px 16px;border-radius:50px;cursor:pointer" data-i18n="edit">Editar</button>
   </div>
   <div class="sa hs">
     <div style="margin-bottom:20px;padding:0 4px">
       <h3 style="font-size:26px;font-weight:900;color:var(--pine)" data-i18n="nav_budget">Presupuesto</h3>
-      <p style="font-size:13px;color:rgba(0,49,31,.6);font-weight:700;margin-top:4px" id="bud-sub">Límites del mes</p>
+      <p style="font-size:13px;color:var(--t-muted);font-weight:700;margin-top:4px" id="bud-sub">Límites del mes</p>
     </div>
     <div id="bud-list"></div>
   </div>
@@ -129,13 +128,13 @@
     <div style="text-align:center;padding:10px 0 28px">
       <div style="width:72px;height:72px;border-radius:24px;background:var(--pine);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:var(--beige);font-size:28px;font-weight:900;box-shadow:var(--sh)">FP</div>
       <h2 style="font-size:22px;font-weight:900;color:var(--pine)" id="sv-name">Usuario</h2>
-      <p style="font-size:13px;color:rgba(0,49,31,.6);font-weight:700;margin-top:4px">Finanzas Pro v6.0</p>
+      <p style="font-size:13px;color:var(--t-muted);font-weight:700;margin-top:4px">Finanzas Pro v7.0</p>
     </div>
 
     <div class="sgrp-title" data-i18n="modules">Módulos Avanzados</div>
     <div class="card-pine" style="padding:0">
-      <div class="srow" onclick="switchView('debts')"><div class="sico"><i class="fa-solid fa-hand-holding-dollar"></i></div><div class="srow-info"><h4 data-i18n="nav_debts" style="color:var(--beige)">Deudas & Préstamos</h4><p data-i18n="debts_sub">Gestiona tus créditos</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
-      <div class="srow" onclick="switchView('taxes')"><div class="sico"><i class="fa-solid fa-file-invoice-dollar"></i></div><div class="srow-info"><h4 data-i18n="nav_taxes" style="color:var(--beige)">Taxes</h4><p data-i18n="taxes_sub">Deducibles e impuestos</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
+      <div class="srow" onclick="switchView('debts')"><div class="sico"><i class="fa-solid fa-hand-holding-dollar"></i></div><div class="srow-info"><h4 data-i18n="nav_debts" style="color:var(--beige)">Deudas & Préstamos</h4><p data-i18n="debts_sub" class="text-muted">Gestiona tus créditos</p></div><i class="fa-solid fa-chevron-right chev" style="color:var(--c-muted)"></i></div>
+      <div class="srow" onclick="switchView('taxes')"><div class="sico"><i class="fa-solid fa-file-invoice-dollar"></i></div><div class="srow-info"><h4 data-i18n="nav_taxes" style="color:var(--beige)">Taxes</h4><p data-i18n="taxes_sub" class="text-muted">Deducibles e impuestos</p></div><i class="fa-solid fa-chevron-right chev" style="color:var(--c-muted)"></i></div>
     </div>
 
     <div class="sgrp-title" data-i18n="preferences">Preferencias</div>
@@ -149,80 +148,84 @@
 
     <div class="sgrp-title" data-i18n="data_cloud">Datos & Nube</div>
     <div class="card-pine" style="padding:0">
-      <div class="srow" onclick="openSheetsModal()"><div class="sico"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="srow-info"><h4 style="color:var(--beige)">Google Sheets</h4><p id="sv-sheets-url">Sin configurar</p></div></div>
+      <div class="srow" onclick="openSheetsModal()"><div class="sico"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="srow-info"><h4 style="color:var(--beige)">Google Sheets</h4><p id="sv-sheets-url" class="text-muted">Sin configurar</p></div></div>
       <div class="srow" onclick="exportCSV()"><div class="sico"><i class="fa-solid fa-file-csv"></i></div><div class="srow-info"><h4 data-i18n="export_csv" style="color:var(--beige)">Exportar CSV</h4></div></div>
       <div class="srow" onclick="forceSyncToSheets()"><div class="sico"><i class="fa-solid fa-rotate"></i></div><div class="srow-info"><h4 data-i18n="force_sync" style="color:var(--beige)">Forzar Sincronización</h4></div></div>
-      <div class="srow" onclick="clearData()"><div class="sico" style="color:var(--rose);background:rgba(244,63,94,.1)"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="srow-info"><h4 data-i18n="delete_data" style="color:var(--rose)">Borrar Datos</h4></div></div>
+      <div class="srow" onclick="clearData()"><div class="sico" style="color:var(--rose);background:rgba(244,63,94,.15)"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="srow-info"><h4 data-i18n="delete_data" style="color:var(--rose)">Borrar Datos</h4></div></div>
     </div>
   </div>
 </div>
 
 <div id="v-debts" class="view">
   <div class="hdr">
-    <button onclick="switchView('settings')" style="background:transparent;border:none;font-size:20px;color:var(--pine);cursor:pointer;width:38px;text-align:left"><i class="fa-solid fa-arrow-left"></i></button>
+    <button onclick="switchView('settings', 4)" style="background:transparent;border:none;font-size:20px;color:var(--pine);cursor:pointer;width:38px;text-align:left"><i class="fa-solid fa-arrow-left"></i></button>
     <div class="hdr-center"><span style="font-size:18px;font-weight:900;color:var(--pine)" data-i18n="nav_debts">Deudas</span></div>
     <div style="width:38px"></div>
   </div>
   <div class="sa hs">
     <div class="card-pine" style="text-align:center;padding:36px 20px">
-      <div style="font-size:11px;color:var(--c-muted);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px" data-i18n="total_owed">Total Adeudado</div>
+      <div style="font-size:11px;color:rgba(255,247,230,.6);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px" data-i18n="total_owed">Total Adeudado</div>
       <div style="font-size:46px;font-weight:900;color:var(--beige);letter-spacing:-.03em;" id="debt-total-remaining">$0</div>
     </div>
-    <button onclick="openDebtModal()" class="sbtn" style="margin:0 0 24px;width:100%;background:rgba(0,49,31,.08);color:var(--pine);box-shadow:none" data-i18n="new_debt">+ Nueva Deuda</button>
+    <button onclick="openDebtModal()" class="sbtn" style="margin:0 0 24px;width:100%;background:var(--beige);color:var(--pine);box-shadow:none" data-i18n="new_debt">+ Nueva Deuda</button>
     <div id="debt-list"></div>
   </div>
 </div>
 
 <div id="v-taxes" class="view">
   <div class="hdr">
-    <button onclick="switchView('settings')" style="background:transparent;border:none;font-size:20px;color:var(--pine);cursor:pointer;width:38px;text-align:left"><i class="fa-solid fa-arrow-left"></i></button>
+    <button onclick="switchView('settings', 4)" style="background:transparent;border:none;font-size:20px;color:var(--pine);cursor:pointer;width:38px;text-align:left"><i class="fa-solid fa-arrow-left"></i></button>
     <div class="hdr-center"><span style="font-size:18px;font-weight:900;color:var(--pine)" data-i18n="nav_taxes">Taxes</span></div>
     <div style="width:38px"></div>
   </div>
   <div class="sa hs">
     <div class="card-pine" style="text-align:center;padding:36px 20px">
-      <div style="font-size:11px;color:var(--c-muted);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px" data-i18n="suggested_reserve">Reserva Sugerida (<span id="tax-year">2026</span>)</div>
+      <div style="font-size:11px;color:rgba(255,247,230,.6);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px" data-i18n="suggested_reserve">Reserva Sugerida (<span id="tax-year">2026</span>)</div>
       <div id="tax-total" style="font-size:46px;color:var(--beige);font-weight:900;letter-spacing:-.03em">$0.00</div>
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px">
-        <span style="font-size:11px;font-weight:800;color:var(--c-muted)">TASA ESTIMADA %</span>
+        <span style="font-size:11px;font-weight:800;color:rgba(255,247,230,.6)">TASA ESTIMADA %</span>
         <input type="number" id="inp-taxpct" onchange="calcTaxes()" style="width:65px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:var(--beige);border-radius:10px;padding:8px;font-size:16px;font-weight:900;text-align:center;outline:none" value="20">
       </div>
     </div>
     <div class="card-pine">
-      <div class="tax-row" style="display:flex;justify-content:space-between;padding:12px 0"><span style="font-size:13px;font-weight:700;color:var(--c-muted)" data-i18n="gross_income">Ingresos Brutos</span><span style="font-size:15px;font-weight:900;color:var(--beige)" id="tax-inc">$0</span></div>
-      <div class="tax-row" style="display:flex;justify-content:space-between;padding:12px 0"><span style="font-size:13px;font-weight:700;color:var(--c-muted)" data-i18n="deductible_exp">Gastos Deducibles</span><span style="font-size:15px;font-weight:900;color:var(--beige)" id="tax-exp">-$0</span></div>
+      <div class="tax-row" style="display:flex;justify-content:space-between;padding:12px 0"><span style="font-size:13px;font-weight:700;color:rgba(255,247,230,.6)" data-i18n="gross_income">Ingresos Brutos</span><span style="font-size:15px;font-weight:900;color:var(--beige)" id="tax-inc">$0</span></div>
+      <div class="tax-row" style="display:flex;justify-content:space-between;padding:12px 0"><span style="font-size:13px;font-weight:700;color:rgba(255,247,230,.6)" data-i18n="deductible_exp">Gastos Deducibles</span><span style="font-size:15px;font-weight:900;color:var(--beige)" id="tax-exp">-$0</span></div>
       <div class="tax-row" style="display:flex;justify-content:space-between;border:none;margin-top:10px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15)"><span style="font-size:13px;font-weight:800;color:var(--beige)" data-i18n="net_income">Ingreso Neto</span><span style="font-size:18px;font-weight:900;color:var(--beige)" id="tax-net">$0</span></div>
     </div>
-    <div class="card-pine"><div class="ct" data-i18n="deductible_categories">Categorías Deducibles</div><div id="deduct-list"></div></div>
-    <div class="card-pine"><div class="ct" data-i18n="deductions_summary">Resumen Deducciones</div><div id="tax-breakdown"></div></div>
-    <button onclick="exportTaxReport()" class="sbtn" style="margin:0 0 24px;width:100%" data-i18n="export_cpa">Exportar PDF / CPA</button>
+    <div class="card-pine"><div class="ct text-muted" data-i18n="deductible_categories">Categorías Deducibles</div><div id="deduct-list"></div></div>
+    <div class="card-pine"><div class="ct text-muted" data-i18n="deductions_summary">Resumen Deducciones</div><div id="tax-breakdown"></div></div>
+    <button onclick="exportTaxReport()" class="sbtn" style="margin:0 0 24px;width:100%;background:var(--beige);color:var(--pine)" data-i18n="export_cpa">Exportar PDF / CPA</button>
   </div>
 </div>
 
-<div class="nav-shadow-wrapper"></div>
 <div class="nav-container">
-  <button class="nb on" id="nav-home" onclick="switchView('home')">
-    <i class="fa-solid fa-house"></i>
-    <span data-i18n="nav_home">Inicio</span>
-  </button>
-  <button class="nb" id="nav-reports" onclick="switchView('reports')">
-    <i class="fa-solid fa-chart-simple"></i>
-    <span data-i18n="nav_reports">Reportes</span>
+  <div class="nav-indicator" id="nav-indicator"></div>
+  
+  <button class="nb on" id="nav-home" onclick="switchView('home', 0)">
+    <div class="icon"><i class="fa-solid fa-house"></i></div>
+    <span class="text" data-i18n="nav_home">Inicio</span>
   </button>
   
-  <div class="nav-spacer"></div> <button class="nb" id="nav-budget" onclick="switchView('budget')">
-    <i class="fa-solid fa-chart-pie"></i>
-    <span data-i18n="nav_budget">Presupuesto</span>
+  <button class="nb" id="nav-reports" onclick="switchView('reports', 1)">
+    <div class="icon"><i class="fa-solid fa-chart-simple"></i></div>
+    <span class="text" data-i18n="nav_reports">Reportes</span>
   </button>
-  <button class="nb" id="nav-settings" onclick="switchView('settings')">
-    <i class="fa-solid fa-ellipsis"></i>
-    <span data-i18n="nav_more">Más</span>
+  
+  <button class="nb" id="nav-add" onclick="openModalNav(2)">
+    <div class="icon"><i class="fa-solid fa-plus"></i></div>
+    <span class="text" data-i18n="nav_add">Añadir</span>
+  </button>
+  
+  <button class="nb" id="nav-budget" onclick="switchView('budget', 3)">
+    <div class="icon"><i class="fa-solid fa-chart-pie"></i></div>
+    <span class="text" data-i18n="nav_budget">Presupuesto</span>
+  </button>
+  
+  <button class="nb" id="nav-settings" onclick="switchView('settings', 4)">
+    <div class="icon"><i class="fa-solid fa-ellipsis"></i></div>
+    <span class="text" data-i18n="nav_more">Más</span>
   </button>
 </div>
-
-<button class="fab-fixed" onclick="openModal()">
-  <i class="fa-solid fa-plus"></i>
-</button>
 
 <div id="modal-tx"><div class="mbg" onclick="closeModal()"></div><div class="msh">
   <div class="dpill"></div>
@@ -230,7 +233,7 @@
   <div class="seg"><label class="slbl ai" id="lbl-i"><input type="radio" name="tt" value="Ingreso" checked onchange="onTC()" style="display:none">Ingreso</label><label class="slbl" id="lbl-e"><input type="radio" name="tt" value="Gasto" onchange="onTC()" style="display:none">Gasto</label></div>
   <div class="awrap"><span class="asym">$</span><input type="number" id="txAmt" class="ainp" placeholder="0" inputmode="decimal"></div>
   <div class="catg" id="cat-grid"></div>
-  <div class="sub-grid" id="sub-grid" style="display:none;background:rgba(0,49,31,.03);margin:0 24px;border-radius:16px;padding:12px"></div>
+  <div class="sub-grid" id="sub-grid" style="display:none;background:var(--beige);margin:0 24px;border-radius:16px;padding:12px"></div>
   <div class="pay-grid" id="pay-grid-modal"></div>
   <div class="frows">
     <div class="fr"><span class="fl"><i class="fa-regular fa-calendar"></i>Fecha</span><input type="date" id="txDate" class="fc"></div>
@@ -249,7 +252,7 @@
 <div id="modal-cats"><div class="mbg" onclick="closeCatMgr()"></div><div class="msh">
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closeCatMgr()">Cerrar</button><span class="mttl">Categorías</span><button class="mc" style="color:var(--pine);font-weight:900;font-size:18px" onclick="promptNewCat()"><i class="fa-solid fa-plus"></i></button></div>
-  <div style="display:flex;background:var(--bdr);padding:4px;border-radius:14px;margin:20px 24px"><button id="cmt-g" onclick="renderCatMgr('Gasto')" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--pine);color:var(--beige);font-size:13px;font-weight:900;cursor:pointer">Gastos</button><button id="cmt-i" onclick="renderCatMgr('Ingreso')" style="flex:1;padding:12px;border-radius:10px;border:none;background:transparent;color:rgba(0,49,31,.6);font-size:13px;font-weight:900;cursor:pointer">Ingresos</button></div>
+  <div style="display:flex;background:var(--bdr);padding:4px;border-radius:14px;margin:20px 24px"><button id="cmt-g" onclick="renderCatMgr('Gasto')" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--pine);color:var(--beige);font-size:13px;font-weight:900;cursor:pointer">Gastos</button><button id="cmt-i" onclick="renderCatMgr('Ingreso')" style="flex:1;padding:12px;border-radius:10px;border:none;background:transparent;color:var(--t-muted);font-size:13px;font-weight:900;cursor:pointer">Ingresos</button></div>
   <div id="cat-editor" style="padding:0 24px 20px"></div>
 </div></div>
 
