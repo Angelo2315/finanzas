@@ -5,11 +5,11 @@ let sheetUrl=SHEETS_URL||localStorage.getItem('fp_url')||'';
 // ═══ TRANSLATIONS (i18n) ═══
 const i18n = {
   es: {
-    nav_home: 'Inicio', nav_reports: 'Reportes', nav_budget: 'Presupuesto', nav_more: 'Más',
-    net_balance: 'Balance Neto', available: 'Disponible', savings: 'Ahorro', income: 'Ingresos', expenses: 'Gastos',
+    nav_home: 'Inicio', nav_reports: 'Reportes', nav_add: 'Añadir', nav_budget: 'Presupuesto', nav_more: 'Más',
+    net_balance: 'BALANCE NETO', available: 'Disponible este mes', savings: 'AHORRO', income: 'INGRESOS', expenses: 'GASTOS',
     expenses_cat: 'Gastos por Categoría', transactions: 'Movimientos',
     month: 'Mes', week: 'Semana', day: 'Día', year: 'Año',
-    nav_debts: 'Deudas', nav_taxes: 'Taxes', modules: 'Módulos Avanzados', debts_sub: 'Gestiona tus créditos',
+    nav_debts: 'Deudas & Préstamos', nav_taxes: 'Taxes', modules: 'Módulos Avanzados', debts_sub: 'Gestiona tus créditos',
     taxes_sub: 'Deducibles e impuestos', preferences: 'Preferencias', language: 'Idioma / Language', savings_goal: 'Meta de Ahorro',
     categories: 'Categorías', payment_methods: 'Métodos de Pago', your_name: 'Tu Nombre',
     data_cloud: 'Datos & Nube', export_csv: 'Exportar CSV', force_sync: 'Forzar Sincronización', delete_data: 'Borrar Datos',
@@ -18,12 +18,12 @@ const i18n = {
     deductions_summary: 'Resumen Deducciones', export_cpa: 'Exportar PDF / CPA', edit: 'Editar'
   },
   en: {
-    nav_home: 'Home', nav_reports: 'Reports', nav_budget: 'Budget', nav_more: 'More',
-    net_balance: 'Net Balance', available: 'Available', savings: 'Savings', income: 'Income', expenses: 'Expenses',
+    nav_home: 'Home', nav_reports: 'Reports', nav_add: 'Add', nav_budget: 'Budget', nav_more: 'More',
+    net_balance: 'NET BALANCE', available: 'Available this month', savings: 'SAVINGS', income: 'INCOME', expenses: 'EXPENSES',
     expenses_cat: 'Expenses by Category', transactions: 'Transactions',
     month: 'Month', week: 'Week', day: 'Day', year: 'Year',
-    nav_debts: 'Debts', nav_taxes: 'Taxes', modules: 'Advanced Modules', debts_sub: 'Manage your credits',
-    taxes_sub: 'Deductibles and taxes', preferences: 'Preferences', language: 'Language', savings_goal: 'Savings Goal',
+    nav_debts: 'Debts & Loans', nav_taxes: 'Taxes', modules: 'Advanced Modules', debts_sub: 'Manage your credits',
+    taxes_sub: 'Deductibles and taxes', preferences: 'Preferences', language: 'Idioma / Language', savings_goal: 'Savings Goal',
     categories: 'Categories', payment_methods: 'Payment Methods', your_name: 'Your Name',
     data_cloud: 'Data & Cloud', export_csv: 'Export CSV', force_sync: 'Force Sync', delete_data: 'Erase Data',
     total_owed: 'Total Owed', new_debt: '+ New Debt', suggested_reserve: 'Suggested Reserve', gross_income: 'Gross Income',
@@ -53,7 +53,7 @@ let curDate=new Date(),calYear=new Date().getFullYear();
 let catMgrT='Gasto',curType='Ingreso',curPeriod='month',isEditBud=false,rChart=null;
 let selCat='',selSub='',selPay=payments[0]||'Débito';
 let debts = JSON.parse(localStorage.getItem('fp_debts')) || [];
-let editDebtId = null, tt=null;
+let editDebtId = null, tt=null, lastNavIndex = 0;
 
 const MS=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const MSF=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -64,10 +64,9 @@ const fmtK=v=>{const n=Number(v)||0;return Math.abs(n)>=1000?'$'+(n/1000).toFixe
 
 function toast(msg){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800);}
 
-// ═══ INIT & BLINDADO ═══
+// ═══ INIT ═══
 document.addEventListener('DOMContentLoaded', () => {
   applyLang();
-  
   if(document.getElementById('txDate')) document.getElementById('txDate').valueAsDate=new Date();
   if(document.getElementById('sheet-url')) document.getElementById('sheet-url').value=sheetUrl;
   if(document.getElementById('sv-name')) document.getElementById('sv-name').textContent=userName;
@@ -108,18 +107,29 @@ function toggleLang() {
   updateMonthDisplay();
 }
 
-// ═══ NAV BAR ═══
-function switchView(v) {
+// ═══ NAV BAR (NOTCH MÓVIL) ═══
+function switchView(v, index) {
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
   const tgt = document.getElementById('v-'+v);
   if(tgt) tgt.classList.add('on');
   
-  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  const btn = document.getElementById('nav-'+v);
-  if(btn) btn.classList.add('on');
+  if(index !== undefined) {
+    document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+    const btn = document.querySelectorAll('.nb')[index];
+    if(btn) btn.classList.add('on');
+    document.querySelector('.nav-container').style.setProperty('--active-index', index);
+    lastNavIndex = index;
+  }
 
   if(v==='home')renderHome(); if(v==='reports')renderReports();
   if(v==='budget')renderBudget(); if(v==='taxes')renderTaxes(); if(v==='debts')renderDebts();
+}
+
+function openModalNav(index) {
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.nb')[index].classList.add('on');
+  document.querySelector('.nav-container').style.setProperty('--active-index', index);
+  openModal();
 }
 
 function getKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
@@ -168,7 +178,7 @@ function renderHome(){
   const hc=document.getElementById('home-cats'); 
   if(hc) {
     const entries=Object.entries(catSums).sort((a,b)=>b[1]-a[1]);
-    if(!entries.length){hc.innerHTML=`<p style="font-size:12px;color:var(--c-muted);padding:4px 0;font-weight:600">${currentLang==='es'?'Sin gastos este mes':'No expenses this month'}</p>`;}
+    if(!entries.length){hc.innerHTML=`<p style="font-size:12px;color:rgba(255,247,230,.6);padding:4px 0;font-weight:600">${currentLang==='es'?'Sin gastos este mes':'No expenses this month'}</p>`;}
     else{const mx=entries[0][1]||1;hc.innerHTML=entries.map(([cat,amt])=>{return`<div class="catbar"><div class="catbar-name"><span style="margin-right:8px;font-size:8px;color:var(--beige)">●</span>${cat}</div><div class="catbar-bg"><div class="catbar-fill" style="width:${(amt/mx*100).toFixed(0)}%;background:var(--beige)"></div></div><div class="catbar-amt">${fmt(amt)}</div></div>`;}).join('');}
   }
   
@@ -183,7 +193,8 @@ function renderDayList(monthly){
   const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
   
   list.innerHTML=dates.map(ds=>{
-    const d=new Date(ds+'T12:00:00'); const label=`${DAYS[d.getDay()]} ${d.getDate()} ${MS[d.getMonth()]} ${d.getFullYear()}`;
+    const d=new Date(ds+'T12:00:00'); 
+    const label=`${DAYS[d.getDay()]} ${d.getDate()} ${MS[d.getMonth()]} ${d.getFullYear()}`;
     const g=groups[ds]; const dayInc=g.filter(t=>t.type==='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0); const dayExp=g.filter(t=>t.type!=='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0); const dayNet=dayInc-dayExp;
     
     const rows=g.map(tx=>{
@@ -191,15 +202,15 @@ function renderDayList(monthly){
       return`<div class="txr-wrap" id="txw-${tx.id}">
         <div class="txr-hint edit"><i class="fa-solid fa-pen"></i></div>
         <div class="txr-hint del"><i class="fa-solid fa-trash"></i></div>
-        <div class="txr-surface card-pine" id="txs-${tx.id}" style="margin:0;border-radius:var(--rs);padding:0">
+        <div class="txr-surface" id="txs-${tx.id}">
           <div class="txr-body">
             <div class="txr-dot" style="background:${isI?'var(--beige)':'rgba(255,247,230,0.3)'}"></div>
             <div class="txr-info">
-              <div class="txr-name text-highlight">${sub}</div>
-              <div class="txr-meta text-muted">${metaParts.join(' · ')}</div>
+              <div class="txr-name">${sub}</div>
+              <div class="txr-meta">${metaParts.join(' · ')}</div>
             </div>
             <div class="txr-right">
-              <div class="txr-amt text-highlight">${sign}${fmt(Number(tx.amount)||0)}</div>
+              <div class="txr-amt">${sign}${fmt(Number(tx.amount)||0)}</div>
               <div class="txr-badge">${tx.type}</div>
             </div>
           </div>
@@ -211,7 +222,7 @@ function renderDayList(monthly){
   initSwipe();
 }
 
-// CORRECCIÓN SWIPE
+// SWIPE MEJORADO
 function initSwipe(){
   document.querySelectorAll('.txr-wrap').forEach(wrap=>{
     const id=wrap.id.replace('txw-','');const surf=document.getElementById('txs-'+id);if(!surf)return;
@@ -261,7 +272,7 @@ function renderBudget(){
   bl.innerHTML=curr.map((b,i)=>{
     const spent=monthly.filter(tx=>tx.type!=='Ingreso'&&tx.category===b.cat).reduce((s,tx)=>s+(Number(tx.amount)||0),0);
     const raw=b.limit>0?(spent/b.limit)*100:0,pct=Math.min(raw,100);
-    const lf=isEditBud?`<input type="number" value="${b.limit}" onchange="updateBL(${i},this.value)" style="border:1px solid var(--beige);border-radius:8px;padding:6px;font-size:15px;font-weight:900;width:90px;text-align:right;background:rgba(255,247,230,.1);color:var(--beige);outline:none">`:`<div style="font-size:16px;font-weight:900;color:var(--beige)">${fmt(spent)}</div><div style="font-size:10px;color:var(--c-muted);font-weight:700;margin-top:2px">de ${fmt(b.limit)}</div>`;
+    const lf=isEditBud?`<input type="number" value="${b.limit}" onchange="updateBL(${i},this.value)" style="border:1px solid var(--beige);border-radius:8px;padding:6px;font-size:15px;font-weight:900;width:90px;text-align:right;background:rgba(255,247,230,.1);color:var(--beige);outline:none">`:`<div style="font-size:16px;font-weight:900;color:var(--beige)">${fmt(spent)}</div><div style="font-size:10px;color:rgba(255,247,230,.6);font-weight:700;margin-top:2px">de ${fmt(b.limit)}</div>`;
     return`<div class="card-pine" style="margin-bottom:12px;padding:16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="display:flex;align-items:center;gap:12px"><div style="width:38px;height:38px;border-radius:12px;background:rgba(255,247,230,.1);display:flex;align-items:center;justify-content:center;font-size:18px">${CAT_ICONS[b.cat]||'📁'}</div><div><div style="font-size:14px;font-weight:900;color:var(--white)">${b.cat}</div></div></div><div style="text-align:right">${lf}</div></div><div style="height:8px;background:rgba(255,247,230,.15);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--beige)"></div></div></div>`;
   }).join('');
 }
@@ -271,9 +282,6 @@ function updateBL(i,v){getCurrentBudgets()[i].limit=parseFloat(v)||0;}
 function setPeriod(p,btn){curPeriod=p;document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderReports();}
 function renderReports(){
   const mt=getMonthTxs();let inc=0,exp=0,catSums={}; mt.forEach(tx=>{const a=Number(tx.amount)||0;if(tx.type==='Ingreso')inc+=a;else{exp+=a;catSums[tx.category]=(catSums[tx.category]||0)+a;}});
-  
-  const titles={month:currentLang==='es'?'Por Día del Mes':'By Month Day',week:currentLang==='es'?'Últimos 7 Días':'Last 7 Days',year:currentLang==='es'?'Resumen Anual':'Yearly Summary'};
-  const rt=document.getElementById('r-title'); if(rt) rt.textContent=titles[curPeriod] || titles['month'];
   
   const Y=curDate.getFullYear(),M=curDate.getMonth(); let labels=[],incD=[],expD=[];
   if(curPeriod==='month'){const dim=new Date(Y,M+1,0).getDate();for(let d=1;d<=dim;d++){const ds=`${Y}-${String(M+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const dt=txs.filter(t=>t.date===ds);labels.push(d);incD.push(dt.filter(t=>t.type==='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0));expD.push(dt.filter(t=>t.type!=='Ingreso').reduce((s,t)=>s+(Number(t.amount)||0),0));}}
@@ -290,7 +298,7 @@ function renderReports(){
   const rcats=document.getElementById('r-cats'); 
   if(rcats) {
     const entries=Object.entries(catSums).sort((a,b)=>b[1]-a[1]);
-    if(!entries.length){rcats.innerHTML=`<p style="font-size:12px;color:var(--c-muted);padding:4px 0;font-weight:600">${currentLang==='es'?'Sin gastos':'No expenses'}</p>`;}
+    if(!entries.length){rcats.innerHTML=`<p style="font-size:12px;color:rgba(255,247,230,.6);padding:4px 0;font-weight:600">${currentLang==='es'?'Sin gastos':'No expenses'}</p>`;}
     else{const mx=entries[0][1]||1;rcats.innerHTML=entries.map(([cat,amt])=>{return`<div class="catbar"><div class="catbar-name"><span style="margin-right:8px;font-size:8px;color:var(--beige)">●</span>${cat}</div><div class="catbar-bg"><div class="catbar-fill" style="width:${(amt/mx*100).toFixed(0)}%;background:var(--beige)"></div></div><div class="catbar-amt">${fmtK(amt)}</div></div>`;}).join('');}
   }
 }
@@ -313,8 +321,8 @@ function renderTaxes(){
   const bd=document.getElementById('tax-breakdown');
   if(bd) {
     const entries=Object.entries(dedMap).sort((a,b)=>b[1]-a[1]); 
-    if(!entries.length){bd.innerHTML=`<p style="font-size:12px;color:var(--c-muted);padding:6px 0;font-weight:600">${currentLang==='es'?'Sin deducciones':'No deductions'}</p>`;}
-    else{bd.innerHTML=entries.map(([cat,amt])=>`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,247,230,.1)"><span style="font-size:14px;color:var(--c-muted);font-weight:700">${cat}</span><span style="font-size:14px;font-weight:900;color:var(--beige)">${fmt(amt)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:14px 0"><span style="font-size:14px;font-weight:800;color:var(--beige)">Total</span><span style="font-size:16px;font-weight:900;color:var(--white)">${fmt(Object.values(dedMap).reduce((s,v)=>s+v,0))}</span></div>`;}
+    if(!entries.length){bd.innerHTML=`<p style="font-size:12px;color:rgba(255,247,230,.6);padding:6px 0;font-weight:600">${currentLang==='es'?'Sin deducciones':'No deductions'}</p>`;}
+    else{bd.innerHTML=entries.map(([cat,amt])=>`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,247,230,.1)"><span style="font-size:14px;color:rgba(255,247,230,.6);font-weight:700">${cat}</span><span style="font-size:14px;font-weight:900;color:var(--beige)">${fmt(amt)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:14px 0"><span style="font-size:14px;font-weight:800;color:var(--beige)">Total</span><span style="font-size:16px;font-weight:900;color:var(--white)">${fmt(Object.values(dedMap).reduce((s,v)=>s+v,0))}</span></div>`;}
   }
 }
 function calcTaxes(){taxPct=parseFloat(document.getElementById('inp-taxpct').value)||0;localStorage.setItem('fp_taxpct',taxPct);renderTaxes();}
@@ -328,7 +336,13 @@ function openModal(){
   onTC();renderPayGridModal();
   document.getElementById('modal-tx').classList.add('mon');
 }
-function closeModal(){ document.getElementById('modal-tx').classList.remove('mon'); }
+function closeModal(){ 
+  document.getElementById('modal-tx').classList.remove('mon'); 
+  // Return the active indicator to original pos
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.nb')[lastNavIndex].classList.add('on');
+  document.querySelector('.nav-container').style.setProperty('--active-index', lastNavIndex);
+}
 
 function onTC(){
   curType=document.querySelector('input[name="tt"]:checked').value;
@@ -375,7 +389,7 @@ function renderPayMgrList() {
   const list = document.getElementById('pay-mgr-list');
   list.innerHTML = payments.map((p,i) => {
     const ico = PAY_ICONS[p]||'💰'; const delBtn = payments.length > 1 ? `<button onclick="delPay(${i})" style="color:var(--rose);border:none;background:transparent;cursor:pointer;padding:4px 10px;font-size:16px"><i class="fa-solid fa-xmark"></i></button>` : ``;
-    return `<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--bdr)"><div style="width:42px;height:42px;border-radius:14px;background:rgba(0,49,31,.06);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--pine)">${ico}</div><span style="flex:1;font-size:15px;font-weight:800;color:var(--pine)">${p}</span>${delBtn}</div>`;
+    return `<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--bdr)"><div style="width:42px;height:42px;border-radius:14px;background:rgba(0,49,31,.05);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--pine)">${ico}</div><span style="flex:1;font-size:15px;font-weight:800;color:var(--pine)">${p}</span>${delBtn}</div>`;
   }).join('');
 }
 function addPayMethod() {
@@ -519,7 +533,7 @@ function payDebt(id) {
     const d = debts.find(x => x.id === id); if(!d) return;
     if(!cats.Gasto['Deudas']) cats.Gasto['Deudas'] = { color: '#00311F', subs: [], deductible: false };
     if(!cats.Gasto['Deudas'].subs.includes(d.name)) cats.Gasto['Deudas'].subs.push(d.name);
-    openModal(); document.querySelector('input[name="tt"][value="Gasto"]').checked = true; onTC(); 
+    openModalNav(2); document.querySelector('input[name="tt"][value="Gasto"]').checked = true; onTC(); 
     setTimeout(() => { const catBtns = Array.from(document.querySelectorAll('.cbtn')); const deudasBtn = catBtns.find(b => b.textContent.includes('Deudas'));
         if(deudasBtn) { selectCat('Deudas', deudasBtn); setTimeout(() => { const subBtns = Array.from(document.querySelectorAll('.sbtns')); const debtSubBtn = subBtns.find(b => b.textContent.includes(d.name)); if(debtSubBtn) selectSub(d.name, debtSubBtn); document.getElementById('txAmt').focus(); }, 50); }
     }, 50);
