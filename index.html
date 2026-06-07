@@ -4,71 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Finanzas">
   <title>Finanzas Pro</title>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 
 <div id="loading-screen">
-  <div class="apple-pulse-container">
-    <div class="apple-pulse"><i class="fa-solid fa-money-bill-trend-up"></i></div>
-  </div>
+  <div class="neon-spinner"></div>
   <div class="loading-title">Finanzas Pro</div>
 </div>
 
 <div id="v-home" class="view on">
   <div class="hdr">
-    <div style="width:38px"><div id="sdot" class="sdot"></div></div>
-    <div class="hdr-center">
-      <div class="month-pill" onclick="openCal()">
-        <button onclick="changeMonth(-1); event.stopPropagation()"><i class="fa-solid fa-chevron-left"></i></button>
-        <div class="mn" id="mn-home">Cargando...</div>
-        <button onclick="changeMonth(1); event.stopPropagation()"><i class="fa-solid fa-chevron-right"></i></button>
+    <div class="user-profile">
+      <div class="avatar"><i class="fa-solid fa-user"></i></div>
+      <div class="greeting">
+        <span class="lbl-sm" style="margin-bottom:2px" id="mn-home">Good Morning</span>
+        <span style="font-size:16px;font-weight:800" id="sv-name">Usuario</span>
       </div>
     </div>
-    <div style="width:38px"></div>
+    <div class="icon-btn" onclick="openCal()"><i class="fa-regular fa-calendar"></i></div>
   </div>
 
   <div class="sa hs">
-    <div class="home-grid">
-      <div class="card-pine" id="gap-card">
-        <div class="kpi-lbl text-muted" data-i18n="net_balance">Balance Neto</div>
-        <div class="kpi-val" id="sc-gap">$0</div>
-        <div class="kpi-sub text-muted" id="sc-gap-sub" data-i18n="available">Disponible este mes</div>
-      </div>
-      <div class="card-beige" style="display:flex;flex-direction:column;justify-content:space-between">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-            <div class="mini-donut" id="mini-donut"><div class="mini-donut-inner"><span class="mini-donut-pct" id="mini-donut-pct">0%</span></div></div>
-            <div style="text-align:right">
-                <div class="kpi-lbl text-muted" data-i18n="savings">Ahorro</div>
-                <div class="kpi-val" id="sc-sav" style="font-size:20px;margin:0">$0</div>
-            </div>
-        </div>
-        <div class="kpi-sub text-muted" id="sc-rate" style="margin-top:10px">Meta: $0</div>
-      </div>
-      <div class="card-beige">
-        <div class="kpi-lbl text-muted" data-i18n="income">Ingresos</div>
-        <div class="kpi-val" id="sc-inc" style="margin:0">$0</div>
-      </div>
-      <div class="card-beige">
-        <div class="kpi-lbl text-muted" data-i18n="expenses">Gastos</div>
-        <div class="kpi-val" id="sc-exp" style="margin:0">$0</div>
+    <div class="main-card">
+      <div class="lbl-sm" data-i18n="net_balance">Balance Neto</div>
+      <div class="val-big" id="sc-gap">$0.00</div>
+      <div style="font-size:12px;color:rgba(20,20,30,0.7);font-weight:600;margin-top:12px;display:flex;align-items:center;gap:6px">
+        <i class="fa-solid fa-circle-check"></i> <span data-i18n="available">Disponible</span>
       </div>
     </div>
 
-    <div class="card-pine">
-        <div class="ct" data-i18n="expenses_cat">Gastos por Categoría</div>
-        <div id="home-cats"></div>
+    <div class="quick-actions">
+      <div class="action-btn" onclick="openModalNav('Ingreso')"><i class="fa-solid fa-arrow-up" style="color:var(--success)"></i><span data-i18n="income">Ingreso</span></div>
+      <div class="action-btn" onclick="openModalNav('Gasto')"><i class="fa-solid fa-arrow-down" style="color:var(--danger)"></i><span data-i18n="expenses">Gasto</span></div>
+      <div class="action-btn" onclick="switchView('debts')"><i class="fa-solid fa-hand-holding-dollar"></i><span data-i18n="nav_debts">Deuda</span></div>
+      <div class="action-btn" onclick="switchView('budget')"><i class="fa-solid fa-bullseye"></i><span data-i18n="nav_budget">Tope</span></div>
     </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin:32px 4px 12px;">
-      <h3 style="font-size:20px;font-weight:900;color:var(--pine)" data-i18n="transactions">Movimientos</h3>
-      <span style="font-size:12px;font-weight:900;color:var(--beige);background:var(--pine);padding:6px 12px;border-radius:50px;" id="h-count">0</span>
+    <div class="grid-2">
+      <div class="stat-card">
+        <i class="fa-solid fa-wallet"></i>
+        <div class="lbl-sm" data-i18n="income">Ingresos</div>
+        <div style="font-size:16px;font-weight:800;color:var(--text-main);margin-top:4px" id="sc-inc">$0</div>
+      </div>
+      <div class="stat-card">
+        <i class="fa-solid fa-credit-card"></i>
+        <div class="lbl-sm" data-i18n="expenses">Gastos</div>
+        <div style="font-size:16px;font-weight:800;color:var(--text-main);margin-top:4px" id="sc-exp">$0</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <div data-i18n="transactions">Transactions</div>
+      <span id="h-count">0</span>
     </div>
     <div id="h-list" style="padding-bottom:20px"></div>
   </div>
@@ -76,165 +69,118 @@
 
 <div id="v-reports" class="view">
   <div class="hdr">
-    <div style="width:38px"></div>
-    <div class="hdr-center">
-      <div class="month-pill" onclick="openCal()">
-        <button onclick="changeMonth(-1); event.stopPropagation()"><i class="fa-solid fa-chevron-left"></i></button>
-        <div class="mn" id="mn-rep">Cargando...</div>
-        <button onclick="changeMonth(1); event.stopPropagation()"><i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-    </div>
-    <div style="width:38px"></div>
+    <div style="width:44px"></div>
+    <div class="hdr-center"><span style="font-size:18px;font-weight:800">Statistic</span></div>
+    <div class="icon-btn" onclick="openCal()"><i class="fa-regular fa-calendar"></i></div>
   </div>
   <div class="sa hs">
-    <div class="ptabs">
-      <button class="ptab on" onclick="setPeriod('month',this)" data-i18n="month">Mes</button>
-      <button class="ptab" onclick="setPeriod('week',this)" data-i18n="week">Semana</button>
-      <button class="ptab" onclick="setPeriod('year',this)" data-i18n="year">Año</button>
-    </div>
-    <div class="card-pine"><div class="ct text-muted" id="r-title">Gráfica</div><div class="cwrap"><canvas id="rChart"></canvas></div></div>
-    <div class="card-pine"><div class="ct text-muted" data-i18n="expenses_cat">Desglose de Gastos</div><div id="r-cats"></div></div>
+    <div class="card" style="padding:24px"><div class="lbl-sm" data-i18n="expenses_cat">Desglose de Gastos</div><div id="r-cats" style="margin-top:20px"></div></div>
   </div>
 </div>
 
 <div id="v-budget" class="view">
   <div class="hdr">
-    <div style="width:38px"></div>
-    <div class="hdr-center">
-      <div class="month-pill" onclick="openCal()">
-        <button onclick="changeMonth(-1); event.stopPropagation()"><i class="fa-solid fa-chevron-left"></i></button>
-        <div class="mn" id="mn-bud">Cargando...</div>
-        <button onclick="changeMonth(1); event.stopPropagation()"><i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-    </div>
-    <button id="edit-bud-btn" onclick="toggleEditBud()" style="font-size:13px;font-weight:800;color:var(--pine);border:none;background:var(--beige);padding:8px 16px;border-radius:50px;cursor:pointer" data-i18n="edit">Editar</button>
+    <div style="width:44px"></div>
+    <div class="hdr-center"><span style="font-size:18px;font-weight:800">Target</span></div>
+    <button class="icon-btn" id="edit-bud-btn" onclick="toggleEditBud()"><i class="fa-solid fa-pen"></i></button>
   </div>
   <div class="sa hs">
-    <div style="margin-bottom:20px;padding:0 4px">
-      <h3 style="font-size:26px;font-weight:900;color:var(--pine)" data-i18n="nav_budget">Presupuesto</h3>
-      <p style="font-size:13px;color:var(--t-muted);font-weight:700;margin-top:4px" id="bud-sub">Límites del mes</p>
+    
+    <div class="budget-chart-container">
+      <div class="lbl-sm" data-i18n="nav_budget">Presupuesto del Mes</div>
+      <div class="budget-bars" id="bud-chart"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--bdr)">
+        <div style="font-size:12px;color:var(--text-muted);font-weight:600" id="bud-sub">Mes actual</div>
+        <div style="font-size:16px;font-weight:800;color:var(--neon)" id="bud-total-spent">$0</div>
+      </div>
     </div>
+
     <div id="bud-list"></div>
   </div>
 </div>
 
 <div id="v-settings" class="view">
   <div class="hdr">
-    <div style="width:38px"></div>
-    <div class="hdr-center"><span style="font-size:20px;font-weight:900;color:var(--pine)">Más</span></div>
-    <div style="width:38px"></div>
+    <div style="width:44px"></div>
+    <div class="hdr-center"><span style="font-size:18px;font-weight:800">Menu</span></div>
+    <div style="width:44px"></div>
   </div>
   <div class="sa hs">
-    <div style="text-align:center;padding:10px 0 28px">
-      <div style="width:72px;height:72px;border-radius:24px;background:var(--pine);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:var(--beige);font-size:28px;font-weight:900;box-shadow:var(--sh)">FP</div>
-      <h2 style="font-size:22px;font-weight:900;color:var(--pine)" id="sv-name">Usuario</h2>
-      <p style="font-size:13px;color:var(--t-muted);font-weight:700;margin-top:4px">Finanzas Pro v7.0</p>
+    <div class="card" style="padding:10px 20px">
+      <div class="srow" onclick="switchView('debts')"><div class="sico"><i class="fa-solid fa-hand-holding-dollar"></i></div><div class="srow-info"><h4 data-i18n="nav_debts">Deudas & Préstamos</h4></div><i class="fa-solid fa-chevron-right chev"></i></div>
+      <div class="srow" onclick="switchView('taxes')"><div class="sico"><i class="fa-solid fa-file-invoice-dollar"></i></div><div class="srow-info"><h4 data-i18n="nav_taxes">Taxes</h4></div><i class="fa-solid fa-chevron-right chev"></i></div>
     </div>
 
-    <div class="sgrp-title" data-i18n="modules">Módulos Avanzados</div>
-    <div class="card-pine" style="padding:0">
-      <div class="srow" onclick="switchView('debts')"><div class="sico"><i class="fa-solid fa-hand-holding-dollar"></i></div><div class="srow-info"><h4 data-i18n="nav_debts" style="color:var(--beige)">Deudas & Préstamos</h4><p data-i18n="debts_sub" class="text-muted">Gestiona tus créditos</p></div><i class="fa-solid fa-chevron-right chev" style="color:var(--c-muted)"></i></div>
-      <div class="srow" onclick="switchView('taxes')"><div class="sico"><i class="fa-solid fa-file-invoice-dollar"></i></div><div class="srow-info"><h4 data-i18n="nav_taxes" style="color:var(--beige)">Taxes</h4><p data-i18n="taxes_sub" class="text-muted">Deducibles e impuestos</p></div><i class="fa-solid fa-chevron-right chev" style="color:var(--c-muted)"></i></div>
+    <div class="lbl-sm" style="margin:24px 0 8px 16px" data-i18n="preferences">Preferencias</div>
+    <div class="card" style="padding:10px 20px">
+      <div class="srow" onclick="toggleLang()"><div class="sico"><i class="fa-solid fa-language"></i></div><div class="srow-info"><h4 data-i18n="language">Idioma / Language</h4></div><div id="sv-lang" style="font-weight:800;color:var(--neon)">ES</div></div>
+      <div class="srow" onclick="promptGoal()"><div class="sico"><i class="fa-solid fa-bullseye"></i></div><div class="srow-info"><h4 data-i18n="savings_goal">Meta de Ahorro</h4></div></div>
+      <div class="srow" onclick="openCatMgr()"><div class="sico"><i class="fa-solid fa-layer-group"></i></div><div class="srow-info"><h4 data-i18n="categories">Categorías</h4></div></div>
+      <div class="srow" onclick="openPayMgr()"><div class="sico"><i class="fa-regular fa-credit-card"></i></div><div class="srow-info"><h4 data-i18n="payment_methods">Métodos de Pago</h4></div></div>
+      <div class="srow" onclick="promptName()"><div class="sico"><i class="fa-regular fa-user"></i></div><div class="srow-info"><h4 data-i18n="your_name">Tu Nombre</h4></div></div>
     </div>
 
-    <div class="sgrp-title" data-i18n="preferences">Preferencias</div>
-    <div class="card-pine" style="padding:0">
-      <div class="srow" onclick="toggleLang()"><div class="sico"><i class="fa-solid fa-language"></i></div><div class="srow-info"><h4 data-i18n="language" style="color:var(--beige)">Idioma / Language</h4></div><div id="sv-lang" style="font-weight:900;color:var(--beige);font-size:14px">ES</div></div>
-      <div class="srow" onclick="promptGoal()"><div class="sico"><i class="fa-solid fa-bullseye"></i></div><div class="srow-info"><h4 data-i18n="savings_goal" style="color:var(--beige)">Meta de Ahorro</h4></div></div>
-      <div class="srow" onclick="openCatMgr()"><div class="sico"><i class="fa-solid fa-layer-group"></i></div><div class="srow-info"><h4 data-i18n="categories" style="color:var(--beige)">Categorías</h4></div></div>
-      <div class="srow" onclick="openPayMgr()"><div class="sico"><i class="fa-regular fa-credit-card"></i></div><div class="srow-info"><h4 data-i18n="payment_methods" style="color:var(--beige)">Métodos de Pago</h4></div></div>
-      <div class="srow" onclick="promptName()"><div class="sico"><i class="fa-regular fa-user"></i></div><div class="srow-info"><h4 data-i18n="your_name" style="color:var(--beige)">Tu Nombre</h4></div></div>
-    </div>
-
-    <div class="sgrp-title" data-i18n="data_cloud">Datos & Nube</div>
-    <div class="card-pine" style="padding:0">
-      <div class="srow" onclick="openSheetsModal()"><div class="sico"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="srow-info"><h4 style="color:var(--beige)">Google Sheets</h4><p id="sv-sheets-url" class="text-muted">Sin configurar</p></div></div>
-      <div class="srow" onclick="exportCSV()"><div class="sico"><i class="fa-solid fa-file-csv"></i></div><div class="srow-info"><h4 data-i18n="export_csv" style="color:var(--beige)">Exportar CSV</h4></div></div>
-      <div class="srow" onclick="forceSyncToSheets()"><div class="sico"><i class="fa-solid fa-rotate"></i></div><div class="srow-info"><h4 data-i18n="force_sync" style="color:var(--beige)">Forzar Sincronización</h4></div></div>
-      <div class="srow" onclick="clearData()"><div class="sico" style="color:var(--rose);background:rgba(244,63,94,.15)"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="srow-info"><h4 data-i18n="delete_data" style="color:var(--rose)">Borrar Datos</h4></div></div>
+    <div class="lbl-sm" style="margin:24px 0 8px 16px" data-i18n="data_cloud">Datos & Nube</div>
+    <div class="card" style="padding:10px 20px">
+      <div class="srow" onclick="openSheetsModal()"><div class="sico"><i class="fa-solid fa-cloud-arrow-up"></i></div><div class="srow-info"><h4>Google Sheets</h4></div></div>
+      <div class="srow" onclick="exportCSV()"><div class="sico"><i class="fa-solid fa-file-csv"></i></div><div class="srow-info"><h4 data-i18n="export_csv">Exportar CSV</h4></div></div>
+      <div class="srow" onclick="forceSyncToSheets()"><div class="sico"><i class="fa-solid fa-rotate"></i></div><div class="srow-info"><h4 data-i18n="force_sync">Forzar Sincronización</h4></div></div>
+      <div class="srow" onclick="clearData()"><div class="sico" style="color:var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="srow-info"><h4 data-i18n="delete_data" style="color:var(--danger)">Borrar Datos</h4></div></div>
     </div>
   </div>
 </div>
 
 <div id="v-debts" class="view">
   <div class="hdr">
-    <button onclick="switchView('settings', 4)" style="background:transparent;border:none;font-size:20px;color:var(--pine);cursor:pointer;width:38px;text-align:left"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="hdr-center"><span style="font-size:18px;font-weight:900;color:var(--pine)" data-i18n="nav_debts">Deudas</span></div>
-    <div style="width:38px"></div>
+    <button class="icon-btn" onclick="switchView('settings')"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="hdr-center"><span style="font-size:18px;font-weight:800" data-i18n="nav_debts">Deudas</span></div>
+    <div style="width:44px"></div>
   </div>
   <div class="sa hs">
-    <div class="card-pine" style="text-align:center;padding:36px 20px">
-      <div style="font-size:11px;color:rgba(255,247,230,.6);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px" data-i18n="total_owed">Total Adeudado</div>
-      <div style="font-size:46px;font-weight:900;color:var(--beige);letter-spacing:-.03em;" id="debt-total-remaining">$0</div>
+    <div class="main-card">
+      <div class="lbl-sm" data-i18n="total_owed">Total Adeudado</div>
+      <div class="val-big" id="debt-total-remaining">$0</div>
     </div>
-    <button onclick="openDebtModal()" class="sbtn" style="margin:0 0 24px;width:100%;background:var(--beige);color:var(--pine);box-shadow:none" data-i18n="new_debt">+ Nueva Deuda</button>
+    <button onclick="openDebtModal()" class="sbtn" style="margin:0 0 24px;width:100%" data-i18n="new_debt">+ Nueva Deuda</button>
     <div id="debt-list"></div>
   </div>
 </div>
 
 <div id="v-taxes" class="view">
   <div class="hdr">
-    <button onclick="switchView('settings', 4)" style="background:transparent;border:none;font-size:20px;color:var(--pine);cursor:pointer;width:38px;text-align:left"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="hdr-center"><span style="font-size:18px;font-weight:900;color:var(--pine)" data-i18n="nav_taxes">Taxes</span></div>
-    <div style="width:38px"></div>
+    <button class="icon-btn" onclick="switchView('settings')"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="hdr-center"><span style="font-size:18px;font-weight:800" data-i18n="nav_taxes">Taxes</span></div>
+    <div style="width:44px"></div>
   </div>
   <div class="sa hs">
-    <div class="card-pine" style="text-align:center;padding:36px 20px">
-      <div style="font-size:11px;color:rgba(255,247,230,.6);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px" data-i18n="suggested_reserve">Reserva Sugerida (<span id="tax-year">2026</span>)</div>
-      <div id="tax-total" style="font-size:46px;color:var(--beige);font-weight:900;letter-spacing:-.03em">$0.00</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px">
-        <span style="font-size:11px;font-weight:800;color:rgba(255,247,230,.6)">TASA ESTIMADA %</span>
-        <input type="number" id="inp-taxpct" onchange="calcTaxes()" style="width:65px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:var(--beige);border-radius:10px;padding:8px;font-size:16px;font-weight:900;text-align:center;outline:none" value="20">
+    <div class="main-card">
+      <div class="lbl-sm" data-i18n="suggested_reserve">Reserva Sugerida</div>
+      <div class="val-big" id="tax-total">$0.00</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:12px">
+        <span style="font-size:10px;font-weight:800;color:var(--bg)">TASA ESTIMADA %</span>
+        <input type="number" id="inp-taxpct" onchange="calcTaxes()" style="width:60px;background:rgba(0,0,0,.2);border:none;color:var(--bg);border-radius:8px;padding:6px;font-size:14px;font-weight:900;text-align:center;outline:none" value="20">
       </div>
     </div>
-    <div class="card-pine">
-      <div class="tax-row" style="display:flex;justify-content:space-between;padding:12px 0"><span style="font-size:13px;font-weight:700;color:rgba(255,247,230,.6)" data-i18n="gross_income">Ingresos Brutos</span><span style="font-size:15px;font-weight:900;color:var(--beige)" id="tax-inc">$0</span></div>
-      <div class="tax-row" style="display:flex;justify-content:space-between;padding:12px 0"><span style="font-size:13px;font-weight:700;color:rgba(255,247,230,.6)" data-i18n="deductible_exp">Gastos Deducibles</span><span style="font-size:15px;font-weight:900;color:var(--beige)" id="tax-exp">-$0</span></div>
-      <div class="tax-row" style="display:flex;justify-content:space-between;border:none;margin-top:10px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15)"><span style="font-size:13px;font-weight:800;color:var(--beige)" data-i18n="net_income">Ingreso Neto</span><span style="font-size:18px;font-weight:900;color:var(--beige)" id="tax-net">$0</span></div>
-    </div>
-    <div class="card-pine"><div class="ct text-muted" data-i18n="deductible_categories">Categorías Deducibles</div><div id="deduct-list"></div></div>
-    <div class="card-pine"><div class="ct text-muted" data-i18n="deductions_summary">Resumen Deducciones</div><div id="tax-breakdown"></div></div>
-    <button onclick="exportTaxReport()" class="sbtn" style="margin:0 0 24px;width:100%;background:var(--beige);color:var(--pine)" data-i18n="export_cpa">Exportar PDF / CPA</button>
+    <div class="card mb12"><div class="fr" style="padding:4px 0"><span class="fl" data-i18n="gross_income">Ingresos Brutos</span><span class="fc" style="text-align:right" id="tax-inc">$0</span></div><div class="fr" style="padding:4px 0;border-bottom:none"><span class="fl" data-i18n="deductible_exp">Gastos Deducibles</span><span class="fc" style="text-align:right;color:var(--danger)" id="tax-exp">-$0</span></div></div>
+    <div class="card mb12"><div class="ct" data-i18n="deductible_categories">Categorías Deducibles</div><div id="deduct-list"></div></div>
+    <button onclick="exportTaxReport()" class="sbtn" style="margin:0 0 24px;width:100%" data-i18n="export_cpa">Exportar PDF / CPA</button>
   </div>
 </div>
 
 <div class="nav-container">
-  <div class="nav-indicator" id="nav-indicator"></div>
-  
-  <button class="nb on" id="nav-home" onclick="switchView('home', 0)">
-    <div class="icon"><i class="fa-solid fa-house"></i></div>
-    <span class="text" data-i18n="nav_home">Inicio</span>
-  </button>
-  
-  <button class="nb" id="nav-reports" onclick="switchView('reports', 1)">
-    <div class="icon"><i class="fa-solid fa-chart-simple"></i></div>
-    <span class="text" data-i18n="nav_reports">Reportes</span>
-  </button>
-  
-  <button class="nb" id="nav-add" onclick="openModalNav(2)">
-    <div class="icon"><i class="fa-solid fa-plus"></i></div>
-    <span class="text" data-i18n="nav_add">Añadir</span>
-  </button>
-  
-  <button class="nb" id="nav-budget" onclick="switchView('budget', 3)">
-    <div class="icon"><i class="fa-solid fa-chart-pie"></i></div>
-    <span class="text" data-i18n="nav_budget">Presupuesto</span>
-  </button>
-  
-  <button class="nb" id="nav-settings" onclick="switchView('settings', 4)">
-    <div class="icon"><i class="fa-solid fa-ellipsis"></i></div>
-    <span class="text" data-i18n="nav_more">Más</span>
-  </button>
+  <button class="nb on" id="nav-home" onclick="switchView('home')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">Home</span></button>
+  <button class="nb" id="nav-reports" onclick="switchView('reports')"><i class="fa-solid fa-chart-simple"></i><span data-i18n="nav_reports">Statistic</span></button>
+  <div class="nav-fab-wrapper"><button class="nav-fab" onclick="openModal()"><i class="fa-solid fa-plus"></i></button></div>
+  <button class="nb" id="nav-budget" onclick="switchView('budget')"><i class="fa-solid fa-bullseye"></i><span data-i18n="nav_budget">Target</span></button>
+  <button class="nb" id="nav-settings" onclick="switchView('settings')"><i class="fa-solid fa-border-all"></i><span data-i18n="nav_more">Menu</span></button>
 </div>
 
 <div id="modal-tx"><div class="mbg" onclick="closeModal()"></div><div class="msh">
   <div class="dpill"></div>
-  <div class="mhdr"><button class="mc" onclick="closeModal()">Cancelar</button><span class="mttl" id="mttl-tx">Nuevo Movimiento</span><div style="width:60px"></div></div>
+  <div class="mhdr"><button class="mc" onclick="closeModal()">Cancelar</button><span class="mttl" id="mttl-tx">Nuevo</span><div style="width:60px"></div></div>
   <div class="seg"><label class="slbl ai" id="lbl-i"><input type="radio" name="tt" value="Ingreso" checked onchange="onTC()" style="display:none">Ingreso</label><label class="slbl" id="lbl-e"><input type="radio" name="tt" value="Gasto" onchange="onTC()" style="display:none">Gasto</label></div>
-  <div class="awrap"><span class="asym">$</span><input type="number" id="txAmt" class="ainp" placeholder="0" inputmode="decimal"></div>
+  <input type="number" id="txAmt" class="ainp" placeholder="0" inputmode="decimal">
   <div class="catg" id="cat-grid"></div>
-  <div class="sub-grid" id="sub-grid" style="display:none;background:var(--beige);margin:0 24px;border-radius:16px;padding:12px"></div>
-  <div class="pay-grid" id="pay-grid-modal"></div>
   <div class="frows">
     <div class="fr"><span class="fl"><i class="fa-regular fa-calendar"></i>Fecha</span><input type="date" id="txDate" class="fc"></div>
     <div class="fr" style="border-bottom:none"><span class="fl"><i class="fa-regular fa-comment"></i>Nota</span><input type="text" id="txNote" class="fc" placeholder="Opcional..."></div>
@@ -245,34 +191,15 @@
 <div id="modal-pay"><div class="mbg" onclick="closePayMgr()"></div><div class="msh">
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closePayMgr()">Cerrar</button><span class="mttl">Métodos de Pago</span><div style="width:60px"></div></div>
-  <div style="padding:20px 24px"><div style="display:flex;gap:12px"><input type="text" id="new-pay-inp" style="flex:1;padding:14px;border:1.5px solid var(--bdr);border-radius:14px;outline:none;font-weight:800;color:var(--pine);font-size:14px" placeholder="Ej. Zelle..."><button style="background:var(--pine);color:var(--beige);border:none;border-radius:14px;padding:0 24px;font-weight:900;cursor:pointer;font-size:14px" onclick="addPayMethod()">Añadir</button></div></div>
+  <div style="padding:20px 24px"><div style="display:flex;gap:12px"><input type="text" id="new-pay-inp" style="flex:1;padding:14px;border:1px solid var(--bdr);border-radius:14px;background:var(--bg);color:var(--text-main);outline:none;font-weight:700;font-size:14px" placeholder="Ej. Zelle..."><button style="background:var(--neon);color:var(--bg);border:none;border-radius:14px;padding:0 24px;font-weight:900;cursor:pointer;font-size:14px" onclick="addPayMethod()">Añadir</button></div></div>
   <div id="pay-mgr-list" style="padding:0 24px 20px"></div>
 </div></div>
 
 <div id="modal-cats"><div class="mbg" onclick="closeCatMgr()"></div><div class="msh">
   <div class="dpill"></div>
-  <div class="mhdr"><button class="mc" onclick="closeCatMgr()">Cerrar</button><span class="mttl">Categorías</span><button class="mc" style="color:var(--pine);font-weight:900;font-size:18px" onclick="promptNewCat()"><i class="fa-solid fa-plus"></i></button></div>
-  <div style="display:flex;background:var(--bdr);padding:4px;border-radius:14px;margin:20px 24px"><button id="cmt-g" onclick="renderCatMgr('Gasto')" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--pine);color:var(--beige);font-size:13px;font-weight:900;cursor:pointer">Gastos</button><button id="cmt-i" onclick="renderCatMgr('Ingreso')" style="flex:1;padding:12px;border-radius:10px;border:none;background:transparent;color:var(--t-muted);font-size:13px;font-weight:900;cursor:pointer">Ingresos</button></div>
+  <div class="mhdr"><button class="mc" onclick="closeCatMgr()">Cerrar</button><span class="mttl">Categorías</span><button class="mc" style="color:var(--neon);font-weight:900;font-size:18px" onclick="promptNewCat()"><i class="fa-solid fa-plus"></i></button></div>
+  <div style="display:flex;background:var(--bg);padding:4px;border-radius:14px;margin:20px 24px"><button id="cmt-g" onclick="renderCatMgr('Gasto')" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--card);color:var(--text-main);font-size:13px;font-weight:800;cursor:pointer">Gastos</button><button id="cmt-i" onclick="renderCatMgr('Ingreso')" style="flex:1;padding:12px;border-radius:10px;border:none;background:transparent;color:var(--text-muted);font-size:13px;font-weight:800;cursor:pointer">Ingresos</button></div>
   <div id="cat-editor" style="padding:0 24px 20px"></div>
-</div></div>
-
-<div id="modal-cal"><div class="mbg" onclick="closeCal()"></div><div class="msh">
-  <div class="dpill"></div>
-  <div class="mhdr">
-    <button class="mc" onclick="changeCalYear(-1)" style="font-size:18px"><i class="fa-solid fa-chevron-left"></i></button>
-    <span class="mttl" id="cal-yr" style="font-size:18px">2026</span>
-    <button class="mc" onclick="changeCalYear(1)" style="font-size:18px"><i class="fa-solid fa-chevron-right"></i></button>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 24px" id="cal-grid"></div>
-</div></div>
-
-<div id="modal-sheets"><div class="mbg" onclick="closeSheetsModal()"></div><div class="msh">
-  <div class="dpill"></div>
-  <div class="mhdr"><button class="mc" onclick="closeSheetsModal()">Cerrar</button><span class="mttl">Google Sheets</span><div style="width:60px"></div></div>
-  <div style="padding:24px">
-    <input type="text" id="sheet-url" style="width:100%;padding:16px;border:1.5px solid var(--bdr);border-radius:16px;font-weight:800;color:var(--pine);outline:none;font-size:14px" placeholder="https://script.google.com/.../exec">
-    <button class="sbtn" style="margin:24px 0 0;width:100%" onclick="saveSheetUrl()">Vincular URL</button>
-  </div>
 </div></div>
 
 <div id="modal-edit"><div class="mbg" onclick="closeEditModal()"></div><div class="msh">
@@ -280,7 +207,7 @@
   <div class="mhdr"><button class="mc" onclick="closeEditModal()">Cancelar</button><span class="mttl">Editar Monto</span><div style="width:70px"></div></div>
   <div style="padding:24px">
     <input type="hidden" id="edit-id">
-    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:24px"><span class="asym">$</span><input type="number" id="edit-amt" class="ainp" inputmode="decimal"></div>
+    <input type="number" id="edit-amt" class="ainp" inputmode="decimal">
     <button class="sbtn" style="margin:0;width:100%" onclick="saveEdit()">Actualizar</button>
   </div>
 </div></div>
@@ -289,12 +216,12 @@
   <div class="dpill"></div>
   <div class="mhdr"><button class="mc" onclick="closeDebtModal()">Cancelar</button><span class="mttl" id="debt-modal-title">Nueva Deuda</span><div style="width:70px"></div></div>
   <div class="frows">
-    <div class="fr"><span class="fl"><i class="fa-solid fa-tag"></i>Nombre</span><input type="text" id="debt-name" class="fc" placeholder="Ej. Car Loan..."></div>
-    <div class="fr"><span class="fl"><i class="fa-solid fa-folder"></i>Tipo</span><select id="debt-type" class="fc"><option>Préstamo Personal</option><option>Auto Loan</option><option>Tarjeta de Crédito</option><option>Hipoteca</option><option>Estudiante</option><option>Otro</option></select></div>
-    <div class="fr"><span class="fl"><i class="fa-solid fa-dollar-sign"></i>Monto original</span><input type="number" id="debt-original" class="fc" placeholder="0" inputmode="decimal"></div>
-    <div class="fr"><span class="fl"><i class="fa-solid fa-percent"></i>Tasa anual (%)</span><input type="number" id="debt-rate" class="fc" placeholder="0" inputmode="decimal"></div>
-    <div class="fr"><span class="fl"><i class="fa-solid fa-calendar-days"></i>Plazo (meses)</span><input type="number" id="debt-term" class="fc" placeholder="60" inputmode="numeric"></div>
-    <div class="fr"><span class="fl"><i class="fa-regular fa-calendar"></i>Fecha inicio</span><input type="date" id="debt-start" class="fc"></div>
+    <div class="fr"><span class="fl">Nombre</span><input type="text" id="debt-name" class="fc" placeholder="Ej. Car Loan..."></div>
+    <div class="fr"><span class="fl">Tipo</span><select id="debt-type" class="fc"><option>Préstamo Personal</option><option>Auto Loan</option><option>Tarjeta de Crédito</option><option>Hipoteca</option><option>Estudiante</option><option>Otro</option></select></div>
+    <div class="fr"><span class="fl">Monto original</span><input type="number" id="debt-original" class="fc" placeholder="0" inputmode="decimal"></div>
+    <div class="fr"><span class="fl">Tasa anual (%)</span><input type="number" id="debt-rate" class="fc" placeholder="0" inputmode="decimal"></div>
+    <div class="fr"><span class="fl">Plazo (meses)</span><input type="number" id="debt-term" class="fc" placeholder="60" inputmode="numeric"></div>
+    <div class="fr" style="border:none"><span class="fl">Fecha inicio</span><input type="date" id="debt-start" class="fc"></div>
   </div>
   <button class="sbtn" onclick="saveDebt()">Guardar Deuda</button>
 </div></div>
