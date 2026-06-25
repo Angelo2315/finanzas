@@ -1,3 +1,9 @@
+function fmtBig(n){
+  const neg=n<0; const abs=Math.abs(n);
+  const dollars=Math.floor(abs).toLocaleString('en-US');
+  const cents=(abs%1).toFixed(2).slice(1); // ".00"
+  return (neg?'-':'')+'$'+dollars+'<span class="cents">'+cents+'</span>';
+}
 // ═══ SHEETS URL ═══
 const SHEETS_URL='https://script.google.com/macros/s/AKfycbxV4hmnyt3Xz11IdyM5GeV9l1RvKT8o4ltFmMPoRLHKhH964SbF0uPpcFzvV2egb7vESQ/exec';
 let sheetUrl=SHEETS_URL||localStorage.getItem('fp_url')||'';
@@ -109,7 +115,7 @@ function renderHome(){
   document.getElementById('sc-exp').textContent=fmt(exp);
   document.getElementById('sc-sav').textContent=fmt(totalSaved);
   const hb=document.getElementById('h-bal');
-  if(hb){hb.textContent=fmt(gap);hb.style.color=gap>=0?'#fff':'#fca5a5';}
+  if(hb){hb.innerHTML=fmtBig(gap);hb.style.color=gap>=0?'var(--t1)':'#fca5a5';}
   const hbs=document.getElementById('h-bal-sub');
   if(hbs){hbs.textContent=gap>=0?'Balance positivo este mes':'Balance negativo — revisa tus gastos';}
   document.getElementById('sc-rate').textContent='Meta: '+fmt(savGoal);
@@ -136,6 +142,7 @@ function renderHome(){
 
   renderDonutSVG();
   renderSparkline();
+  renderHomeBudgets();
 }
 
 function renderDayList(monthly){
@@ -159,19 +166,20 @@ function renderDayList(monthly){
       const metaParts=[tx.category,tx.method,tx.notes].filter(Boolean);
       const badgeBg=isI?'rgba(90,125,95,.1)':'rgba(209,143,119,.1)';
       const badgeClr=isI?'var(--green)':'var(--terra)';
+      const catIco=isI?(CAT_ICONS[tx.category]||'💵'):(CAT_ICONS[tx.category]||'📦');
       return`<div class="txr-wrap" id="txw-${tx.id}">
         <div class="txr-hint edit"><i class="fa-solid fa-pen"></i></div>
         <div class="txr-hint del"><i class="fa-solid fa-trash"></i></div>
         <div class="txr-surface" id="txs-${tx.id}">
-          <div class="txr-body">
-            <div class="txr-dot" style="background:${cd.color}"></div>
-            <div class="txr-info">
-              <div class="txr-name">${sub}</div>
-              <div class="txr-meta">${metaParts.join(' · ')}</div>
+          <div class="tx-row" style="border-bottom:none">
+            <div class="tx-ico" style="background:${cd.color}22;color:${cd.color}">${catIco}</div>
+            <div class="tx-mid">
+              <div class="tx-name">${sub}</div>
+              <div class="tx-meta">${metaParts.join(' · ')}</div>
             </div>
-            <div class="txr-right">
-              <div class="txr-amt" style="color:${isI?'var(--green)':'var(--terra)'}">${sign}${fmt(Number(tx.amount)||0)}</div>
-              <div class="txr-badge" style="background:${badgeBg};color:${badgeClr}">${tx.type}</div>
+            <div class="tx-r">
+              <div class="tx-amt ${isI?'inc':'exp'}" style="color:${isI?'var(--green)':'var(--t1)'}">${sign}${fmt(Number(tx.amount)||0)}</div>
+              <div class="tx-date">${tx.method||tx.type}</div>
             </div>
           </div>
         </div>
@@ -240,7 +248,7 @@ function renderReports(){
   else if(curPeriod==='day'){for(let i=0;i<7;i++){labels.push(DAYS[i]);incD.push(0);expD.push(0);}mt.forEach(tx=>{const dw=new Date(tx.date+'T12:00:00').getDay();const a=Number(tx.amount)||0;if(tx.type==='Ingreso')incD[dw]+=a;else expD[dw]+=a;});}
   if(rChart){rChart.destroy();rChart=null;}
   const ctx=document.getElementById('rChart').getContext('2d');
-  rChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Ingresos',data:incD,backgroundColor:'rgba(90,125,95,.75)',borderRadius:5,borderSkipped:false},{label:'Gastos',data:expD,backgroundColor:'rgba(209,143,119,.75)',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:9,font:{size:10,family:'Inter'},color:'#8C867F'}}},scales:{x:{ticks:{color:'#8C867F',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#8C867F',font:{size:9},callback:v=>'$'+v},grid:{color:'rgba(0,0,0,.04)'}}}}});
+  rChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Ingresos',data:incD,backgroundColor:'rgba(34,197,94,.8)',borderRadius:6,borderSkipped:false},{label:'Gastos',data:expD,backgroundColor:'rgba(239,68,68,.8)',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:9,font:{size:10},color:'#94A3B8',padding:12}}},scales:{x:{ticks:{color:'#5A6478',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#5A6478',font:{size:9},callback:v=>'$'+v},grid:{color:'rgba(255,255,255,.05)'}}}}});
   const mst=document.getElementById('monthly-savings-table');
   const savsByMonth=[];let maxSav=0;
   for(let m=0;m<12;m++){const mt2=getMonthTxs(Y,m);let saved=0;mt2.forEach(t=>{if(t.type!=='Ingreso'&&t.category==='Savings')saved+=Number(t.amount)||0;});savsByMonth.push({month:m,sav:saved});if(saved>maxSav)maxSav=saved;}
@@ -829,4 +837,33 @@ function renderSparkline(){
     <path d="${d}" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="${xs(last).toFixed(1)}" cy="${ys(pts[last]).toFixed(1)}" r="4" fill="#fff"/>
   `;
+}
+
+
+// ═══ HOME BUDGET PREVIEW — top 3 budgets ═══
+function renderHomeBudgets(){
+  const el=document.getElementById('home-budgets'); if(!el)return;
+  const mt=getMonthTxs(); const spent={};
+  mt.forEach(t=>{if(t.type==='Gasto')spent[t.category]=(spent[t.category]||0)+(Number(t.amount)||0);});
+  const all=getCurrentBudgets().filter(b=>b.limit>0);
+  // sort by usage% desc, show top 3
+  const list=all.map(b=>({...b,sp:spent[b.cat]||0,ratio:(spent[b.cat]||0)/b.limit})).sort((a,b)=>b.ratio-a.ratio).slice(0,3);
+  if(!list.length){el.innerHTML='<p style="font-size:13px;color:var(--t2);padding:4px 0">Sin presupuestos configurados</p>';return;}
+  el.innerHTML=list.map(b=>{
+    const sp=spent[b.cat]||0, pct=Math.min(999,(sp/b.limit)*100);
+    const cd=cats.Gasto[b.cat]||{color:'#64748B'};
+    let barColor=cd.color, pctColor='var(--t1)';
+    if(pct>=100){barColor='var(--terra)';pctColor='var(--terra)';}
+    else if(pct>=80){barColor='var(--amber)';pctColor='var(--amber)';}
+    else {barColor='var(--green)';pctColor='var(--green)';}
+    return `<div class="bud-row">
+      <div class="bud-ico" style="background:${cd.color}22;color:${cd.color}">${CAT_ICONS[b.cat]||'📦'}</div>
+      <div class="bud-mid">
+        <div class="bud-name">${b.cat}</div>
+        <div class="bud-bar"><div class="bud-fill" style="width:${Math.min(100,pct)}%;background:${barColor}"></div></div>
+        <div class="bud-sub">${fmt(sp).replace('.00','')} de ${fmt(b.limit).replace('.00','')}</div>
+      </div>
+      <div class="bud-pct" style="color:${pctColor}">${pct.toFixed(0)}%</div>
+    </div>`;
+  }).join('');
 }
