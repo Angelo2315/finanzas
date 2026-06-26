@@ -27,14 +27,20 @@ const DEF_SUBS={
   Compras:['Ropa','Tecnología','Hogar','Regalos'],
   Entretenimiento:['Cine','Streaming','Salidas','Juegos'],
   Salud:['Farmacia','Doctor','Gym','Seguro'],
-  Otros:['Varios','Imprevistos']
+  Otros:['Varios','Imprevistos'],
+  Ingreso:['Sueldo','Negocio','Freelance','Propinas','Otros'],
+  Ahorro:['Fondo de Emergencia','Vacaciones','Meta','Inversión']
 };
-const INC_SUBS=['Sueldo','Negocio','Freelance','Propinas','Otros'];
+// Savings category meta (special: counts as commitment, NOT a real expense)
+const SAV_CAT={ico:'🐷',color:'#7C5CFC'};
 
 // State
 let txs=JSON.parse(localStorage.getItem('fp_txs'))||[];
-// subcats: { Casa:['Renta','Luz',...], ... } — user-editable list of subcategories per category
+// subcats: { Casa:['Renta','Luz',...], Ingreso:[...], Ahorro:[...] } — all user-editable
 let subcats=JSON.parse(localStorage.getItem('fp_subcats'))||JSON.parse(JSON.stringify(DEF_SUBS));
+// ensure Ingreso + Ahorro keys exist (for users with old data)
+if(!subcats.Ingreso)subcats.Ingreso=[...DEF_SUBS.Ingreso];
+if(!subcats.Ahorro)subcats.Ahorro=[...DEF_SUBS.Ahorro];
 // subBudgets: { "Casa/Renta":1200, "Casa/Luz":150, ... } — budget PER subcategory
 let subBudgets=JSON.parse(localStorage.getItem('fp_subbudgets'))||{};
 // migrate: if user had old category-level budgets, seed first sub with it (one-time)
@@ -134,21 +140,29 @@ function pickMonth(m){
 // ═══ HOME ═══
 function renderHome(){
   const mt=monthTxs();
-  let inc=0,exp=0,catSums={};
+  let inc=0,exp=0,sav=0,catSums={};
   mt.forEach(t=>{const a=Number(t.amount)||0;
     if(t.type==='Ingreso')inc+=a;
+    else if(t.type==='Ahorro')sav+=a;       // savings: commitment, not a real expense
     else{exp+=a;catSums[t.category]=(catSums[t.category]||0)+a;}
   });
-  const bal=inc-exp;
+  // balance disponible = income - real expenses - money sent to savings
+  const bal=inc-exp-sav;
   // previous month for comparison
   const pd=new Date(curDate.getFullYear(),curDate.getMonth()-1,1);
   const pmt=monthTxs(pd.getFullYear(),pd.getMonth());
   let pInc=0,pExp=0;
-  pmt.forEach(t=>{const a=Number(t.amount)||0;t.type==='Ingreso'?pInc+=a:pExp+=a;});
+  pmt.forEach(t=>{const a=Number(t.amount)||0;if(t.type==='Ingreso')pInc+=a;else if(t.type!=='Ahorro')pExp+=a;});
   // balance
   $('h-bal').innerHTML=fmtS(bal)+'<span class="c">.'+(Math.abs(bal)%1).toFixed(2).slice(2)+'</span>';
   $('h-inc').textContent=fmtS(inc);
   $('h-exp').textContent=fmtS(exp);
+  // show savings line if any this month
+  const savEl=$('h-sav-line');
+  if(savEl){
+    if(sav>0){savEl.style.display='flex';$('h-sav-val').textContent=fmtS(sav);}
+    else savEl.style.display='none';
+  }
   // comparison chips vs previous month
   setCompare('h-inc-cmp',inc,pInc,true);   // income: up is good
   setCompare('h-exp-cmp',exp,pExp,false);   // expense: up is bad
@@ -223,17 +237,21 @@ function renderTx(mt){
   const sorted=[...mt].sort((a,b)=>b.date.localeCompare(a.date));
   el.innerHTML=sorted.slice(0,30).map(t=>{
     const isI=t.type==='Ingreso';
-    const c=isI?INC_CAT:(CATS[t.category]||CATS.Otros);
+    const isS=t.type==='Ahorro';
+    const c=isI?INC_CAT:(isS?SAV_CAT:(CATS[t.category]||CATS.Otros));
     const d=new Date(t.date+'T12:00:00');
     const dstr=`${d.getDate()} ${MSS[d.getMonth()]}`;
-    const meta=t.subcategory&&t.subcategory!==t.category?t.category+(t.notes?' · '+t.notes:''):(t.notes||t.category);
+    const catLabel=isS?'Ahorro':t.category;
+    const meta=t.subcategory&&t.subcategory!==t.category?catLabel+(t.notes?' · '+t.notes:''):(t.notes||catLabel);
+    const sign=isI?'+':(isS?'↗':'-');
+    const amtColor=isI?'var(--green)':(isS?'var(--violet2)':'var(--t1)');
     return `<div class="swipe-wrap" data-id="${t.id}">
       <div class="swipe-action edit"><i class="fa-solid fa-pen"></i></div>
       <div class="swipe-action del"><i class="fa-solid fa-trash"></i></div>
       <div class="tx-row swipe-surface" onclick="rowTap('${t.id}')">
         <div class="tx-ico" style="background:${c.color}22;color:${c.color}">${c.ico}</div>
-        <div class="tx-mid"><div class="tx-name">${t.subcategory||t.category}</div><div class="tx-meta">${meta}</div></div>
-        <div class="tx-r"><div class="tx-amt ${isI?'i':''}">${isI?'+':'-'}${fmtS(t.amount)}</div><div class="tx-date">${dstr}</div></div>
+        <div class="tx-mid"><div class="tx-name">${t.subcategory||catLabel}</div><div class="tx-meta">${meta}</div></div>
+        <div class="tx-r"><div class="tx-amt" style="color:${amtColor}">${sign}${fmtS(t.amount)}</div><div class="tx-date">${dstr}</div></div>
       </div>
     </div>`;
   }).join('');
@@ -375,29 +393,41 @@ function delSub(cat,sub){
 
 // ═══ SAVINGS VIEW ═══
 function renderSavings(){
-  // total saved = sum of all income - all expense across all time
+  // total saved = sum of all 'Ahorro' type transactions (money intentionally set aside)
   let saved=0;
-  txs.forEach(t=>saved+=(t.type==='Ingreso'?1:-1)*(Number(t.amount)||0));
-  saved=Math.max(0,saved);
+  txs.forEach(t=>{if(t.type==='Ahorro')saved+=Number(t.amount)||0;});
   $('s-val').textContent=fmtS(saved);
-  $('s-goal').textContent='Meta: '+fmtS(savGoal);
+  $('s-goal').textContent='Meta: '+fmtS(savGoal)+' ›';
   const pct=savGoal>0?Math.min(100,(saved/savGoal)*100):0;
   $('s-bar').style.width=pct+'%';
   $('s-pct').textContent=pct.toFixed(0)+'% de tu meta';
-  // monthly savings breakdown (last 6 months)
+  // breakdown by savings subcategory (goals)
+  const byGoal={};
+  txs.forEach(t=>{if(t.type==='Ahorro'){const k=t.subcategory||'Meta';byGoal[k]=(byGoal[k]||0)+(Number(t.amount)||0);}});
+  const goalEntries=Object.entries(byGoal).sort((a,b)=>b[1]-a[1]);
+  const goalSubs=$('s-goals');
+  if(goalSubs){
+    goalSubs.innerHTML=goalEntries.length?goalEntries.map(([g,amt])=>
+      `<div class="tx-row">
+        <div class="tx-ico" style="background:rgba(124,92,252,.15);color:var(--violet2)">🎯</div>
+        <div class="tx-mid"><div class="tx-name">${g}</div><div class="tx-meta">Ahorro acumulado</div></div>
+        <div class="tx-r"><div class="tx-amt" style="color:var(--violet2)">${fmtS(amt)}</div></div>
+      </div>`).join(''):'<div class="empty" style="padding:24px 0"><p>Aún no apartas dinero</p><span>Usa + y elige "Ahorro"</span></div>';
+  }
+  // monthly savings breakdown (last 6 months) — money sent to savings each month
   const rows=[];
   for(let i=0;i<6;i++){
     const d=new Date(curDate.getFullYear(),curDate.getMonth()-i,1);
     const mt=monthTxs(d.getFullYear(),d.getMonth());
-    let inc=0,exp=0;mt.forEach(t=>t.type==='Ingreso'?inc+=Number(t.amount)||0:exp+=Number(t.amount)||0);
-    rows.push({m:d.getMonth(),y:d.getFullYear(),net:inc-exp});
+    let s=0;mt.forEach(t=>{if(t.type==='Ahorro')s+=Number(t.amount)||0;});
+    rows.push({m:d.getMonth(),y:d.getFullYear(),sav:s});
   }
   $('s-months').innerHTML=rows.map(r=>{
-    const pos=r.net>=0;
+    const has=r.sav>0;
     return `<div class="tx-row">
-      <div class="tx-ico" style="background:${pos?'rgba(48,209,88,.15)':'rgba(255,69,58,.15)'};color:${pos?'var(--green)':'var(--red)'}"><i class="fa-solid fa-${pos?'arrow-trend-up':'arrow-trend-down'}"></i></div>
-      <div class="tx-mid"><div class="tx-name">${MS[r.m]} ${r.y}</div><div class="tx-meta">${pos?'Ahorrado':'Déficit'}</div></div>
-      <div class="tx-r"><div class="tx-amt ${pos?'i':''}" style="color:${pos?'var(--green)':'var(--red)'}">${pos?'+':''}${fmtS(r.net)}</div></div>
+      <div class="tx-ico" style="background:${has?'rgba(124,92,252,.15)':'rgba(255,255,255,.04)'};color:${has?'var(--violet2)':'var(--t3)'}"><i class="fa-solid fa-piggy-bank"></i></div>
+      <div class="tx-mid"><div class="tx-name">${MS[r.m]} ${r.y}</div><div class="tx-meta">${has?'Apartado':'Nada apartado'}</div></div>
+      <div class="tx-r"><div class="tx-amt" style="color:${has?'var(--violet2)':'var(--t3)'}">${has?'+'+fmtS(r.sav):'$0'}</div></div>
     </div>`;
   }).join('');
 }
@@ -444,6 +474,7 @@ function setType(t){
   curType=t;
   $('seg-i').className='seg-b'+(t==='Ingreso'?' act-i':'');
   $('seg-e').className='seg-b'+(t==='Gasto'?' act-e':'');
+  $('seg-s').className='seg-b'+(t==='Ahorro'?' act-s':'');
   selCat='';selSub='';
   $('sub-sec').style.display='none';
   renderCatGrid();
@@ -451,17 +482,25 @@ function setType(t){
 function renderCatGrid(){
   const grid=$('cat-grid');
   if(curType==='Ingreso'){
-    grid.innerHTML=Object.entries({Ingreso:INC_CAT}).map(()=>'').join('');
     grid.innerHTML=`<div class="cat-btn sel" data-cat="Ingreso" style="grid-column:span 3;border-color:${INC_CAT.color};background:${INC_CAT.color}18;color:${INC_CAT.color}" onclick="pickCat('Ingreso',this)"><span class="cat-btn-ico">${INC_CAT.ico}</span>Ingreso</div>`;
     selCat='Ingreso';renderSubGrid('Ingreso');return;
+  }
+  if(curType==='Ahorro'){
+    grid.innerHTML=`<div class="cat-btn sel" data-cat="Ahorro" style="grid-column:span 3;border-color:${SAV_CAT.color};background:${SAV_CAT.color}18;color:${SAV_CAT.color}" onclick="pickCat('Ahorro',this)"><span class="cat-btn-ico">${SAV_CAT.ico}</span>Ahorro</div>`;
+    selCat='Ahorro';renderSubGrid('Ahorro');return;
   }
   grid.innerHTML=Object.entries(CATS).map(([cat,c])=>
     `<div class="cat-btn" data-cat="${cat}" onclick="pickCat('${cat}',this)"><span class="cat-btn-ico">${c.ico}</span>${cat}</div>`
   ).join('');
 }
+function catMeta(cat){
+  if(cat==='Ingreso')return INC_CAT;
+  if(cat==='Ahorro')return SAV_CAT;
+  return CATS[cat]||CATS.Otros;
+}
 function pickCat(cat,btn,keepSub){
   selCat=cat;
-  const c=cat==='Ingreso'?INC_CAT:CATS[cat];
+  const c=catMeta(cat);
   document.querySelectorAll('.cat-btn').forEach(b=>{b.classList.remove('sel');b.style='';});
   btn.classList.add('sel');btn.style=`border-color:${c.color};background:${c.color}18;color:${c.color}`;
   if(!keepSub)selSub='';
@@ -469,15 +508,26 @@ function pickCat(cat,btn,keepSub){
 }
 function renderSubGrid(cat){
   const sec=$('sub-sec'),grid=$('sub-grid');
-  const c=cat==='Ingreso'?INC_CAT:CATS[cat];
-  const subs=cat==='Ingreso'?INC_SUBS:(subcats[cat]||[]);
-  if(!subs.length){sec.style.display='none';return;}
+  const c=catMeta(cat);
+  const subs=subcats[cat]||[];
   sec.style.display='block';
   grid.innerHTML=subs.map(s=>
     `<div class="sub-btn${s===selSub?' sel':''}" data-sub="${s}" onclick="pickSub('${s}',this,'${c.color}')" ${s===selSub?`style="border-color:${c.color};background:${c.color}18;color:${c.color}"`:''}>${s}</div>`
-  ).join('');
+  ).join('')
+  // inline "+" to add a new subcategory right from the add screen
+  +`<div class="sub-btn sub-add" onclick="quickAddSub('${cat}')"><i class="fa-solid fa-plus"></i></div>`;
   // auto-select first if none chosen
-  if(!selSub){selSub=subs[0];const f=grid.querySelector('.sub-btn');if(f){f.classList.add('sel');f.style=`border-color:${c.color};background:${c.color}18;color:${c.color}`;}}
+  if(!selSub&&subs.length){selSub=subs[0];const f=grid.querySelector('.sub-btn');if(f){f.classList.add('sel');f.style=`border-color:${c.color};background:${c.color}18;color:${c.color}`;}}
+}
+function quickAddSub(cat){
+  const name=prompt('Nueva subcategoría en '+cat+':');
+  if(!name||!name.trim())return;
+  const n=name.trim();
+  if(!subcats[cat])subcats[cat]=[];
+  if(subcats[cat].includes(n)){toast('Ya existe');return;}
+  subcats[cat].push(n);saveSubcats();
+  syncData('save_subcats',{subcats});
+  selSub=n;renderSubGrid(cat);toast('✅ Agregada');
 }
 function pickSub(s,btn,color){
   selSub=s;
@@ -560,12 +610,27 @@ function saveUrl(){
 document.addEventListener('DOMContentLoaded',()=>{
   $('tdate').valueAsDate=new Date();
   if($('url-inp'))$('url-inp').value=sheetUrl;
-  // ALWAYS exit loading after 1.4s
-  setTimeout(()=>{
-    $('load').classList.add('hide');
+
+  // render whatever we have locally first (instant), then fetch fresh
+  updateMonth();
+
+  let done=false;
+  const finish=()=>{
+    if(done)return;done=true;
     updateMonth();
-    if(sheetUrl)setTimeout(()=>{loadFromSheets(false);retryQueue();},400);
-  },1400);
+    $('load').classList.add('hide');
+  };
+
+  if(sheetUrl){
+    // try to load from Sheets; hide skeleton when data arrives
+    loadFromSheets(false).finally(()=>{retryQueue();finish();});
+    // safety: never keep skeleton longer than 3.5s even if network hangs
+    setTimeout(finish,3500);
+  }else{
+    // no sheets configured — short skeleton just for polish
+    setTimeout(finish,900);
+  }
+
   setInterval(()=>{if(sheetUrl&&document.visibilityState==='visible')loadFromSheets(false);},5*60*1000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&sheetUrl){retryQueue();loadFromSheets(false);}});
 });
