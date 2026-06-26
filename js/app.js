@@ -191,8 +191,32 @@ function renderHome(){
   }).join(''):'<p style="font-size:13px;color:var(--t2);padding:6px">Sin gastos aún</p>';
   // donut
   renderDonut(catSums,exp);
+  // savings dashboard card
+  renderSavDash(mt,sav);
   // transactions
   renderTx(mt);
+}
+
+// savings card on the dashboard
+function renderSavDash(mt,savThisMonth){
+  const card=$('h-sav-card');if(!card)return;
+  // total saved across all time
+  let totalSaved=0;
+  txs.forEach(t=>{if(t.type==='Ahorro')totalSaved+=Number(t.amount)||0;});
+  if(totalSaved<=0&&savThisMonth<=0){card.style.display='none';return;}
+  card.style.display='block';
+  $('h-sav-total').textContent=fmtS(totalSaved);
+  $('h-sav-sub').textContent=savThisMonth>0?fmtS(savThisMonth)+' apartado este mes':'Total acumulado';
+  const pct=savGoal>0?Math.min(100,(totalSaved/savGoal)*100):0;
+  $('h-sav-goal').textContent='Meta: '+fmtS(savGoal)+' · '+pct.toFixed(0)+'%';
+  $('h-sav-bar').style.width=pct+'%';
+  // chips: top savings goals
+  const byGoal={};
+  txs.forEach(t=>{if(t.type==='Ahorro'){const k=t.subcategory||'Meta';byGoal[k]=(byGoal[k]||0)+(Number(t.amount)||0);}});
+  const top=Object.entries(byGoal).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  $('h-sav-chips').innerHTML=top.map(([g,amt])=>
+    `<div class="sav-dash-chip"><span class="sav-dash-chip-n">${g}</span><span class="sav-dash-chip-v">${fmtS(amt)}</span></div>`
+  ).join('');
 }
 
 // comparison helper: shows ↑/↓ vs previous month
@@ -559,6 +583,62 @@ function delTx(){
   localStorage.setItem('fp_txs',JSON.stringify(txs));
   syncData('delete_tx',{id});
   closeAdd();updateMonth();toast('🗑 Eliminado');
+}
+
+// ═══ CONFIGURAR SUBCATEGORÍAS (Más) ═══
+let cfgType='gasto'; // gasto | ingreso | ahorro
+function openCatConfig(){cfgType='gasto';cfgSetTab('gasto');renderCfg();$('cfg-modal').classList.add('mon');}
+function closeCatConfig(){$('cfg-modal').classList.remove('mon');}
+function cfgTab(t){cfgType=t;cfgSetTab(t);renderCfg();}
+function cfgSetTab(t){
+  ['gasto','ingreso','ahorro'].forEach(x=>{const b=$('cfg-tab-'+x);if(b)b.className='cfg-tab'+(x===t?' on':'');});
+}
+function renderCfg(){
+  const body=$('cfg-body');
+  if(cfgType==='gasto'){
+    // show each expense category with its subcategories (add/remove)
+    body.innerHTML=Object.keys(CATS).map(cat=>{
+      const c=CATS[cat];const subs=subcats[cat]||[];
+      return `<div class="cfg-cat">
+        <div class="cfg-cat-hd"><div class="cfg-cat-ico" style="background:${c.color}22;color:${c.color}">${c.ico}</div><span class="cfg-cat-name">${cat}</span></div>
+        <div class="cfg-subs">
+          ${subs.map(s=>`<div class="cfg-chip"><span>${s}</span><button onclick="cfgDelSub('${cat}','${s}')"><i class="fa-solid fa-xmark"></i></button></div>`).join('')}
+          <button class="cfg-add" onclick="cfgAddSub('${cat}')"><i class="fa-solid fa-plus"></i> Agregar</button>
+        </div>
+      </div>`;
+    }).join('');
+  }else{
+    // single category: Ingreso or Ahorro
+    const cat=cfgType==='ingreso'?'Ingreso':'Ahorro';
+    const c=cfgType==='ingreso'?INC_CAT:SAV_CAT;
+    const subs=subcats[cat]||[];
+    body.innerHTML=`<div class="cfg-cat">
+      <div class="cfg-cat-hd"><div class="cfg-cat-ico" style="background:${c.color}22;color:${c.color}">${c.ico}</div><span class="cfg-cat-name">${cfgType==='ingreso'?'Fuentes de ingreso':'Metas de ahorro'}</span></div>
+      <div class="cfg-subs">
+        ${subs.map(s=>`<div class="cfg-chip"><span>${s}</span><button onclick="cfgDelSub('${cat}','${s}')"><i class="fa-solid fa-xmark"></i></button></div>`).join('')}
+        <button class="cfg-add" onclick="cfgAddSub('${cat}')"><i class="fa-solid fa-plus"></i> Agregar</button>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--t3);padding:6px 4px;line-height:1.5">${cfgType==='ingreso'?'Estas aparecen al registrar un ingreso.':'Estas son tus metas al apartar dinero al ahorro.'}</p>`;
+  }
+}
+function cfgAddSub(cat){
+  const name=prompt('Nueva subcategoría en '+cat+':');
+  if(!name||!name.trim())return;
+  const n=name.trim();
+  if(!subcats[cat])subcats[cat]=[];
+  if(subcats[cat].includes(n)){toast('Ya existe');return;}
+  subcats[cat].push(n);saveSubcats();
+  syncData('save_subcats',{subcats});
+  renderCfg();toast('✅ Agregada');
+}
+function cfgDelSub(cat,sub){
+  if(!confirm('¿Eliminar "'+sub+'"? (los movimientos no se borran)'))return;
+  subcats[cat]=(subcats[cat]||[]).filter(s=>s!==sub);
+  delete subBudgets[cat+'/'+sub];
+  saveSubcats();saveSubBudgets();
+  syncData('save_subcats',{subcats});
+  renderCfg();toast('🗑 Eliminada');
 }
 
 // ═══ GOOGLE SHEETS ═══
