@@ -23,6 +23,7 @@ let txs=JSON.parse(localStorage.getItem('fp_txs'))||[];
 let budgets=JSON.parse(localStorage.getItem('fp_budgets'))||{
   Comida:500,Transporte:300,Casa:1200,Servicios:200,Compras:250,Entretenimiento:150,Salud:100,Otros:100
 };
+Object.keys(budgets).forEach(k=>budgets[k]=Number(budgets[k])||0);
 let savGoal=parseFloat(localStorage.getItem('fp_savgoal'))||2000;
 let curDate=new Date();
 let curType='Gasto', selCat='';
@@ -70,7 +71,7 @@ function renderHome(){
   $('h-inc').textContent=fmtS(inc);
   $('h-exp').textContent=fmtS(exp);
   // budget summary
-  const totalBud=Object.values(budgets).reduce((s,v)=>s+v,0);
+  const totalBud=Object.values(budgets).reduce((s,v)=>s+(Number(v)||0),0);
   const left=totalBud-exp;
   $('h-bud-left').innerHTML=fmtS(left)+'<span class="lt">restante</span>';
   $('h-bud-spent').textContent=fmtS(exp)+' gastado de '+fmtS(totalBud);
@@ -140,8 +141,8 @@ function renderTx(mt){
 function renderBudget(){
   const mt=monthTxs();const spent={};
   mt.forEach(t=>{if(t.type==='Gasto')spent[t.category]=(spent[t.category]||0)+(Number(t.amount)||0);});
-  const totalBud=Object.values(budgets).reduce((s,v)=>s+v,0);
-  const totalSpent=Object.values(spent).reduce((s,v)=>s+v,0);
+  const totalBud=Object.values(budgets).reduce((s,v)=>s+(Number(v)||0),0);
+  const totalSpent=Object.values(spent).reduce((s,v)=>s+(Number(v)||0),0);
   const pct=totalBud>0?Math.min(100,(totalSpent/totalBud)*100):0;
   $('b-total').textContent=fmtS(totalBud);
   $('b-pct').textContent='%'+pct.toFixed(0);
@@ -291,7 +292,8 @@ async function loadFromSheets(show){
       txs=data.transactions;localStorage.setItem('fp_txs',JSON.stringify(txs));
     }
     if(data.budgets&&typeof data.budgets==='object'){
-      budgets={...budgets,...data.budgets};localStorage.setItem('fp_budgets',JSON.stringify(budgets));
+      const clean={};Object.keys(data.budgets).forEach(k=>clean[k]=Number(data.budgets[k])||0);
+      budgets={...budgets,...clean};localStorage.setItem('fp_budgets',JSON.stringify(budgets));
     }
     setSS('');updateMonth();
     if(show)toast('✅ Sincronizado');
