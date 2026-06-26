@@ -24,7 +24,7 @@
 <div id="v-home" class="view on">
   <div class="hd">
     <div class="hd-arrow" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></div>
-    <div class="hd-month"><span id="mn-home">Jun 2026</span><i class="fa-solid fa-chevron-down"></i></div>
+    <div class="hd-month" onclick="openCal()"><span id="mn-home">Jun 2026</span><i class="fa-solid fa-chevron-down"></i></div>
     <div class="hd-arrow" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></div>
   </div>
   <div class="sa hs">
@@ -38,8 +38,8 @@
         <div class="bal-chev" onclick="go('savings')"><i class="fa-solid fa-chevron-down"></i></div>
       </div>
       <div class="bal-sub">
-        <div class="bal-mini"><div class="bal-mini-lbl"><span class="dot-g"></span>Ingresos</div><div class="bal-mini-val" id="h-inc" style="color:var(--green)">$0</div></div>
-        <div class="bal-mini"><div class="bal-mini-lbl"><span class="dot-r"></span>Gastos</div><div class="bal-mini-val" id="h-exp" style="color:var(--red)">$0</div></div>
+        <div class="bal-mini"><div class="bal-mini-lbl"><span class="dot-g"></span>Ingresos</div><div class="bal-mini-val" id="h-inc" style="color:var(--green)">$0</div><div class="bal-cmp" id="h-inc-cmp"></div></div>
+        <div class="bal-mini"><div class="bal-mini-lbl"><span class="dot-r"></span>Gastos</div><div class="bal-mini-val" id="h-exp" style="color:var(--red)">$0</div><div class="bal-cmp" id="h-exp-cmp"></div></div>
       </div>
     </div>
 
@@ -74,7 +74,7 @@
 <div id="v-budget" class="view">
   <div class="hd">
     <div class="hd-arrow" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></div>
-    <div class="hd-month"><span id="mn-bud">Jun 2026</span></div>
+    <div class="hd-month" onclick="openCal()"><span id="mn-bud">Jun 2026</span><i class="fa-solid fa-chevron-down"></i></div>
     <div class="hd-arrow" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></div>
   </div>
   <div class="sa hs">
@@ -99,7 +99,7 @@
 <div id="v-savings" class="view">
   <div class="hd">
     <div class="hd-arrow" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></div>
-    <div class="hd-month"><span id="mn-sav">Jun 2026</span></div>
+    <div class="hd-month" onclick="openCal()"><span id="mn-sav">Jun 2026</span><i class="fa-solid fa-chevron-down"></i></div>
     <div class="hd-arrow" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></div>
   </div>
   <div class="sa hs">
@@ -175,6 +175,18 @@
     <p style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:14px">Pega la URL de tu Apps Script (terminada en /exec).</p>
     <input type="text" id="url-inp" class="inp" placeholder="https://script.google.com/.../exec">
   </div>
+</div></div>
+
+<!-- ═══ CALENDAR MODAL ═══ -->
+<div id="cal-modal"><div class="mbg" onclick="closeCal()"></div><div class="msh">
+  <div class="pill"></div>
+  <div class="mhd">
+    <button class="mc" onclick="calChangeYear(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+    <span class="mtt" id="cal-year">2026</span>
+    <button class="mc" onclick="calChangeYear(1)"><i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div style="padding:0 20px 8px;font-size:12px;color:var(--t3);text-align:center">Toca un mes para verlo · muestra ingreso de cada mes</div>
 </div></div>
 
 <div id="toast"></div>
