@@ -203,3 +203,19 @@ select.row-c option{background:var(--card);color:var(--t1);}
 .sico{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 .srow-i{flex:1;}.srow-i h4{font-size:15px;font-weight:600;}.srow-i p{font-size:12px;color:var(--t2);margin-top:1px;}
 .srow-v{font-size:14px;color:var(--t2);}.chev{color:var(--t3);font-size:13px;}
+
+/* ═══ SWIPE TRANSACTIONS ═══ */
+.swipe-wrap{position:relative;overflow:hidden;border-radius:0;}
+.swipe-wrap:not(:last-child){border-bottom:1px solid var(--bdr);}
+.swipe-action{position:absolute;top:0;bottom:0;width:88px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;}
+.swipe-action.edit{left:0;background:var(--blue);}      /* swipe RIGHT reveals blue edit on left */
+.swipe-action.del{right:0;background:var(--red);}        /* swipe LEFT reveals red delete on right */
+.swipe-surface{position:relative;z-index:2;background:var(--card);will-change:transform;}
+.swipe-wrap .tx-row{border-bottom:none;}
+
+/* ═══ SUBCATEGORY GRID ═══ */
+.sub-sec{display:none;padding:0 20px 8px;}
+.sub-sec-lbl{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:10px;}
+.sub-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.sub-btn{padding:10px 16px;border-radius:50px;border:1.5px solid var(--bdr);background:var(--card2);cursor:pointer;font-size:13px;font-weight:600;color:var(--t2);transition:all .15s;}
+.sub-btn.sel{border-width:2px;}
