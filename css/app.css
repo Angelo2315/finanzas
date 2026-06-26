@@ -268,3 +268,35 @@ select.row-c option{background:var(--card);color:var(--t1);}
 /* inline + to add subcategory in add modal */
 .sub-btn.sub-add{border-style:dashed;color:var(--violet2);min-width:44px;display:flex;align-items:center;justify-content:center;padding:10px 16px;}
 .sub-btn.sub-add:active{background:var(--card);}
+
+/* ═══ CATEGORY CONFIG MODAL ═══ */
+.cfg-tabs{display:flex;gap:6px;padding:16px 20px 0;}
+.cfg-tab{flex:1;padding:10px;border-radius:12px;font-size:13px;font-weight:700;border:1px solid var(--bdr);background:var(--card2);color:var(--t2);cursor:pointer;transition:all .15s;}
+.cfg-tab.on{background:var(--violet);color:#fff;border-color:var(--violet);}
+.cfg-body{padding:16px 20px;max-height:62vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.cfg-body::-webkit-scrollbar{display:none;}
+.cfg-cat{margin-bottom:18px;}
+.cfg-cat-hd{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
+.cfg-cat-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.cfg-cat-name{font-size:15px;font-weight:700;}
+.cfg-subs{display:flex;flex-wrap:wrap;gap:8px;}
+.cfg-chip{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--bdr);border-radius:50px;padding:8px 8px 8px 14px;font-size:13px;font-weight:600;}
+.cfg-chip button{width:22px;height:22px;border-radius:50%;border:none;background:rgba(255,69,58,.15);color:var(--red);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;}
+.cfg-chip button:active{background:var(--red);color:#fff;}
+.cfg-add{display:flex;align-items:center;gap:6px;background:none;border:1px dashed var(--bdr);border-radius:50px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--violet2);cursor:pointer;}
+.cfg-add:active{background:var(--card2);}
+
+/* ═══ SAVINGS DASHBOARD CARD ═══ */
+.sav-dash{background:linear-gradient(145deg,#1A1530,#141416);border:1px solid rgba(124,92,252,.25);border-radius:22px;padding:22px;margin-bottom:14px;cursor:pointer;}
+.sav-dash-hd{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.sav-dash-ico{width:40px;height:40px;border-radius:12px;background:rgba(124,92,252,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sav-dash-title{font-size:16px;font-weight:700;}
+.sav-dash-sub{font-size:12px;color:var(--t2);margin-top:1px;}
+.sav-dash-val{font-size:30px;font-weight:800;letter-spacing:-.03em;}
+.sav-dash-goal{font-size:13px;color:var(--violet2);font-weight:600;margin:4px 0 14px;}
+.sav-dash-bar{height:8px;background:var(--card2);border-radius:5px;overflow:hidden;margin-bottom:14px;}
+.sav-dash-bar-f{height:100%;border-radius:5px;background:var(--grad-v);transition:width .9s cubic-bezier(.22,1,.36,1);}
+.sav-dash-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.sav-dash-chip{display:flex;flex-direction:column;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.2);border-radius:12px;padding:9px 13px;flex:1;min-width:90px;}
+.sav-dash-chip-n{font-size:11px;color:var(--t2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sav-dash-chip-v{font-size:15px;font-weight:800;color:var(--violet2);margin-top:2px;}
