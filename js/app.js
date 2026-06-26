@@ -4,16 +4,16 @@ let sheetUrl=localStorage.getItem('fp_url')||SHEETS_URL;
 
 // Categories — simple fixed set
 const CATS={
-  Comida:{ico:'🍔',color:'#FF9F0A'},
-  Transporte:{ico:'🚗',color:'#FF453A'},
-  Casa:{ico:'🏠',color:'#7C5CFC'},
-  Servicios:{ico:'⚡',color:'#64D2FF'},
-  Compras:{ico:'🛍️',color:'#FF375F'},
-  Entretenimiento:{ico:'🎮',color:'#30D158'},
-  Salud:{ico:'💊',color:'#0A84FF'},
-  Otros:{ico:'📦',color:'#8E8E93'}
+  Comida:{ico:'🍔',color:'#FF9F0A',subs:['Supermercado','Restaurantes','Café','Delivery']},
+  Transporte:{ico:'🚗',color:'#FF453A',subs:['Gasolina','Uber','Transporte','Estacionamiento']},
+  Casa:{ico:'🏠',color:'#7C5CFC',subs:['Renta','Hipoteca','Mantenimiento','Muebles']},
+  Servicios:{ico:'⚡',color:'#64D2FF',subs:['Luz','Agua','Internet','Teléfono']},
+  Compras:{ico:'🛍️',color:'#FF375F',subs:['Ropa','Tecnología','Hogar','Regalos']},
+  Entretenimiento:{ico:'🎮',color:'#30D158',subs:['Cine','Streaming','Salidas','Juegos']},
+  Salud:{ico:'💊',color:'#0A84FF',subs:['Farmacia','Doctor','Gym','Seguro']},
+  Otros:{ico:'📦',color:'#8E8E93',subs:['Varios','Imprevistos']}
 };
-const INC_CAT={ico:'💰',color:'#30D158'};
+const INC_CAT={ico:'💰',color:'#30D158',subs:['Sueldo','Negocio','Freelance','Propinas','Otros']};
 const MS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MSS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -26,7 +26,7 @@ let budgets=JSON.parse(localStorage.getItem('fp_budgets'))||{
 Object.keys(budgets).forEach(k=>budgets[k]=Number(budgets[k])||0);
 let savGoal=parseFloat(localStorage.getItem('fp_savgoal'))||2000;
 let curDate=new Date();
-let curType='Gasto', selCat='';
+let curType='Gasto', selCat='', selSub='';
 
 // Helpers
 const fmt=n=>'$'+(Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -124,17 +124,70 @@ function renderTx(mt){
   const el=$('tx-list');
   if(!mt.length){el.innerHTML='<div class="empty"><div class="empty-emoji">👻</div><p>Sin movimientos</p><span>Toca + para agregar</span></div>';return;}
   const sorted=[...mt].sort((a,b)=>b.date.localeCompare(a.date));
-  el.innerHTML=sorted.slice(0,20).map(t=>{
+  el.innerHTML=sorted.slice(0,30).map(t=>{
     const isI=t.type==='Ingreso';
     const c=isI?INC_CAT:(CATS[t.category]||CATS.Otros);
     const d=new Date(t.date+'T12:00:00');
     const dstr=`${d.getDate()} ${MSS[d.getMonth()]}`;
-    return `<div class="tx-row" onclick="editTx('${t.id}')">
-      <div class="tx-ico" style="background:${c.color}22;color:${c.color}">${c.ico}</div>
-      <div class="tx-mid"><div class="tx-name">${t.subcategory||t.category}</div><div class="tx-meta">${t.category}${t.notes?' · '+t.notes:''}</div></div>
-      <div class="tx-r"><div class="tx-amt ${isI?'i':''}">${isI?'+':'-'}${fmtS(t.amount)}</div><div class="tx-date">${dstr}</div></div>
+    const meta=t.subcategory&&t.subcategory!==t.category?t.category+(t.notes?' · '+t.notes:''):(t.notes||t.category);
+    return `<div class="swipe-wrap" data-id="${t.id}">
+      <div class="swipe-action edit"><i class="fa-solid fa-pen"></i></div>
+      <div class="swipe-action del"><i class="fa-solid fa-trash"></i></div>
+      <div class="tx-row swipe-surface" onclick="rowTap('${t.id}')">
+        <div class="tx-ico" style="background:${c.color}22;color:${c.color}">${c.ico}</div>
+        <div class="tx-mid"><div class="tx-name">${t.subcategory||t.category}</div><div class="tx-meta">${meta}</div></div>
+        <div class="tx-r"><div class="tx-amt ${isI?'i':''}">${isI?'+':'-'}${fmtS(t.amount)}</div><div class="tx-date">${dstr}</div></div>
+      </div>
     </div>`;
   }).join('');
+  attachSwipe();
+}
+
+// ═══ SWIPE GESTURE ═══
+let swipeOpen=null;
+function rowTap(id){
+  // if a row is open, tapping closes it instead of editing
+  if(swipeOpen){closeSwipe();return;}
+  editTx(id);
+}
+function closeSwipe(){
+  if(swipeOpen){swipeOpen.style.transform='translateX(0)';swipeOpen=null;}
+}
+function attachSwipe(){
+  document.querySelectorAll('.swipe-wrap').forEach(wrap=>{
+    const surface=wrap.querySelector('.swipe-surface');
+    const id=wrap.dataset.id;
+    let startX=0,startY=0,curX=0,dragging=false,locked=false;
+    const TH=72; // threshold to reveal action
+    surface.addEventListener('touchstart',e=>{
+      if(swipeOpen&&swipeOpen!==surface){closeSwipe();}
+      startX=e.touches[0].clientX;startY=e.touches[0].clientY;dragging=true;locked=false;
+      surface.style.transition='none';
+    },{passive:true});
+    surface.addEventListener('touchmove',e=>{
+      if(!dragging)return;
+      const dx=e.touches[0].clientX-startX, dy=e.touches[0].clientY-startY;
+      if(!locked){ if(Math.abs(dx)>Math.abs(dy)+4){locked=true;} else if(Math.abs(dy)>8){dragging=false;return;} }
+      if(locked){ curX=Math.max(-96,Math.min(96,dx)); surface.style.transform=`translateX(${curX}px)`; }
+    },{passive:true});
+    surface.addEventListener('touchend',()=>{
+      if(!dragging)return;dragging=false;
+      surface.style.transition='transform .25s cubic-bezier(.25,.8,.25,1)';
+      if(curX<=-TH){ // swiped LEFT → delete (red revealed on right)
+        surface.style.transform='translateX(-500px)';
+        setTimeout(()=>doDelete(id),180);
+      } else if(curX>=TH){ // swiped RIGHT → edit (blue revealed on left)
+        surface.style.transform='translateX(0)';swipeOpen=null;editTx(id);
+      } else { surface.style.transform='translateX(0)';swipeOpen=null; }
+      curX=0;
+    });
+  });
+}
+function doDelete(id){
+  txs=txs.filter(t=>t.id!==id);
+  localStorage.setItem('fp_txs',JSON.stringify(txs));
+  syncData('delete_tx',{id});
+  swipeOpen=null;updateMonth();toast('🗑 Eliminado');
 }
 
 // ═══ BUDGET VIEW ═══
@@ -212,25 +265,32 @@ function editGoal(){
 
 // ═══ ADD/EDIT TRANSACTION ═══
 function openAdd(){
-  curType='Gasto';selCat='';
+  curType='Gasto';selCat='';selSub='';
   $('m-title').textContent='Nuevo Movimiento';
   $('edit-id').value='';
   $('amt').value='';
   $('note').value='';
   $('tdate').valueAsDate=new Date();
+  $('del-btn').style.display='none';
   setType('Gasto');
   $('modal').classList.add('mon');
   setTimeout(()=>$('amt').focus(),400);
 }
 function editTx(id){
   const t=txs.find(x=>x.id===id);if(!t)return;
-  curType=t.type;selCat=t.category;
+  curType=t.type;selCat=t.category;selSub=t.subcategory||'';
   $('m-title').textContent='Editar Movimiento';
   $('edit-id').value=id;
   $('amt').value=t.amount;
   $('note').value=t.notes||'';
   $('tdate').value=t.date;
+  $('del-btn').style.display='block';
   setType(t.type);
+  // re-select the category + subcategory after grid renders
+  setTimeout(()=>{
+    const btn=document.querySelector(`.cat-btn[data-cat="${selCat}"]`);
+    if(btn)pickCat(selCat,btn,true);
+  },20);
   $('modal').classList.add('mon');
 }
 function closeAdd(){$('modal').classList.remove('mon');}
@@ -238,22 +298,45 @@ function setType(t){
   curType=t;
   $('seg-i').className='seg-b'+(t==='Ingreso'?' act-i':'');
   $('seg-e').className='seg-b'+(t==='Gasto'?' act-e':'');
+  selCat='';selSub='';
+  $('sub-sec').style.display='none';
   renderCatGrid();
 }
 function renderCatGrid(){
   const grid=$('cat-grid');
   if(curType==='Ingreso'){
-    grid.innerHTML=`<div class="cat-btn sel" style="grid-column:span 3;border-color:${INC_CAT.color};background:${INC_CAT.color}18;color:${INC_CAT.color}" onclick="selCat='Ingreso'"><span class="cat-btn-ico">${INC_CAT.ico}</span>Ingreso</div>`;
-    selCat='Ingreso';return;
+    grid.innerHTML=Object.entries({Ingreso:INC_CAT}).map(()=>'').join('');
+    grid.innerHTML=`<div class="cat-btn sel" data-cat="Ingreso" style="grid-column:span 3;border-color:${INC_CAT.color};background:${INC_CAT.color}18;color:${INC_CAT.color}" onclick="pickCat('Ingreso',this)"><span class="cat-btn-ico">${INC_CAT.ico}</span>Ingreso</div>`;
+    selCat='Ingreso';renderSubGrid('Ingreso');return;
   }
   grid.innerHTML=Object.entries(CATS).map(([cat,c])=>
     `<div class="cat-btn" data-cat="${cat}" onclick="pickCat('${cat}',this)"><span class="cat-btn-ico">${c.ico}</span>${cat}</div>`
   ).join('');
 }
-function pickCat(cat,btn){
-  selCat=cat;const c=CATS[cat];
+function pickCat(cat,btn,keepSub){
+  selCat=cat;
+  const c=cat==='Ingreso'?INC_CAT:CATS[cat];
   document.querySelectorAll('.cat-btn').forEach(b=>{b.classList.remove('sel');b.style='';});
   btn.classList.add('sel');btn.style=`border-color:${c.color};background:${c.color}18;color:${c.color}`;
+  if(!keepSub)selSub='';
+  renderSubGrid(cat);
+}
+function renderSubGrid(cat){
+  const sec=$('sub-sec'),grid=$('sub-grid');
+  const c=cat==='Ingreso'?INC_CAT:CATS[cat];
+  const subs=c&&c.subs?c.subs:[];
+  if(!subs.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  grid.innerHTML=subs.map(s=>
+    `<div class="sub-btn${s===selSub?' sel':''}" data-sub="${s}" onclick="pickSub('${s}',this,'${c.color}')" ${s===selSub?`style="border-color:${c.color};background:${c.color}18;color:${c.color}"`:''}>${s}</div>`
+  ).join('');
+  // auto-select first if none chosen
+  if(!selSub){selSub=subs[0];const f=grid.querySelector('.sub-btn');if(f){f.classList.add('sel');f.style=`border-color:${c.color};background:${c.color}18;color:${c.color}`;}}
+}
+function pickSub(s,btn,color){
+  selSub=s;
+  document.querySelectorAll('.sub-btn').forEach(b=>{b.classList.remove('sel');b.style='';});
+  btn.classList.add('sel');btn.style=`border-color:${color};background:${color}18;color:${color}`;
 }
 function saveTx(){
   const amt=parseFloat($('amt').value);
@@ -263,8 +346,8 @@ function saveTx(){
   const tx={
     id:editId||('TX-'+Date.now().toString().slice(-9)),
     date:$('tdate').value,type:curType,
-    category:curType==='Ingreso'?'Ingreso':selCat,
-    subcategory:curType==='Ingreso'?'Ingreso':selCat,
+    category:selCat,
+    subcategory:selSub||selCat,
     amount:amt,notes:$('note').value
   };
   if(editId){txs=txs.map(t=>t.id===editId?tx:t);}
