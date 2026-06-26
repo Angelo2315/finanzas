@@ -219,3 +219,33 @@ select.row-c option{background:var(--card);color:var(--t1);}
 .sub-grid{display:flex;flex-wrap:wrap;gap:8px;}
 .sub-btn{padding:10px 16px;border-radius:50px;border:1.5px solid var(--bdr);background:var(--card2);cursor:pointer;font-size:13px;font-weight:600;color:var(--t2);transition:all .15s;}
 .sub-btn.sel{border-width:2px;}
+
+/* ═══ MONTH COMPARISON ═══ */
+.bal-cmp{font-size:11px;font-weight:600;margin-top:3px;}
+
+/* ═══ CALENDAR ═══ */
+.cal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:18px 20px;}
+.cal-cell{background:var(--card2);border:1px solid var(--bdr);border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .15s;}
+.cal-cell:active{transform:scale(.96);}
+.cal-cell.cur{border-color:var(--violet);background:rgba(124,92,252,.12);}
+.cal-m{font-size:14px;font-weight:700;margin-bottom:5px;}
+.cal-inc{font-size:13px;font-weight:700;}
+
+/* ═══ BUDGET — expandable categories ═══ */
+.be-cat{background:var(--card2);border:1px solid var(--bdr);border-radius:16px;margin-bottom:10px;overflow:hidden;}
+.be-cat .be-row{border-bottom:none;padding:14px;cursor:pointer;}
+.be-chev{color:var(--t3);font-size:13px;transition:transform .25s;flex-shrink:0;}
+.be-subs{padding:0 14px 8px;border-top:1px solid var(--bdr);}
+.sub-bud-row{display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--bdr);}
+.sub-bud-row:last-of-type{border-bottom:none;}
+.sub-bud-mid{flex:1;min-width:0;}
+.sub-bud-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.sub-bud-name{font-size:14px;font-weight:600;}
+.sub-bud-edit{font-size:13px;font-weight:700;color:var(--violet2);background:rgba(124,92,252,.12);border:none;padding:5px 12px;border-radius:50px;cursor:pointer;}
+.sub-bud-bar{height:5px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:5px;}
+.sub-bud-bar-f{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.22,1,.36,1);}
+.sub-bud-sub{font-size:11px;color:var(--t2);font-weight:500;}
+.sub-del{width:30px;height:30px;border-radius:50%;border:none;background:none;color:var(--t3);cursor:pointer;font-size:14px;flex-shrink:0;}
+.sub-del:active{background:rgba(255,69,58,.15);color:var(--red);}
+.add-sub-btn{width:100%;padding:12px;margin-top:6px;border-radius:12px;border:1px dashed var(--bdr);background:none;color:var(--violet2);font-size:13px;font-weight:600;cursor:pointer;}
+.add-sub-btn:active{background:var(--card);}
