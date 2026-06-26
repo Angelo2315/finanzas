@@ -2,31 +2,76 @@
 const SHEETS_URL='https://script.google.com/macros/s/AKfycbxV4hmnyt3Xz11IdyM5GeV9l1RvKT8o4ltFmMPoRLHKhH964SbF0uPpcFzvV2egb7vESQ/exec';
 let sheetUrl=localStorage.getItem('fp_url')||SHEETS_URL;
 
-// Categories — simple fixed set
+// Category icons/colors (fixed) — subcategories are now user-configurable
 const CATS={
-  Comida:{ico:'🍔',color:'#FF9F0A',subs:['Supermercado','Restaurantes','Café','Delivery']},
-  Transporte:{ico:'🚗',color:'#FF453A',subs:['Gasolina','Uber','Transporte','Estacionamiento']},
-  Casa:{ico:'🏠',color:'#7C5CFC',subs:['Renta','Hipoteca','Mantenimiento','Muebles']},
-  Servicios:{ico:'⚡',color:'#64D2FF',subs:['Luz','Agua','Internet','Teléfono']},
-  Compras:{ico:'🛍️',color:'#FF375F',subs:['Ropa','Tecnología','Hogar','Regalos']},
-  Entretenimiento:{ico:'🎮',color:'#30D158',subs:['Cine','Streaming','Salidas','Juegos']},
-  Salud:{ico:'💊',color:'#0A84FF',subs:['Farmacia','Doctor','Gym','Seguro']},
-  Otros:{ico:'📦',color:'#8E8E93',subs:['Varios','Imprevistos']}
+  Comida:{ico:'🍔',color:'#FF9F0A'},
+  Transporte:{ico:'🚗',color:'#FF453A'},
+  Casa:{ico:'🏠',color:'#7C5CFC'},
+  Servicios:{ico:'⚡',color:'#64D2FF'},
+  Compras:{ico:'🛍️',color:'#FF375F'},
+  Entretenimiento:{ico:'🎮',color:'#30D158'},
+  Salud:{ico:'💊',color:'#0A84FF'},
+  Otros:{ico:'📦',color:'#8E8E93'}
 };
-const INC_CAT={ico:'💰',color:'#30D158',subs:['Sueldo','Negocio','Freelance','Propinas','Otros']};
+const INC_CAT={ico:'💰',color:'#30D158'};
 const MS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MSS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
+// Default subcategories per category (user can edit/add/remove)
+const DEF_SUBS={
+  Comida:['Supermercado','Restaurantes','Café','Delivery'],
+  Transporte:['Gasolina','Uber','Transporte','Estacionamiento'],
+  Casa:['Renta','Hipoteca','Mantenimiento','Muebles'],
+  Servicios:['Luz','Agua','Internet','Teléfono'],
+  Compras:['Ropa','Tecnología','Hogar','Regalos'],
+  Entretenimiento:['Cine','Streaming','Salidas','Juegos'],
+  Salud:['Farmacia','Doctor','Gym','Seguro'],
+  Otros:['Varios','Imprevistos']
+};
+const INC_SUBS=['Sueldo','Negocio','Freelance','Propinas','Otros'];
+
 // State
 let txs=JSON.parse(localStorage.getItem('fp_txs'))||[];
-let budgets=JSON.parse(localStorage.getItem('fp_budgets'))||{
-  Comida:500,Transporte:300,Casa:1200,Servicios:200,Compras:250,Entretenimiento:150,Salud:100,Otros:100
-};
-Object.keys(budgets).forEach(k=>budgets[k]=Number(budgets[k])||0);
+// subcats: { Casa:['Renta','Luz',...], ... } — user-editable list of subcategories per category
+let subcats=JSON.parse(localStorage.getItem('fp_subcats'))||JSON.parse(JSON.stringify(DEF_SUBS));
+// subBudgets: { "Casa/Renta":1200, "Casa/Luz":150, ... } — budget PER subcategory
+let subBudgets=JSON.parse(localStorage.getItem('fp_subbudgets'))||{};
+// migrate: if user had old category-level budgets, seed first sub with it (one-time)
+(function migrate(){
+  const old=JSON.parse(localStorage.getItem('fp_budgets')||'null');
+  if(old&&!localStorage.getItem('fp_subbudgets_migrated')){
+    Object.keys(old).forEach(cat=>{
+      const subs=subcats[cat]||[];
+      if(subs.length&&Number(old[cat])>0){ subBudgets[cat+'/'+subs[0]]=Number(old[cat]); }
+    });
+    localStorage.setItem('fp_subbudgets',JSON.stringify(subBudgets));
+    localStorage.setItem('fp_subbudgets_migrated','1');
+  }
+})();
+Object.keys(subBudgets).forEach(k=>subBudgets[k]=Number(subBudgets[k])||0);
 let savGoal=parseFloat(localStorage.getItem('fp_savgoal'))||2000;
 let curDate=new Date();
 let curType='Gasto', selCat='', selSub='';
+
+// ── Budget helpers ──
+// budget of a category = sum of its subcategory budgets
+function catBudget(cat){
+  return (subcats[cat]||[]).reduce((s,sub)=>s+(Number(subBudgets[cat+'/'+sub])||0),0);
+}
+function totalBudget(){
+  return Object.keys(CATS).reduce((s,cat)=>s+catBudget(cat),0);
+}
+// spent in a category this month
+function catSpent(cat,mt){
+  return (mt||monthTxs()).filter(t=>t.type==='Gasto'&&t.category===cat).reduce((s,t)=>s+(Number(t.amount)||0),0);
+}
+// spent in a specific subcategory this month
+function subSpent(cat,sub,mt){
+  return (mt||monthTxs()).filter(t=>t.type==='Gasto'&&t.category===cat&&t.subcategory===sub).reduce((s,t)=>s+(Number(t.amount)||0),0);
+}
+function saveSubBudgets(){localStorage.setItem('fp_subbudgets',JSON.stringify(subBudgets));}
+function saveSubcats(){localStorage.setItem('fp_subcats',JSON.stringify(subcats));}
 
 // Helpers
 const fmt=n=>'$'+(Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -57,6 +102,35 @@ function updateMonth(){
   if(ov){if(ov.id==='v-home')renderHome();if(ov.id==='v-budget')renderBudget();if(ov.id==='v-savings')renderSavings();}
 }
 
+// ═══ CALENDAR DROPDOWN — pick month, shows income per month ═══
+let calYear=new Date().getFullYear();
+function openCal(){
+  calYear=curDate.getFullYear();
+  renderCal();
+  $('cal-modal').classList.add('mon');
+}
+function closeCal(){$('cal-modal').classList.remove('mon');}
+function calChangeYear(d){calYear+=d;renderCal();}
+function renderCal(){
+  $('cal-year').textContent=calYear;
+  const grid=$('cal-grid');
+  grid.innerHTML=MS.map((m,i)=>{
+    // income for this month/year
+    const mt=monthTxs(calYear,i);
+    let inc=0;mt.forEach(t=>{if(t.type==='Ingreso')inc+=Number(t.amount)||0;});
+    const isCur=(i===curDate.getMonth()&&calYear===curDate.getFullYear());
+    const isFuture=(calYear>new Date().getFullYear())||(calYear===new Date().getFullYear()&&i>new Date().getMonth());
+    return `<div class="cal-cell${isCur?' cur':''}" onclick="pickMonth(${i})">
+      <div class="cal-m">${MSS[i]}</div>
+      <div class="cal-inc" style="color:${inc>0?'var(--green)':'var(--t3)'}">${inc>0?fmtS(inc):(isFuture?'—':'$0')}</div>
+    </div>`;
+  }).join('');
+}
+function pickMonth(m){
+  curDate=new Date(calYear,m,1);
+  closeCal();updateMonth();
+}
+
 // ═══ HOME ═══
 function renderHome(){
   const mt=monthTxs();
@@ -66,36 +140,59 @@ function renderHome(){
     else{exp+=a;catSums[t.category]=(catSums[t.category]||0)+a;}
   });
   const bal=inc-exp;
+  // previous month for comparison
+  const pd=new Date(curDate.getFullYear(),curDate.getMonth()-1,1);
+  const pmt=monthTxs(pd.getFullYear(),pd.getMonth());
+  let pInc=0,pExp=0;
+  pmt.forEach(t=>{const a=Number(t.amount)||0;t.type==='Ingreso'?pInc+=a:pExp+=a;});
   // balance
   $('h-bal').innerHTML=fmtS(bal)+'<span class="c">.'+(Math.abs(bal)%1).toFixed(2).slice(2)+'</span>';
   $('h-inc').textContent=fmtS(inc);
   $('h-exp').textContent=fmtS(exp);
-  // budget summary
-  const totalBud=Object.values(budgets).reduce((s,v)=>s+(Number(v)||0),0);
+  // comparison chips vs previous month
+  setCompare('h-inc-cmp',inc,pInc,true);   // income: up is good
+  setCompare('h-exp-cmp',exp,pExp,false);   // expense: up is bad
+  // budget summary (sum of all sub-budgets)
+  const totalBud=totalBudget();
   const left=totalBud-exp;
   $('h-bud-left').innerHTML=fmtS(left)+'<span class="lt">restante</span>';
   $('h-bud-spent').textContent=fmtS(exp)+' gastado de '+fmtS(totalBud);
   const budPct=totalBud>0?Math.min(100,(exp/totalBud)*100):0;
   $('h-bud-bar').style.width=budPct+'%';
   $('h-bud-bar').style.background=budPct>=100?'var(--red)':budPct>=80?'var(--amber)':'var(--grad-v)';
-  // budget chips — top spent categories
+  // budget chips — top spent categories with their sub-budget total
   const chipEntries=Object.entries(catSums).sort((a,b)=>b[1]-a[1]).slice(0,4);
   $('h-bud-chips').innerHTML=chipEntries.length?chipEntries.map(([cat,amt])=>{
-    const c=CATS[cat]||CATS.Otros;const lim=budgets[cat]||0;
+    const c=CATS[cat]||CATS.Otros;const lim=catBudget(cat);
     const pct=lim>0?Math.min(100,(amt/lim)*100):0;
     const circ=2*Math.PI*14;const dash=(pct/100)*circ;
+    const over=lim>0&&amt>lim;
     return `<div class="bud-chip">
       <svg class="bud-chip-ring" viewBox="0 0 34 34">
         <circle cx="17" cy="17" r="14" fill="none" stroke="var(--card)" stroke-width="3"/>
-        <circle cx="17" cy="17" r="14" fill="none" stroke="${c.color}" stroke-width="3" stroke-dasharray="${dash} ${circ}" stroke-linecap="round" transform="rotate(-90 17 17)"/>
+        <circle cx="17" cy="17" r="14" fill="none" stroke="${over?'var(--red)':c.color}" stroke-width="3" stroke-dasharray="${dash} ${circ}" stroke-linecap="round" transform="rotate(-90 17 17)"/>
       </svg>
-      <div class="bud-chip-info"><div class="bud-chip-name">${cat}</div><div class="bud-chip-spent">${fmtS(amt)} gastado</div></div>
+      <div class="bud-chip-info"><div class="bud-chip-name">${cat}</div><div class="bud-chip-spent">${fmtS(amt)}${lim>0?' / '+fmtS(lim):''}</div></div>
     </div>`;
   }).join(''):'<p style="font-size:13px;color:var(--t2);padding:6px">Sin gastos aún</p>';
   // donut
   renderDonut(catSums,exp);
   // transactions
   renderTx(mt);
+}
+
+// comparison helper: shows ↑/↓ vs previous month
+function setCompare(id,cur,prev,upGood){
+  const el=$(id);if(!el)return;
+  if(prev===0){el.innerHTML='';return;}
+  const diff=cur-prev;
+  if(Math.abs(diff)<0.01){el.innerHTML='<span style="color:var(--t3)">= igual</span>';return;}
+  const up=diff>0;
+  const good=(up&&upGood)||(!up&&!upGood);
+  const color=good?'var(--green)':'var(--red)';
+  const arrow=up?'▲':'▼';
+  const pctChange=Math.abs((diff/prev)*100);
+  el.innerHTML=`<span style="color:${color}">${arrow} ${pctChange.toFixed(0)}%</span> <span style="color:var(--t3)">vs mes ant.</span>`;
 }
 
 function renderDonut(sums,total){
@@ -191,40 +288,89 @@ function doDelete(id){
 }
 
 // ═══ BUDGET VIEW ═══
+let expandedCat=null; // which category is expanded in budget view
 function renderBudget(){
-  const mt=monthTxs();const spent={};
-  mt.forEach(t=>{if(t.type==='Gasto')spent[t.category]=(spent[t.category]||0)+(Number(t.amount)||0);});
-  const totalBud=Object.values(budgets).reduce((s,v)=>s+(Number(v)||0),0);
-  const totalSpent=Object.values(spent).reduce((s,v)=>s+(Number(v)||0),0);
+  const mt=monthTxs();
+  const totalBud=totalBudget();
+  let totalSpent=0;
+  Object.keys(CATS).forEach(cat=>totalSpent+=catSpent(cat,mt));
   const pct=totalBud>0?Math.min(100,(totalSpent/totalBud)*100):0;
   $('b-total').textContent=fmtS(totalBud);
   $('b-pct').textContent='%'+pct.toFixed(0);
   $('b-bar').style.width=pct+'%';
+  $('b-bar').style.background=pct>=100?'var(--red)':pct>=80?'var(--amber)':'var(--grad-v)';
   $('b-spent').textContent=fmtS(totalSpent)+' gastado';
   $('b-left').textContent=fmtS(totalBud-totalSpent)+' restante';
   $('b-list').innerHTML=Object.keys(CATS).map(cat=>{
-    const lim=budgets[cat]||0;const sp=spent[cat]||0;
+    const lim=catBudget(cat);const sp=catSpent(cat,mt);
     const p=lim>0?(sp/lim)*100:0;const c=CATS[cat];
     let bc=c.color;if(p>=100)bc='var(--red)';else if(p>=80)bc='var(--amber)';
-    return `<div class="be-row">
-      <div class="be-ico" style="background:${c.color}22;color:${c.color}">${c.ico}</div>
-      <div class="be-mid">
-        <div class="be-name">${cat}</div>
-        <div class="be-bar"><div class="be-bar-f" style="width:${Math.min(100,p)}%;background:${bc}"></div></div>
-        <div class="be-sub">${fmtS(sp)} de ${fmtS(lim)}</div>
+    const exp=expandedCat===cat;
+    const subs=subcats[cat]||[];
+    // subcategory rows (shown when expanded)
+    const subRows=subs.map(sub=>{
+      const slim=Number(subBudgets[cat+'/'+sub])||0;
+      const ssp=subSpent(cat,sub,mt);
+      const sp2=slim>0?(ssp/slim)*100:0;
+      let sbc=c.color;if(sp2>=100)sbc='var(--red)';else if(sp2>=80)sbc='var(--amber)';
+      return `<div class="sub-bud-row">
+        <div class="sub-bud-mid">
+          <div class="sub-bud-top"><span class="sub-bud-name">${sub}</span><button class="sub-bud-edit" onclick="event.stopPropagation();editSubBudget('${cat}','${sub}')">${slim>0?fmtS(slim):'Definir'}</button></div>
+          <div class="sub-bud-bar"><div class="sub-bud-bar-f" style="width:${Math.min(100,sp2)}%;background:${sbc}"></div></div>
+          <div class="sub-bud-sub">${fmtS(ssp)} gastado${slim>0?' · '+sp2.toFixed(0)+'%':''}</div>
+        </div>
+        <button class="sub-del" onclick="event.stopPropagation();delSub('${cat}','${sub}')"><i class="fa-solid fa-xmark"></i></button>
+      </div>`;
+    }).join('');
+    return `<div class="be-cat ${exp?'open':''}">
+      <div class="be-row" onclick="toggleCat('${cat}')">
+        <div class="be-ico" style="background:${c.color}22;color:${c.color}">${c.ico}</div>
+        <div class="be-mid">
+          <div class="be-name">${cat}</div>
+          <div class="be-bar"><div class="be-bar-f" style="width:${Math.min(100,p)}%;background:${bc}"></div></div>
+          <div class="be-sub">${fmtS(sp)} de ${fmtS(lim)}${lim>0?' · '+p.toFixed(0)+'%':' · sin budget'}</div>
+        </div>
+        <i class="fa-solid fa-chevron-down be-chev" style="transform:${exp?'rotate(180deg)':'none'}"></i>
       </div>
-      <button class="be-edit" onclick="editBudget('${cat}')">${lim>0?p.toFixed(0)+'%':'+'}</button>
+      <div class="be-subs" style="${exp?'':'display:none'}">
+        ${subRows}
+        <button class="add-sub-btn" onclick="addSub('${cat}')"><i class="fa-solid fa-plus"></i> Agregar subcategoría</button>
+      </div>
     </div>`;
   }).join('');
 }
-function editBudget(cat){
-  const cur=budgets[cat]||0;
-  const v=prompt('Presupuesto mensual para '+cat+':',cur);
+function toggleCat(cat){
+  expandedCat=expandedCat===cat?null:cat;
+  renderBudget();
+}
+function editSubBudget(cat,sub){
+  const key=cat+'/'+sub;
+  const cur=Number(subBudgets[key])||0;
+  const v=prompt('Budget mensual para '+cat+' › '+sub+':',cur);
   if(v===null)return;
-  budgets[cat]=parseFloat(v)||0;
-  localStorage.setItem('fp_budgets',JSON.stringify(budgets));
-  syncData('save_budget',{category:cat,limit:budgets[cat]});
-  renderBudget();toast('✅ Presupuesto actualizado');
+  subBudgets[key]=parseFloat(v)||0;
+  saveSubBudgets();
+  syncData('save_subbudget',{category:cat,subcategory:sub,limit:subBudgets[key]});
+  renderBudget();toast('✅ Budget actualizado');
+}
+function addSub(cat){
+  const name=prompt('Nombre de la nueva subcategoría en '+cat+':');
+  if(!name||!name.trim())return;
+  const n=name.trim();
+  if(!subcats[cat])subcats[cat]=[];
+  if(subcats[cat].includes(n)){toast('Ya existe');return;}
+  subcats[cat].push(n);
+  saveSubcats();
+  syncData('save_subcats',{subcats});
+  renderBudget();toast('✅ Subcategoría agregada');
+}
+function delSub(cat,sub){
+  if(!confirm('¿Eliminar subcategoría "'+sub+'"? (los movimientos no se borran)'))return;
+  subcats[cat]=(subcats[cat]||[]).filter(s=>s!==sub);
+  delete subBudgets[cat+'/'+sub];
+  saveSubcats();saveSubBudgets();
+  syncData('save_subcats',{subcats});
+  renderBudget();toast('🗑 Eliminada');
 }
 
 // ═══ SAVINGS VIEW ═══
@@ -324,7 +470,7 @@ function pickCat(cat,btn,keepSub){
 function renderSubGrid(cat){
   const sec=$('sub-sec'),grid=$('sub-grid');
   const c=cat==='Ingreso'?INC_CAT:CATS[cat];
-  const subs=c&&c.subs?c.subs:[];
+  const subs=cat==='Ingreso'?INC_SUBS:(subcats[cat]||[]);
   if(!subs.length){sec.style.display='none';return;}
   sec.style.display='block';
   grid.innerHTML=subs.map(s=>
@@ -374,9 +520,12 @@ async function loadFromSheets(show){
     if(data.transactions&&Array.isArray(data.transactions)){
       txs=data.transactions;localStorage.setItem('fp_txs',JSON.stringify(txs));
     }
-    if(data.budgets&&typeof data.budgets==='object'){
-      const clean={};Object.keys(data.budgets).forEach(k=>clean[k]=Number(data.budgets[k])||0);
-      budgets={...budgets,...clean};localStorage.setItem('fp_budgets',JSON.stringify(budgets));
+    if(data.subBudgets&&typeof data.subBudgets==='object'){
+      const clean={};Object.keys(data.subBudgets).forEach(k=>clean[k]=Number(data.subBudgets[k])||0);
+      subBudgets={...subBudgets,...clean};saveSubBudgets();
+    }
+    if(data.subcats&&typeof data.subcats==='object'){
+      subcats={...subcats,...data.subcats};saveSubcats();
     }
     setSS('');updateMonth();
     if(show)toast('✅ Sincronizado');
