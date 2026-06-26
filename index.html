@@ -103,6 +103,22 @@
       <div class="cat-legend" id="cat-legend"></div>
     </div>
 
+    <!-- SAVINGS DASHBOARD CARD -->
+    <div class="sav-dash" id="h-sav-card" style="display:none" onclick="go('savings')">
+      <div class="sav-dash-hd">
+        <div class="sav-dash-ico">🐷</div>
+        <div style="flex:1">
+          <div class="sav-dash-title">Ahorro</div>
+          <div class="sav-dash-sub" id="h-sav-sub">Apartado este mes</div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color:var(--t3);font-size:13px"></i>
+      </div>
+      <div class="sav-dash-val" id="h-sav-total">$0</div>
+      <div class="sav-dash-goal" id="h-sav-goal">Meta: $0</div>
+      <div class="sav-dash-bar"><div class="sav-dash-bar-f" id="h-sav-bar" style="width:0%"></div></div>
+      <div class="sav-dash-chips" id="h-sav-chips"></div>
+    </div>
+
     <!-- TRANSACTIONS -->
     <div class="tx-card">
       <div class="tx-hd"><div class="tx-title">Movimientos</div></div>
@@ -174,9 +190,14 @@
       <div class="srow" onclick="loadFromSheets(true)"><div class="sico" style="background:rgba(48,209,88,.15);color:var(--green)"><i class="fa-solid fa-rotate"></i></div><div class="srow-i"><h4>Sincronizar ahora</h4><p>Descargar desde Google Sheets</p></div><span id="sdot"></span></div>
       <div class="srow" onclick="openSheets()"><div class="sico" style="background:rgba(124,92,252,.15);color:var(--violet2)"><i class="fa-solid fa-table"></i></div><div class="srow-i"><h4>Google Sheets</h4><p>Configurar conexión</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
     </div>
+    <div class="sec-title">Configuración</div>
+    <div class="set-card">
+      <div class="srow" onclick="openCatConfig()"><div class="sico" style="background:rgba(124,92,252,.15);color:var(--violet2)"><i class="fa-solid fa-sliders"></i></div><div class="srow-i"><h4>Configurar subcategorías</h4><p>Gasto, ingreso y ahorro</p></div><i class="fa-solid fa-chevron-right chev"></i></div>
+      <div class="srow" onclick="editGoal()"><div class="sico" style="background:rgba(124,92,252,.15);color:var(--violet2)"><i class="fa-solid fa-bullseye"></i></div><div class="srow-i"><h4>Meta de ahorro</h4></div><i class="fa-solid fa-chevron-right chev"></i></div>
+    </div>
+
     <div class="sec-title">Preferencias</div>
     <div class="set-card">
-      <div class="srow" onclick="editGoal()"><div class="sico" style="background:rgba(124,92,252,.15);color:var(--violet2)"><i class="fa-solid fa-bullseye"></i></div><div class="srow-i"><h4>Meta de ahorro</h4></div><i class="fa-solid fa-chevron-right chev"></i></div>
       <div class="srow" onclick="if(confirm('¿Borrar todos los datos locales?')){localStorage.clear();location.reload();}"><div class="sico" style="background:rgba(255,69,58,.15);color:var(--red)"><i class="fa-solid fa-trash"></i></div><div class="srow-i"><h4 style="color:var(--red)">Borrar datos</h4></div></div>
     </div>
   </div>
@@ -233,6 +254,18 @@
   </div>
   <div class="cal-grid" id="cal-grid"></div>
   <div style="padding:0 20px 8px;font-size:12px;color:var(--t3);text-align:center">Toca un mes para verlo · muestra ingreso de cada mes</div>
+</div></div>
+
+<!-- ═══ CATEGORY CONFIG MODAL ═══ -->
+<div id="cfg-modal"><div class="mbg" onclick="closeCatConfig()"></div><div class="msh">
+  <div class="pill"></div>
+  <div class="mhd"><button class="mc" onclick="closeCatConfig()">Cerrar</button><span class="mtt">Subcategorías</span><div style="width:50px"></div></div>
+  <div class="cfg-tabs">
+    <button class="cfg-tab on" id="cfg-tab-gasto" onclick="cfgTab('gasto')">Gasto</button>
+    <button class="cfg-tab" id="cfg-tab-ingreso" onclick="cfgTab('ingreso')">Ingreso</button>
+    <button class="cfg-tab" id="cfg-tab-ahorro" onclick="cfgTab('ahorro')">Ahorro</button>
+  </div>
+  <div id="cfg-body" class="cfg-body"></div>
 </div></div>
 
 <div id="toast"></div>
