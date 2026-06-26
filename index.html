@@ -15,9 +15,46 @@
 <body>
 
 <div id="load">
-  <img src="assets/icon.png" alt="Budget">
-  <div class="t">Mi Budget</div>
-  <div class="lbar"><div class="lbar-f"></div></div>
+  <div class="sk-hd">
+    <div class="sk sk-arrow"></div>
+    <div class="sk sk-month"></div>
+    <div class="sk sk-arrow"></div>
+  </div>
+  <div class="sk-body">
+    <!-- balance card skeleton -->
+    <div class="sk sk-card" style="height:148px">
+      <div class="sk-pad">
+        <div class="sk sk-line" style="width:90px;height:13px"></div>
+        <div class="sk sk-line" style="width:170px;height:36px;margin-top:12px"></div>
+        <div class="sk-row" style="margin-top:22px">
+          <div><div class="sk sk-line" style="width:60px;height:11px"></div><div class="sk sk-line" style="width:80px;height:17px;margin-top:6px"></div></div>
+          <div><div class="sk sk-line" style="width:60px;height:11px"></div><div class="sk sk-line" style="width:80px;height:17px;margin-top:6px"></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- budget card skeleton -->
+    <div class="sk sk-card" style="height:170px">
+      <div class="sk-pad">
+        <div class="sk-row"><div class="sk sk-line" style="width:70px;height:16px"></div><div class="sk sk-line" style="width:70px;height:26px;border-radius:50px"></div></div>
+        <div class="sk sk-line" style="width:140px;height:30px;margin-top:14px"></div>
+        <div class="sk sk-line" style="width:100%;height:8px;border-radius:5px;margin-top:14px"></div>
+        <div class="sk-row" style="margin-top:16px;gap:10px">
+          <div class="sk sk-line" style="width:130px;height:54px;border-radius:14px"></div>
+          <div class="sk sk-line" style="width:130px;height:54px;border-radius:14px"></div>
+        </div>
+      </div>
+    </div>
+    <!-- donut card skeleton -->
+    <div class="sk sk-card" style="height:300px">
+      <div class="sk-pad">
+        <div class="sk sk-line" style="width:90px;height:16px"></div>
+        <div style="display:flex;justify-content:center;margin:18px 0"><div class="sk sk-circle"></div></div>
+        <div class="sk sk-line" style="width:100%;height:14px;margin-top:14px"></div>
+        <div class="sk sk-line" style="width:100%;height:14px;margin-top:14px"></div>
+        <div class="sk sk-line" style="width:100%;height:14px;margin-top:14px"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ HOME ═══ -->
@@ -40,6 +77,10 @@
       <div class="bal-sub">
         <div class="bal-mini"><div class="bal-mini-lbl"><span class="dot-g"></span>Ingresos</div><div class="bal-mini-val" id="h-inc" style="color:var(--green)">$0</div><div class="bal-cmp" id="h-inc-cmp"></div></div>
         <div class="bal-mini"><div class="bal-mini-lbl"><span class="dot-r"></span>Gastos</div><div class="bal-mini-val" id="h-exp" style="color:var(--red)">$0</div><div class="bal-cmp" id="h-exp-cmp"></div></div>
+      </div>
+      <div class="sav-line" id="h-sav-line" style="display:none" onclick="go('savings')">
+        <div class="sav-line-l"><span class="dot-v"></span>Apartado al ahorro</div>
+        <div class="sav-line-v" id="h-sav-val">$0</div>
       </div>
     </div>
 
@@ -106,7 +147,7 @@
     <div class="sav-card">
       <div class="sav-hd">
         <div class="sav-ico">🐷</div>
-        <div><div class="sav-title">Total Ahorrado</div><div class="sav-sub">Ingresos − Gastos acumulado</div></div>
+        <div><div class="sav-title">Total Ahorrado</div><div class="sav-sub">Dinero apartado a propósito</div></div>
       </div>
       <div class="sav-val" id="s-val">$0</div>
       <div class="sav-goal" id="s-goal" onclick="editGoal()">Meta: $2,000 ›</div>
@@ -114,7 +155,11 @@
       <div class="sav-pct" id="s-pct">0% de tu meta</div>
     </div>
     <div class="tx-card" style="padding:8px 22px">
-      <div class="tx-hd"><div class="tx-title">Ahorro por mes</div></div>
+      <div class="tx-hd"><div class="tx-title">Mis metas de ahorro</div></div>
+      <div id="s-goals" style="margin-bottom:6px"></div>
+    </div>
+    <div class="tx-card" style="padding:8px 22px">
+      <div class="tx-hd"><div class="tx-title">Apartado por mes</div></div>
       <div id="s-months"></div>
     </div>
   </div>
@@ -155,6 +200,7 @@
   <div class="seg">
     <div class="seg-b" id="seg-i" onclick="setType('Ingreso')">Ingreso</div>
     <div class="seg-b act-e" id="seg-e" onclick="setType('Gasto')">Gasto</div>
+    <div class="seg-b" id="seg-s" onclick="setType('Ahorro')">Ahorro</div>
   </div>
   <div class="amt-box"><span class="s">$</span><input type="number" id="amt" class="amt-inp" placeholder="0" inputmode="decimal"></div>
   <div class="cat-grid" id="cat-grid"></div>
